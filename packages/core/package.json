@@ -1,0 +1,15 @@
+{
+  "name": "@score-storm/core",
+  "version": "1.0.0-dev.0",
+  "description": "",
+  "main": "./lib/index.js",
+  "scripts": {
+    "build": "tsc --build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "mnxconverter": "^1.0.1"
+  }
+}

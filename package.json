@@ -1,0 +1,51 @@
+{
+  "name": "score-storm",
+  "private": true,
+  "version": "1.0.0-dev.0",
+  "description": "A javascript package for rendering and editing music scores",
+  "workspaces": [
+    "packages/*"
+  ],
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc --build",
+    "commit": "cz"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/deemaagog/score-storm.git"
+  },
+  "keywords": [
+    "music score",
+    "music sheet",
+    "score editor"
+  ],
+  "author": "deemaagog",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/deemaagog/score-storm/issues"
+  },
+  "homepage": "https://github.com/deemaagog/score-storm#readme",
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@typescript-eslint/eslint-plugin": "^6.18.1",
+    "@typescript-eslint/parser": "^6.18.1",
+    "commitizen": "^4.3.0",
+    "cz-conventional-changelog": "^3.3.0",
+    "eslint": "^8.56.0",
+    "husky": "^8.0.3",
+    "prettier": "^3.2.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  },
+  "husky": {
+    "hooks": {
+      "prepare-commit-msg": "exec < /dev/tty && npx cz --hook || true"
+    }
+  }
+}
