@@ -47,5 +47,8 @@
     "hooks": {
       "prepare-commit-msg": "exec < /dev/tty && npx cz --hook || true"
     }
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

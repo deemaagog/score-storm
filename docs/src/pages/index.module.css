@@ -1,0 +1,26 @@
+/**
+ * CSS files with the .module.css suffix will be treated as CSS modules
+ * and scoped locally.
+ */
+
+.heroBanner {
+  padding: 4rem 0;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  background-position: center;
+  /* background-image: linear-gradient(rgb(49 97 80 / 90%),rgb(8 79 65 / 90%)) , url(https://cdn.merriammusic.com/2018/07/How-to-Read-Piano-Sheet-Music.jpeg); */
+  background-image: linear-gradient(rgb(49 97 80 / 90%),rgb(8 79 65 / 90%)) , url("/img/hero.jpeg");
+}
+
+@media screen and (max-width: 996px) {
+  .heroBanner {
+    padding: 2rem;
+  }
+}
+
+.buttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
