@@ -1,0 +1,60 @@
+# Canvas Renderer
+
+Basic examples of rendering
+
+## Render your first music score
+
+React example:
+
+import React from "react"
+import Demo from "@site/src/components/Demo"
+import FontLoader from "@site/src/components/FontLoader"
+
+<FontLoader>
+  <Demo />
+</FontLoader>
+
+## More sophisticated example
+
+```jsx
+export const Highlight = ({children, color}) => (
+  <span
+    style={{
+      backgroundColor: color,
+      borderRadius: '20px',
+      color: '#fff',
+      padding: '10px',
+      cursor: 'pointer',
+    }}
+    onClick={() => {
+      alert(`You clicked the color ${color} with label ${children}`)
+    }}>
+    {children}
+  </span>
+);
+
+<Highlight color="#25c2a0">Add bar</Highlight> !
+```
+
+export const Highlight = ({ children, color }) => (
+  <span
+    style={{
+      backgroundColor: color,
+      borderRadius: "20px",
+      color: "#fff",
+      padding: "10px",
+      cursor: "pointer",
+    }}
+    onClick={() => {
+      alert(`You clicked the color ${color} with label ${children}`)
+    }}
+  >
+    {children}
+  </span>
+)
+
+<Highlight color="#25c2a0">Add bar</Highlight>
+
+<FontLoader>
+  <Demo />
+</FontLoader>
