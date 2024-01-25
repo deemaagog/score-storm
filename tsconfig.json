@@ -16,6 +16,9 @@
   "references": [
     {
       "path": "./packages/core"
+    },
+    {
+      "path": "./packages/canvas-renderer"
     }
   ],
   "include": ["src/**/*.ts", "test/**/*.ts"]

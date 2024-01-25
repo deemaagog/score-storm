@@ -1,7 +1,7 @@
 {
   "name": "score-storm",
   "private": true,
-  "version": "1.0.0-dev.0",
+  "version": "1.0.0-dev.1",
   "description": "A javascript package for rendering and editing music scores",
   "workspaces": [
     "packages/*"

@@ -1,5 +1,5 @@
 {
-  "name": "@score-storm/core",
+  "name": "@score-storm/canvas-renderer",
   "version": "1.0.0-dev.1",
   "description": "",
   "main": "./lib/index.js",
@@ -10,6 +10,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "mnxconverter": "^1.0.1"
+    "@score-storm/core": "*"
   }
 }

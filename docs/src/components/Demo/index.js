@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from "react"
-import ScoreRenderer from "@score-storm/core"
+import ScoreStorm from "@score-storm/core"
+import CanvasRenderer from "@score-storm/canvas-renderer"
 import textXml from "./basic-musicxml"
 
 function Demo() {
@@ -11,9 +12,11 @@ function Demo() {
             return
         }
 
-        const scoreRenderer = new ScoreRenderer(ref.current).fromMusicXML(textXml)
-
+        const scoreRenderer = new ScoreStorm()
+        scoreRenderer.fromMusicXML(textXml)
+        scoreRenderer.setRenderer(new CanvasRenderer(ref.current))
         scoreRenderer.render()
+
     }, [ref])
 
     return (
