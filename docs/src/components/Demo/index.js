@@ -1,52 +1,66 @@
 import React, { useEffect, useRef, useState } from "react"
-import ScoreStorm from "@score-storm/core"
+import ScoreStorm, { Score } from "@score-storm/core"
 import CanvasRenderer from "@score-storm/canvas-renderer"
 import basicMusicXml from "./musicxml/basic"
 import basicAccidentalsMusicXml from "./musicxml/basic-accidentals"
 import partsBasicMusicXml from "./musicxml/parts-basic"
 
 const musicalXMLOptions = {
-    "basic": basicMusicXml,
-    "accidentals": basicAccidentalsMusicXml,
-    "parts": partsBasicMusicXml
+  basic: basicMusicXml,
+  accidentals: basicAccidentalsMusicXml,
+  parts: partsBasicMusicXml,
 }
 
-
 function Demo() {
-    const rootElementRef = useRef(null)
-    const [selectedMusicXml, setSelectedMusicXml] = useState("basic")
+  const rootElementRef = useRef(null)
+  const [selectedMusicXml, setSelectedMusicXml] = useState()
 
-    const scoreStorm = useRef(new ScoreStorm())
+  const scoreStorm = useRef(new ScoreStorm())
 
-    useEffect(() => {
-        if (!rootElementRef.current) {
-            return
-        }
+  useEffect(() => {
+    if (!rootElementRef.current) {
+      return
+    }
 
-        scoreStorm.current.setRenderer(new CanvasRenderer(rootElementRef.current))
+    scoreStorm.current.setRenderer(new CanvasRenderer(rootElementRef.current))
+    scoreStorm.current.render()
+  }, [rootElementRef])
 
-    }, [rootElementRef])
+  useEffect(() => {
+    if (!rootElementRef.current || !selectedMusicXml) {
+      return
+    }
 
-    useEffect(() => {
-        if (!rootElementRef.current) {
-            return
-        }
-
-        scoreStorm.current.fromMusicXML(musicalXMLOptions[selectedMusicXml])
-        scoreStorm.current.render()
-
-    }, [rootElementRef, selectedMusicXml])
-
-    return (
-        <div style={{ width: "100%" }}>
-            <button style={{ marginRight: "16px" }}>+ Add bar</button>
-            Music xml example:
-            <select name="select" value={selectedMusicXml} onChange={e => setSelectedMusicXml(e.target.value)}>
-                {Object.keys(musicalXMLOptions).map((key) => <option value={key}>{key}</option>)}
-            </select>
-            <div style={{ width: "100%", marginTop: "16px", border: "1px solid #efefef" }} ref={rootElementRef} />
-        </div >
+    scoreStorm.current.setScore(
+      musicalXMLOptions[selectedMusicXml]
+        ? Score.fromMusicXML(musicalXMLOptions[selectedMusicXml])
+        : Score.createDefaultScore(),
     )
+    scoreStorm.current.render()
+  }, [rootElementRef, selectedMusicXml])
+
+  const handleClickAddBar = () => {
+    scoreStorm.current.getScore().addMeasure()
+    scoreStorm.current.render()
+  }
+
+  return (
+    <div style={{ width: "100%" }}>
+      <button style={{ marginRight: "16px" }} onClick={handleClickAddBar}>
+        + Add bar
+      </button>
+      Music xml example:
+      <select name="select" value={selectedMusicXml} onChange={(e) => setSelectedMusicXml(e.target.value)}>
+        <option value={undefined}>No music xml (default)</option>
+        {Object.keys(musicalXMLOptions).map((key) => (
+          <option key={key} value={key}>
+            {key}
+          </option>
+        ))}
+      </select>
+      <div style={{ width: "100%", marginTop: "16px", border: "1px solid #efefef" }} ref={rootElementRef} />
+    </div>
+  )
 }
 
 export default Demo

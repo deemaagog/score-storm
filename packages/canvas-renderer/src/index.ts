@@ -29,21 +29,19 @@ class CanvasRenderer implements Renderer {
 
   constructor(root: HTMLDivElement) {
     this.rootElement = root
-    this.canvasElement = document.createElement("canvas");
-    this.canvasElement.width = this.rootElement.clientWidth;
-    this.canvasElement.height = 1000; // temp for demo
+    this.canvasElement = document.createElement("canvas")
+    this.canvasElement.width = this.rootElement.clientWidth
+    this.canvasElement.height = 1000 // temp for demo
     this.rootElement.appendChild(this.canvasElement)
 
     this.setupResizeObserver()
-
   }
 
   setupResizeObserver() {
-    new ResizeObserver(entries => {
+    new ResizeObserver((entries) => {
       const newRootElementWidth = entries[0].contentRect.width
-      console.log('newRootElementWidth', newRootElementWidth)
-    }).observe(this.rootElement); // todo: unobserve?
-    
+      console.log("newRootElementWidth", newRootElementWidth)
+    }).observe(this.rootElement) // todo: unobserve?
   }
 
   render(score: Score, params: RenderParams) {
@@ -56,7 +54,7 @@ class CanvasRenderer implements Renderer {
     // staveline thickness: 64px font size equals to 2px thickness. Staveline Y position should be adjusted: y - thickness/2
 
     const context = this.canvasElement.getContext("2d")!
-    context.clearRect(0, 0, this.canvasElement.width, this.canvasElement.height); // temp
+    context.clearRect(0, 0, this.canvasElement.width, this.canvasElement.height) // temp
     context.font = `${params.fontSize}px Bravura`
 
     context.fillStyle = params.mainColor
@@ -66,7 +64,9 @@ class CanvasRenderer implements Renderer {
 
     const measureWidth = (this.canvasElement.width - params.padding * 2) / 2 // temp, just for demo
 
-    for (const bar of score.bars) {
+    for (let i = 0; i < score.globalMeasures.length; i++) {
+      const bar = score.globalMeasures[i];
+      
       // draw barline
       context.fillRect(x, y, params.barLineThickness, params.barlineHeight)
 
@@ -86,22 +86,21 @@ class CanvasRenderer implements Renderer {
       context.fillStyle = "black"
       context.fillText(getText("U+E4E3"), x + measureWidth / 2, y + params.midStave) //whole rest
 
-      if (bar.timesig.length ) {
-        const [top, bottom] = bar.timesig
-        context.fillText(getText(getTimeSignatureSymbol(top)), x + params.unit, y + params.midStave - params.unit) //
-        context.fillText(getText(getTimeSignatureSymbol(bottom)), x + params.unit, y + params.midStave + params.unit) //
+      if (bar.time) {
+        const { count, unit } = bar.time
+        context.fillText(getText(getTimeSignatureSymbol(count)), x + params.unit, y + params.midStave - params.unit) //
+        context.fillText(getText(getTimeSignatureSymbol(unit)), x + params.unit, y + params.midStave + params.unit) //
       }
 
       x += measureWidth
       // draw end barline
-      if (bar.idx === score.bars.length - 1) {
+      if (i === score.globalMeasures.length - 1) {
         context.fillRect(x - params.unit, y, params.barLineThickness, params.barlineHeight)
         context.fillRect(x - params.barLineThickness * 3.8, y, params.barLineThickness * 3.8, params.barlineHeight)
       } else {
         context.fillRect(x, y, params.barLineThickness, params.barlineHeight)
       }
     }
-
   }
 
   test() {
