@@ -56,6 +56,7 @@ class CanvasRenderer implements Renderer {
     // staveline thickness: 64px font size equals to 2px thickness. Staveline Y position should be adjusted: y - thickness/2
 
     const context = this.canvasElement.getContext("2d")!
+    context.clearRect(0, 0, this.canvasElement.width, this.canvasElement.height); // temp
     context.font = `${params.fontSize}px Bravura`
 
     context.fillStyle = params.mainColor
@@ -85,7 +86,7 @@ class CanvasRenderer implements Renderer {
       context.fillStyle = "black"
       context.fillText(getText("U+E4E3"), x + measureWidth / 2, y + params.midStave) //whole rest
 
-      if (bar.timesig) {
+      if (bar.timesig.length ) {
         const [top, bottom] = bar.timesig
         context.fillText(getText(getTimeSignatureSymbol(top)), x + params.unit, y + params.midStave - params.unit) //
         context.fillText(getText(getTimeSignatureSymbol(bottom)), x + params.unit, y + params.midStave + params.unit) //

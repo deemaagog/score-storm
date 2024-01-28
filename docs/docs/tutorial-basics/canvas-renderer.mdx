@@ -9,50 +9,10 @@ React example:
 import React from "react"
 import Demo from "@site/src/components/Demo"
 import FontLoader from "@site/src/components/FontLoader"
+import CodeBlock from "@theme/CodeBlock"
+import DemoSource from "!!raw-loader!@site/src/components/Demo"
 
-<FontLoader>
-  <Demo />
-</FontLoader>
-
-## More sophisticated example
-
-```jsx
-function Demo() {
-  const ref = useRef(null)
-
-  useEffect(() => {
-    if (!ref.current) {
-      return
-    }
-
-    const scoreRenderer = new ScoreStorm()
-    scoreRenderer.fromMusicXML(textXml)
-    scoreRenderer.setRenderer(new CanvasRenderer(ref.current))
-    scoreRenderer.render()
-  }, [ref])
-
-  return <canvas height={"600px"} width={"600px"} ref={ref} />
-}
-```
-
-export const Highlight = ({ children, color }) => (
-  <span
-    style={{
-      backgroundColor: color,
-      borderRadius: "20px",
-      color: "#fff",
-      padding: "10px",
-      cursor: "pointer",
-    }}
-    onClick={() => {
-      alert(`You clicked the color ${color} with label ${children}`)
-    }}
-  >
-    {children}
-  </span>
-)
-
-<Highlight color="#25c2a0">Add bar</Highlight>
+<CodeBlock language="jsx">{DemoSource}</CodeBlock>
 
 <FontLoader>
   <Demo />
