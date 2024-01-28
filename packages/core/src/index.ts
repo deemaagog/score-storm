@@ -53,6 +53,7 @@ class ScoreStorm {
 
   fromMusicXML(xml: string) {
     this.score = getScoreFromMusicXml(xml)
+    console.log("this.score", this.score)
     return this
   }
 
