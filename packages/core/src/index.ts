@@ -1,5 +1,5 @@
-import { Score, getScoreFromMusicXml } from "mnxconverter"
 import { Renderer } from "./interfaces"
+import { Score } from "./model/Score"
 export { Score, Renderer }
 
 const SCALE_TO_FONT_RATIO = 64 / 100
@@ -24,10 +24,9 @@ export interface RenderParams {
 }
 
 class ScoreStorm {
-  // @ts-expect-error temp
-  score: Score
-  renderer?: Renderer
-  renderParams: RenderParams
+  private score: Score
+  private renderer?: Renderer
+  private renderParams: RenderParams
 
   constructor(options?: ScoreStormOptions) {
     const scale = options?.scale || 100
@@ -49,12 +48,16 @@ class ScoreStorm {
       barlineHeight,
       midStave: barlineHeight / 2,
     }
+
+    this.score = Score.createDefaultScore()
   }
 
-  fromMusicXML(xml: string) {
-    this.score = getScoreFromMusicXml(xml)
-    console.log("this.score", this.score)
-    return this
+  setScore(score: Score) {
+    this.score = score
+  }
+
+  getScore() {
+    return this.score
   }
 
   setRenderer(renderer: Renderer) {

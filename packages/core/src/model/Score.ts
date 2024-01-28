@@ -1,14 +1,45 @@
-// monkey patching mnxconverter score model
+import { getMNXScore, getScoreFromMusicXml } from "mnxconverter"
 
-import { Bar, Score } from "mnxconverter"
-
-declare module "mnxconverter" {
-  interface Score {
-    addBar(): void
+class GlobalMeasure {
+  key?: {
+    // todo: use mnx types
+    fifths: number
+  }
+  time?: {
+    count: number
+    unit: number
   }
 }
 
-Score.prototype.addBar = function () {
-  console.log("this.bars", this.bars)
-  this.bars.push(new Bar(this, this.bars.length))
+export class Score {
+  static createDefaultScore() {
+    return new Score([
+      {
+        time: {
+          count: 2,
+          unit: 4,
+        },
+      },
+    ])
+  }
+
+  static fromMusicXML(xml: string) {
+    const mnxScore = getMNXScore(getScoreFromMusicXml(xml))
+    return new Score(mnxScore.global.measures)
+  }
+
+  globalMeasures: GlobalMeasure[]
+
+  constructor(globalMeasures: ReturnType<typeof getMNXScore>["global"]["measures"]) {
+    // todo: use mnx types
+    this.globalMeasures = globalMeasures
+  }
+
+  addMeasure() {
+    this.globalMeasures.push({})
+  }
+
+  removeMeasure(index: number) {
+    this.globalMeasures.splice(index)
+  }
 }
