@@ -24,10 +24,26 @@ function getTimeSignatureSymbol(n: number) {
 }
 
 class CanvasRenderer implements Renderer {
-  element: HTMLCanvasElement
+  rootElement: HTMLDivElement
+  canvasElement: HTMLCanvasElement
 
-  constructor(canvas: HTMLCanvasElement) {
-    this.element = canvas
+  constructor(root: HTMLDivElement) {
+    this.rootElement = root
+    this.canvasElement = document.createElement("canvas");
+    this.canvasElement.width = this.rootElement.clientWidth;
+    this.canvasElement.height = 1000; // temp for demo
+    this.rootElement.appendChild(this.canvasElement)
+
+    this.setupResizeObserver()
+
+  }
+
+  setupResizeObserver() {
+    new ResizeObserver(entries => {
+      const newRootElementWidth = entries[0].contentRect.width
+      console.log('newRootElementWidth', newRootElementWidth)
+    }).observe(this.rootElement); // todo: unobserve?
+    
   }
 
   render(score: Score, params: RenderParams) {
@@ -39,7 +55,7 @@ class CanvasRenderer implements Renderer {
     // unless other specified (g clef + 1 stave space, barline default vertical position is bottom of 5 lines stave)
     // staveline thickness: 64px font size equals to 2px thickness. Staveline Y position should be adjusted: y - thickness/2
 
-    const context = this.element.getContext("2d")!
+    const context = this.canvasElement.getContext("2d")!
     context.font = `${params.fontSize}px Bravura`
 
     context.fillStyle = params.mainColor
@@ -47,7 +63,7 @@ class CanvasRenderer implements Renderer {
     let x = params.padding
     const y = params.padding
 
-    const measureWidth = (this.element.width - params.padding * 2) / 2 // temp, just for demo
+    const measureWidth = (this.canvasElement.width - params.padding * 2) / 2 // temp, just for demo
 
     for (const bar of score.bars) {
       // draw barline
@@ -84,10 +100,11 @@ class CanvasRenderer implements Renderer {
         context.fillRect(x, y, params.barLineThickness, params.barlineHeight)
       }
     }
+
   }
 
   test() {
-    const context = this.element.getContext("2d")!
+    const context = this.canvasElement.getContext("2d")!
     context.font = `64px Bravura`
     // test baseline
     context.fillStyle = "red"

@@ -20,7 +20,7 @@ function Demo() {
     }, [ref])
 
     return (
-        <canvas height={"600px"} width={"600px"} ref={ref} />
+        <div style={{ width: "100%" }} ref={ref} />
     )
 }
 
