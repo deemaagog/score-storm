@@ -1,6 +1,7 @@
+import { GraphicalScore } from "./GraphicalScore"
 import { Renderer } from "./interfaces"
-import { Score } from "./model/Score"
-export { Score, Renderer }
+import { Score } from "./Score"
+export { Score, Renderer, GraphicalScore }
 
 const SCALE_TO_FONT_RATIO = 64 / 100
 const NUMBER_OF_STAFF_LINES = 5 // hardcode for now
@@ -12,7 +13,6 @@ export interface ScoreStormOptions {
 export interface RenderParams {
   fontSize: number
   unit: number
-  padding: number
   numberOfStaffLines: number
   staffLineThickness: number
   clefPadding: number
@@ -38,7 +38,6 @@ class ScoreStorm {
     this.renderParams = {
       fontSize,
       unit,
-      padding: 40,
       numberOfStaffLines: NUMBER_OF_STAFF_LINES,
       staffLineThickness,
       clefPadding: unit,
@@ -68,7 +67,9 @@ class ScoreStorm {
     if (!this.renderer) {
       throw new Error("Renderer is not set!")
     }
-    this.renderer.render(this.score, this.renderParams)
+
+    const graphicalScore = new GraphicalScore(this.score, this.renderer.containerWidth, this.renderParams)
+    this.renderer.render(graphicalScore, this.renderParams)
   }
 }
 

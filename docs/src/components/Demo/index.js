@@ -58,7 +58,9 @@ function Demo() {
           </option>
         ))}
       </select>
-      <div style={{ width: "100%", marginTop: "16px", border: "1px solid #efefef" }} ref={rootElementRef} />
+      <div style={{ marginTop: "16px", border: "1px solid #efefef", padding: "40px" }}>
+        <div style={{ width: "100%" }} ref={rootElementRef} />
+      </div>
     </div>
   )
 }

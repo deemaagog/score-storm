@@ -1,6 +1,6 @@
 import { getMNXScore, getScoreFromMusicXml } from "mnxconverter"
 
-class GlobalMeasure {
+export class GlobalMeasure {
   key?: {
     // todo: use mnx types
     fifths: number
@@ -37,9 +37,11 @@ export class Score {
 
   addMeasure() {
     this.globalMeasures.push({})
+    return this
   }
 
   removeMeasure(index: number) {
     this.globalMeasures.splice(index)
+    return this
   }
 }
