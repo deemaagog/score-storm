@@ -1,4 +1,4 @@
-import { Renderer, RenderParams, Score } from "@score-storm/core"
+import { Renderer, RenderParams, GraphicalScore } from "@score-storm/core"
 
 function getText(unicodeSymbol: string) {
   const codeString = parseInt(unicodeSymbol.replace("U+", ""), 16)
@@ -24,27 +24,30 @@ function getTimeSignatureSymbol(n: number) {
 }
 
 class CanvasRenderer implements Renderer {
-  rootElement: HTMLDivElement
+  containerElement: HTMLDivElement
+  containerWidth: number
   canvasElement: HTMLCanvasElement
 
-  constructor(root: HTMLDivElement) {
-    this.rootElement = root
+  constructor(containerElement: HTMLDivElement) {
+    console.log("containerElement", containerElement.clientWidth, containerElement.offsetWidth)
+    this.containerElement = containerElement
+    this.containerWidth = this.containerElement.clientWidth
     this.canvasElement = document.createElement("canvas")
-    this.canvasElement.width = this.rootElement.clientWidth
-    this.canvasElement.height = 1000 // temp for demo
-    this.rootElement.appendChild(this.canvasElement)
-
+    this.containerElement.appendChild(this.canvasElement)
+    
     this.setupResizeObserver()
   }
-
+  
   setupResizeObserver() {
     new ResizeObserver((entries) => {
-      const newRootElementWidth = entries[0].contentRect.width
-      console.log("newRootElementWidth", newRootElementWidth)
-    }).observe(this.rootElement) // todo: unobserve?
+      this.containerWidth = entries[0].contentRect.width
+      console.log("this.containerWidth", this.containerWidth)
+    }).observe(this.containerElement) // todo: unobserve?
   }
-
-  render(score: Score, params: RenderParams) {
+  
+  render(graphicalScore: GraphicalScore, params: RenderParams) {
+    this.canvasElement.width = this.containerWidth
+    this.canvasElement.height = graphicalScore.height // temp for demo
     // https://opentype.js.org/glyph-inspector.html
 
     // notes on glyph positioning
@@ -54,52 +57,61 @@ class CanvasRenderer implements Renderer {
     // staveline thickness: 64px font size equals to 2px thickness. Staveline Y position should be adjusted: y - thickness/2
 
     const context = this.canvasElement.getContext("2d")!
-    context.clearRect(0, 0, this.canvasElement.width, this.canvasElement.height) // temp
+    // context.clearRect(0, 0, this.canvasElement.width, this.canvasElement.height) // temp
     context.font = `${params.fontSize}px Bravura`
 
-    context.fillStyle = params.mainColor
+    
 
-    let x = params.padding
-    const y = params.padding
+    let x = 0
+    let y = 0
 
-    const measureWidth = (this.canvasElement.width - params.padding * 2) / 2 // temp, just for demo
+    for (let ri = 0; ri < graphicalScore.rows.length; ri++) {
+      const latestRow = ri === graphicalScore.rows.length - 1
+      const row = graphicalScore.rows[ri]
 
-    for (let i = 0; i < score.globalMeasures.length; i++) {
-      const bar = score.globalMeasures[i];
-      
-      // draw barline
-      context.fillRect(x, y, params.barLineThickness, params.barlineHeight)
+      for (let mi = 0; mi < row.measures.length; mi++) {
+        const latestMeasureInRow = mi === row.measures.length - 1
+        const graphicalMeasure = row.measures[mi]
 
-      // draw stafflines
-      context.fillStyle = "#666666"
-      // context.fillStyle = "red"
-      const half = Math.floor(params.numberOfStaffLines / 2)
-      for (let index = -half; index <= half; index++) {
-        context.fillRect(
-          x,
-          y + params.midStave + params.unit * index - params.staffLineThickness / 2,
-          measureWidth,
-          params.staffLineThickness,
-        )
-      }
+        // draw stafflines
+        context.fillStyle = "#666666"
+        const half = Math.floor(params.numberOfStaffLines / 2)
+        for (let index = -half; index <= half; index++) {
+          context.fillRect(
+            x,
+            y + params.midStave + params.unit * index - params.staffLineThickness / 2,
+            graphicalMeasure.width,
+            params.staffLineThickness,
+          )
+        }
 
-      context.fillStyle = "black"
-      context.fillText(getText("U+E4E3"), x + measureWidth / 2, y + params.midStave) //whole rest
-
-      if (bar.time) {
-        const { count, unit } = bar.time
-        context.fillText(getText(getTimeSignatureSymbol(count)), x + params.unit, y + params.midStave - params.unit) //
-        context.fillText(getText(getTimeSignatureSymbol(unit)), x + params.unit, y + params.midStave + params.unit) //
-      }
-
-      x += measureWidth
-      // draw end barline
-      if (i === score.globalMeasures.length - 1) {
-        context.fillRect(x - params.unit, y, params.barLineThickness, params.barlineHeight)
-        context.fillRect(x - params.barLineThickness * 3.8, y, params.barLineThickness * 3.8, params.barlineHeight)
-      } else {
+        context.fillStyle = params.mainColor
+        // draw barline
         context.fillRect(x, y, params.barLineThickness, params.barlineHeight)
+
+        context.textBaseline = "alphabetic" // middle
+        context.textAlign = "start"
+        context.fillText(getText("U+E4E3"), x + graphicalMeasure.width / 2, y + params.midStave) //whole rest
+
+        if (graphicalMeasure.globalMeasure.time) {
+          const { count, unit } = graphicalMeasure.globalMeasure.time
+          context.fillText(getText(getTimeSignatureSymbol(count)), x + params.unit, y + params.midStave - params.unit) //
+          context.fillText(getText(getTimeSignatureSymbol(unit)), x + params.unit, y + params.midStave + params.unit) //
+        }
+
+        x += graphicalMeasure.width
+        // draw end barline
+        if (latestMeasureInRow) {
+          if (latestRow) {
+            context.fillRect(x - params.unit, y, params.barLineThickness, params.barlineHeight)
+            context.fillRect(x - params.barLineThickness * 3.8, y, params.barLineThickness * 3.8, params.barlineHeight)
+          } else {
+            context.fillRect(x - params.barLineThickness, y, params.barLineThickness, params.barlineHeight)
+          }
+        }
       }
+      x = 0
+      y += row.height
     }
   }
 

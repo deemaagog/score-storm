@@ -1,5 +1,7 @@
-import { RenderParams, Score } from "."
+import { RenderParams } from "."
+import { GraphicalScore } from "./GraphicalScore"
 
 export interface Renderer {
-  render(score: Score, params: RenderParams): void
+  render(score: GraphicalScore, params: RenderParams): void
+  containerWidth: number
 }
