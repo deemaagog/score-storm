@@ -19,6 +19,9 @@
     },
     {
       "path": "./packages/canvas-renderer"
+    },
+    {
+      "path": "./packages/svg-renderer"
     }
   ],
   "include": ["src/**/*.ts", "test/**/*.ts"]

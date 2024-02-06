@@ -18,6 +18,7 @@
     "@docusaurus/preset-classic": "3.1.0",
     "@mdx-js/react": "^3.0.0",
     "@score-storm/canvas-renderer": "file:../packages/canvas-renderer",
+    "@score-storm/svg-renderer": "file:../packages/svg-renderer",
     "@score-storm/core": "file:../packages/core",
     "clsx": "^2.0.0",
     "prism-react-renderer": "^2.3.0",
