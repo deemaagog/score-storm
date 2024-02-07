@@ -5,24 +5,33 @@ const NS = "http://www.w3.org/2000/svg"
 class SvgRenderer implements Renderer {
   containerElement: HTMLDivElement
   containerWidth: number
-  svgElement: SVGElement
+  svgElement!: SVGElement
   currentColor: string
+  resizeObserver: ResizeObserver
+  isInitialized: boolean = false
 
   constructor(containerElement: HTMLDivElement) {
     this.containerElement = containerElement
     this.containerWidth = this.containerElement.clientWidth
-    this.svgElement = document.createElementNS(NS, "svg")
-    this.containerElement.appendChild(this.svgElement)
-
     this.currentColor = "black"
 
-    this.setupResizeObserver()
+    // make this and destroy method part of BrowserRenderer?
+    this.resizeObserver = new ResizeObserver((entries) => {
+      this.containerWidth = entries[0].contentRect.width
+    })
+    this.resizeObserver.observe(this.containerElement)
   }
 
-  setupResizeObserver() {
-    new ResizeObserver((entries) => {
-      this.containerWidth = entries[0].contentRect.width
-    }).observe(this.containerElement) // todo: unobserve?
+  init() {
+    this.svgElement = document.createElementNS(NS, "svg")
+    this.containerElement.appendChild(this.svgElement)
+    this.isInitialized = true
+  }
+
+  destroy() {
+    this.containerElement.innerHTML = ""
+    this.isInitialized = false
+    this.resizeObserver.unobserve(this.containerElement)
   }
 
   prepare(height: number, fontSize: number) {

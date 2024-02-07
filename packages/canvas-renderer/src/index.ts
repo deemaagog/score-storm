@@ -3,23 +3,35 @@ import { Renderer } from "@score-storm/core"
 class CanvasRenderer implements Renderer {
   containerElement: HTMLDivElement
   containerWidth: number
-  canvasElement: HTMLCanvasElement
-  context: CanvasRenderingContext2D
+  canvasElement!: HTMLCanvasElement
+  context!: CanvasRenderingContext2D
+  resizeObserver: ResizeObserver
+  isInitialized: boolean = false
 
   constructor(containerElement: HTMLDivElement) {
     this.containerElement = containerElement
     this.containerWidth = this.containerElement.clientWidth
+    
+
+    // make this and destroy method part of BrowserRenderer?
+    this.resizeObserver = new ResizeObserver((entries) => {
+      this.containerWidth = entries[0].contentRect.width
+    })
+    this.resizeObserver.observe(this.containerElement)
+  }
+
+  init() {
     this.canvasElement = document.createElement("canvas")
     this.context = this.canvasElement.getContext("2d")!
     this.containerElement.appendChild(this.canvasElement)
-
-    this.setupResizeObserver()
+    this.isInitialized = true
   }
 
-  setupResizeObserver() {
-    new ResizeObserver((entries) => {
-      this.containerWidth = entries[0].contentRect.width
-    }).observe(this.containerElement) // todo: unobserve?
+
+  destroy() {
+    this.containerElement.innerHTML = ""
+    this.isInitialized = false
+    this.resizeObserver.unobserve(this.containerElement)
   }
 
   prepare(height: number, fontSize: number) {

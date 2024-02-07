@@ -1,14 +1,13 @@
-import { RenderParams } from "."
 import { GlobalMeasure, Score } from "./Score"
 
 const SPACE_BETWEEN_STAVE_ROWS_COEF = 10 // space unit
 
 interface GraphicalScoreRow {
   height: number
-  measures: GraphicalScoreMeasure[]
+  measures: GraphicalMeasure[]
 }
 
-interface GraphicalScoreMeasure {
+export interface GraphicalMeasure {
   width: number
   globalMeasure: GlobalMeasure
 }
@@ -20,15 +19,15 @@ export class GraphicalScore {
   rows: GraphicalScoreRow[]
   height: number
 
-  constructor(score: Score, containerWidth: number, renderParams: RenderParams) {
+  constructor(score: Score, containerWidth: number, unit: number) {
     const measureWidth = containerWidth / 2 // temp, just for demo
 
     const rows: GraphicalScoreRow[] = []
     let currentRowWidth = 0
-    let currentRowGraphicalMeasures: GraphicalScoreMeasure[] = []
+    let currentRowGraphicalMeasures: GraphicalMeasure[] = []
     for (const globalMeasure of score.globalMeasures) {
       if (currentRowWidth >= containerWidth) {
-        rows.push({ height: renderParams.unit * SPACE_BETWEEN_STAVE_ROWS_COEF, measures: currentRowGraphicalMeasures })
+        rows.push({ height: unit * SPACE_BETWEEN_STAVE_ROWS_COEF, measures: currentRowGraphicalMeasures })
         currentRowWidth = 0
         currentRowGraphicalMeasures = []
       }
@@ -37,10 +36,10 @@ export class GraphicalScore {
     }
 
     if (currentRowGraphicalMeasures.length) {
-      rows.push({ height: renderParams.unit * SPACE_BETWEEN_STAVE_ROWS_COEF, measures: currentRowGraphicalMeasures })
+      rows.push({ height: unit * SPACE_BETWEEN_STAVE_ROWS_COEF, measures: currentRowGraphicalMeasures })
     }
 
     this.rows = rows
-    this.height= renderParams.unit * SPACE_BETWEEN_STAVE_ROWS_COEF* rows.length // very initial attempt to calculate total height
+    this.height = unit * SPACE_BETWEEN_STAVE_ROWS_COEF * rows.length // very initial attempt to calculate total height
   }
 }
