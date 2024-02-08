@@ -34,7 +34,7 @@ class SvgRenderer implements Renderer {
     this.resizeObserver.unobserve(this.containerElement)
   }
 
-  prepare(height: number, fontSize: number) {
+  preRender(height: number, fontSize: number) {
     this.svgElement.setAttribute("viewBox", `0 0 ${this.containerWidth} ${height}`)
     this.svgElement.setAttribute("width", `${this.containerWidth}`)
     this.svgElement.setAttribute("height", `${height}`)
@@ -54,6 +54,10 @@ class SvgRenderer implements Renderer {
 
   clear() {
     this.svgElement.innerHTML = ""
+  }
+
+  postRender(): void {
+    
   }
 
   setColor(color: string) {

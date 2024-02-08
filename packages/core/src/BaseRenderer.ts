@@ -96,10 +96,12 @@ class BaseRenderer {
 
     // clear
     this.renderer.clear()
-    // set sizes
-    this.renderer.prepare(this.graphicalScore.height, this.renderParams.fontSize)
+    // set sizes and other stuff
+    this.renderer.preRender(this.graphicalScore.height, this.renderParams.fontSize)
     // loop through measures and draw
     this.renderScore()
+    // do some stuff when socre is rendered
+    this.renderer.postRender()
   }
 
   renderScore() {

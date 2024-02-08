@@ -4,7 +4,9 @@ export interface Renderer {
 
   init(): void
 
-  prepare(height: number, fontSize: number): void
+  preRender(height: number, fontSize: number): void
+  
+  postRender(): void
 
   clear(): void
 
