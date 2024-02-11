@@ -1,0 +1,36 @@
+---
+sidebar_position: 3
+---
+
+# SVG Renderer
+
+Meant to be used in browser apps, renders score as [SVG](https://developer.mozilla.org/en-US/docs/Web/SVG)
+
+import React from "react"
+import Demo from "@site/src/components/Demo"
+import FontLoader from "@site/src/components/FontLoader"
+
+<FontLoader>
+  <Demo rendere="canvas" />
+</FontLoader>
+
+Usage in code:
+
+```html
+<html>
+  <body>
+    <div id="ss-container"></div>
+  </body>
+</html>
+```
+
+```js
+import SvgRenderer from "@score-storm/svg-renderer"
+
+const scoreStorm = new ScoreStorm()
+
+const containerEl = document.getElementById("ss-container") // your container element, usually div
+
+scoreStorm.setRenderer(new SvgRenderer(containerEl))
+scoreStorm.render()
+```

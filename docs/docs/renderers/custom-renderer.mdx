@@ -1,0 +1,26 @@
+---
+sidebar_position: 5
+---
+
+# Custom Renderer
+
+Feel free to create your own renderer.
+Renderer has to implement common interface
+
+import CodeBlock from "@theme/CodeBlock"
+import Renderer from "!!raw-loader!@score-storm/core/lib/interfaces.d.ts"
+
+<CodeBlock language="jsx">{Renderer}</CodeBlock>
+
+Example:
+
+```js
+class CustomRenderer {
+  // implementation according to Renderer interface
+}
+
+const scoreStorm = new ScoreStorm()
+
+scoreStorm.setRenderer(new CustomRenderer(/** args **/))
+scoreStorm.render()
+```

@@ -1,0 +1,21 @@
+---
+sidebar_position: 4
+---
+
+# Score Model
+
+Score model is the heart of the library. Rendered score uses model as primary source, as well as changing the rendered score is only possible by altering the model
+
+The model is very similar to how data is stored in MNX format.
+The model can be accessed as follows
+
+```js
+const score = scoreStorm.getScore()
+```
+
+Model provides a set of public methods:
+
+```js
+score.addMeasure()
+score.removeMeasure(index)
+```

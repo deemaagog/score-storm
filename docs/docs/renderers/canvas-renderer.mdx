@@ -1,0 +1,36 @@
+---
+sidebar_position: 4
+---
+
+# Canvas Renderer
+
+Meant to be used in browser apps, renders score in [HTML5 Canvas](https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API)
+
+import React from "react"
+import Demo from "@site/src/components/Demo"
+import FontLoader from "@site/src/components/FontLoader"
+
+<FontLoader>
+  <Demo rendere="canvas" />
+</FontLoader>
+
+Usage in code:
+
+```html
+<html>
+  <body>
+    <div id="ss-container"></div>
+  </body>
+</html>
+```
+
+```js
+import CanvasRenderer from "@score-storm/canvas-renderer"
+
+const scoreStorm = new ScoreStorm()
+
+const containerEl = document.getElementById("ss-container") // your container element, usually div
+
+scoreStorm.setRenderer(new CanvasRenderer(containerEl))
+scoreStorm.render()
+```

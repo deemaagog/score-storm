@@ -6,8 +6,14 @@ sidebar_position: 1
 
 Let's discover Score-storm.
 
-## Installation
+## Supported features
 
-```bash
-npm i @score-storm/core
-```
+TBD
+
+## Roadmap
+
+TBD
+
+## Credits
+
+TBD

@@ -1,0 +1,36 @@
+---
+sidebar_position: 1
+---
+
+# Overview
+
+Score-storm core aims to be decoupled from environments specific renderer.
+Library provides a set of renderers : HTML5 Canvas Renderer, SVG Renderer.
+
+Below is an example of the same music score rendered on Canvas and SVG
+
+import Tabs from "@theme/Tabs"
+import TabItem from "@theme/TabItem"
+import Demo from "@site/src/components/Demo"
+import FontLoader from "@site/src/components/FontLoader"
+
+<Tabs lazy className="scorestorm-tabs">
+  <TabItem value="Canvas" default>
+    This score is rendered on canvas
+    <FontLoader>
+      <Demo renderer="canvas" />
+    </FontLoader>
+  </TabItem>
+  <TabItem value="SVG">
+    This score is rendered as SVG
+    <FontLoader>
+      <Demo renderer="svg" />
+    </FontLoader>
+  </TabItem>
+</Tabs>
+
+:::warning
+
+Regardless of the renderer you use, take care of [setting up the font](/docs/renderers/fonts)
+
+:::
