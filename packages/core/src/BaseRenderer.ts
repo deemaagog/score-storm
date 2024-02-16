@@ -75,6 +75,7 @@ class BaseRenderer {
 
   setRenderer(renderer: Renderer) {
     if (this.renderer) {
+      // eslint-disable-next-line no-console
       console.log("destroying...")
       this.renderer.destroy()
     }
@@ -82,12 +83,14 @@ class BaseRenderer {
   }
 
   render(score: Score) {
+    // eslint-disable-next-line no-console
     console.log("rendering...")
     if (!this.renderer) {
       throw new Error("Renderer is not set!")
     }
 
     if (!this.renderer.isInitialized) {
+      // eslint-disable-next-line no-console
       console.log("initializing...")
       this.renderer.init()
     }

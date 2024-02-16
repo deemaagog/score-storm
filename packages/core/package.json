@@ -1,15 +1,33 @@
 {
   "name": "@score-storm/core",
   "version": "1.0.0-dev.1",
-  "description": "",
-  "main": "./lib/index.js",
-  "scripts": {
-    "build": "tsc --build"
+  "description": "A javascript package for rendering and editing music scores",
+  "main": "./dist/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/deemaagog/score-storm.git"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "music score",
+    "music sheet",
+    "music score editor"
+  ],
+  "author": "deemaagog",
   "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/deemaagog/score-storm/issues"
+  },
+  "homepage": "http://score-storm.netlify.com",
+  "scripts": {
+    "build": "tsc --build",
+    "lint": "eslint ."
+  },
   "dependencies": {
     "mnxconverter": "^1.0.1"
+  },
+  "devDependencies": {
+    "@score-storm/typescript-config": "workspace:*",
+    "@score-storm/eslint-config": "workspace:*",
+    "typescript": "^5.3.3"
   }
 }

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 export interface Renderer {
   containerWidth: number
   isInitialized: boolean
@@ -5,7 +6,7 @@ export interface Renderer {
   init(): void
 
   preRender(height: number, fontSize: number): void
-  
+
   postRender(): void
 
   clear(): void

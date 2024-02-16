@@ -2,14 +2,20 @@
   "name": "@score-storm/svg-renderer",
   "version": "1.0.0-dev.1",
   "description": "",
-  "main": "./lib/index.js",
+  "main": "./dist/index.js",
   "scripts": {
-    "build": "tsc --build"
+    "build": "tsc --build",
+    "lint": "eslint ."
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@score-storm/core": "*"
+    "@score-storm/core": "workspace:*"
+  },
+  "devDependencies": {
+    "@score-storm/typescript-config": "workspace:*",
+    "@score-storm/eslint-config": "workspace:*",
+    "typescript": "^5.3.3"
   }
 }

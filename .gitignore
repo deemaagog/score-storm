@@ -119,3 +119,8 @@ dist
 lib/
 
 .DS_Store
+
+# Turbo
+.turbo
+
+.vscode
