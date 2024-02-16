@@ -2,7 +2,7 @@ import BaseRenderer from "./BaseRenderer"
 import { GraphicalScore } from "./GraphicalScore"
 import { Renderer } from "./interfaces"
 import { Score } from "./Score"
-export { Score, Renderer, GraphicalScore }
+export { Score, type Renderer, GraphicalScore }
 
 export interface ScoreStormOptions {
   scale: number

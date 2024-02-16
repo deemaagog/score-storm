@@ -67,4 +67,3 @@ class CanvasRenderer implements Renderer {
 }
 
 export default CanvasRenderer
-
