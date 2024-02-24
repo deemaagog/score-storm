@@ -30,7 +30,7 @@ function Demo({ renderer = "canvas", musicXml = undefined, bordered = false }) {
 
   return (
     <div style={{ width: "100%", border: bordered ? "1px solid #efefef" : "none", padding: "40px" }}>
-      <div style={{ width: "100%" }} ref={rootElementRef} />
+      <div style={{ width: "100%", lineHeight: 0 }} ref={rootElementRef} />
     </div>
   )
 }

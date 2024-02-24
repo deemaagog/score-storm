@@ -2,6 +2,8 @@
   "scripts": {
     "build": "turbo run build",
     "lint": "turbo run lint",
+    "e2e": "turbo run e2e",
+    "e2e:install": "turbo run e2e:install",
     "start": "turbo run start",
     "commit": "cz"
   },

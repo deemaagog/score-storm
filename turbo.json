@@ -13,6 +13,10 @@
     },
     "clean": {
       "cache": false
-    }
+    },
+    "e2e": {
+      "dependsOn": ["^build"]
+    },
+    "e2e:install": {}
   }
 }
