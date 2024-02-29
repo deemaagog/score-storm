@@ -1,38 +1,53 @@
-import { GlobalMeasure, Score } from "./Score"
+import { Score } from "../model/Score"
+import { GraphicalMeasure } from "./GraphicalMeasure"
+import { GraphicalRow } from "./GraphicalRow"
 
 const SPACE_BETWEEN_STAVE_ROWS_COEF = 10 // space unit
-
-interface GraphicalScoreRow {
-  height: number
-  measures: GraphicalMeasure[]
-}
-
-export interface GraphicalMeasure {
-  width: number
-  globalMeasure: GlobalMeasure
-}
 
 /**
  * The main class for graphical representation of music score model
  */
 export class GraphicalScore {
-  rows: GraphicalScoreRow[]
+  rows: GraphicalRow[]
   height: number
 
   constructor(score: Score, containerWidth: number, unit: number) {
     const measureWidth = containerWidth / 2 // temp, just for demo
 
-    const rows: GraphicalScoreRow[] = []
+    const rows: GraphicalRow[] = []
     let currentRowWidth = 0
     let currentRowGraphicalMeasures: GraphicalMeasure[] = []
-    for (const globalMeasure of score.globalMeasures) {
+    let isFirstMeasureInRow = true
+    let isFirstRow = true
+
+    for (let i = 0; i < score.measures.length; i++) {
       if (currentRowWidth >= containerWidth) {
         rows.push({ height: unit * SPACE_BETWEEN_STAVE_ROWS_COEF, measures: currentRowGraphicalMeasures })
         currentRowWidth = 0
         currentRowGraphicalMeasures = []
+        isFirstMeasureInRow = true
       }
+
+      const measure = score.measures[i]
+      const globalMeasure = score.globalMeasures[i]
       currentRowWidth += measureWidth
-      currentRowGraphicalMeasures.push({ width: measureWidth, globalMeasure })
+
+      const graphicalMeasure = new GraphicalMeasure()
+      graphicalMeasure.width = measureWidth
+
+      if (isFirstRow) {
+        graphicalMeasure.time = globalMeasure.time
+      }
+
+      if (isFirstMeasureInRow) {
+        graphicalMeasure.clef = measure.clef
+        graphicalMeasure.key = globalMeasure.key
+      }
+
+      currentRowGraphicalMeasures.push(graphicalMeasure)
+
+      isFirstMeasureInRow = false
+      isFirstRow = false
     }
 
     if (currentRowGraphicalMeasures.length) {

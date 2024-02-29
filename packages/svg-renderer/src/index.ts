@@ -42,12 +42,15 @@ class SvgRenderer implements Renderer {
     // https://developer.mozilla.org/en-US/docs/Web/API/SVGStyleElement
     // TODO: override styles instead of recreating
     const style = document.createElementNS(NS, "style")
-    const node = document.createTextNode(`.glyph { 
-      font-size: ${fontSize}px;
-      font-family: Bravura;
-      dominant-baseline: alphabetic;
-      text-anchor: start;
-    }`)
+    const node = document.createTextNode(`
+      .glyph { 
+        font-size: ${fontSize}px;
+        font-family: Bravura;
+        dominant-baseline: alphabetic;
+        text-anchor: start;
+        user-select: none;
+      }
+    `)
     style.appendChild(node)
     this.svgElement.appendChild(style)
   }
@@ -56,9 +59,7 @@ class SvgRenderer implements Renderer {
     this.svgElement.innerHTML = ""
   }
 
-  postRender(): void {
-    
-  }
+  postRender(): void {}
 
   setColor(color: string) {
     this.currentColor = color
