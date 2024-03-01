@@ -1,6 +1,7 @@
 import { Score } from "../model/Score"
 import { GraphicalMeasure } from "./GraphicalMeasure"
 import { GraphicalRow } from "./GraphicalRow"
+import { GraphicalTimeSignature } from "./GraphicalTimeSignature"
 
 const SPACE_BETWEEN_STAVE_ROWS_COEF = 10 // space unit
 
@@ -36,7 +37,7 @@ export class GraphicalScore {
       graphicalMeasure.width = measureWidth
 
       if (isFirstRow) {
-        graphicalMeasure.time = globalMeasure.time
+        graphicalMeasure.time = new GraphicalTimeSignature(globalMeasure.time)
       }
 
       if (isFirstMeasureInRow) {

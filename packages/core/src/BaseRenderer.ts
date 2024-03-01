@@ -1,30 +1,8 @@
-import { GraphicalScore, ScoreStormOptions } from "."
-import { GraphicalMeasure } from "./GraphicalScore"
-import { Score } from "./Score"
+import { Score } from "./model/Score"
 import { Renderer } from "./interfaces"
-
-function getText(unicodeSymbol: string) {
-  const codeString = parseInt(unicodeSymbol.replace("U+", ""), 16)
-  return String.fromCharCode(codeString)
-}
-
-function getTimeSignatureSymbol(n: number) {
-  const map = {
-    0: "U+E080",
-    1: "U+E081",
-    2: "U+E082",
-    3: "U+E083",
-    4: "U+E084",
-    5: "U+E085",
-    6: "U+E086",
-    7: "U+E087",
-    8: "U+E088",
-    9: "U+E089",
-  }
-
-  // @ts-expect-error temp
-  return map[n] || map[0]
-}
+import { ScoreStormOptions } from "./ScoreStorm"
+import { GraphicalScore } from "./graphical/GraphicalScore"
+import { GraphicalMeasure } from "./graphical/GraphicalMeasure"
 
 export interface RenderParams {
   fontSize: number
@@ -41,6 +19,7 @@ export interface RenderParams {
 
 const SCALE_TO_FONT_RATIO = 64 / 100
 const NUMBER_OF_STAFF_LINES = 5 // hardcode for now
+const TIME_SIGNATURE_MARGIN = 1 // space between start barline and time signature
 
 /**
  * Main class responsible for rendering music score.
@@ -134,7 +113,7 @@ class BaseRenderer {
     this.renderer.setColor(this.renderParams.mainColor)
     this.renderer.drawRect(this.x, this.y, this.renderParams.barLineThickness, this.renderParams.barlineHeight)
 
-    this.renderMeasureNotes(graphicalMeasure)
+    this.renderMeasureContent(graphicalMeasure)
 
     this.x += graphicalMeasure.width
     // draw end barline
@@ -176,25 +155,46 @@ class BaseRenderer {
     }
   }
 
-  renderMeasureNotes(graphicalMeasure: GraphicalMeasure) {
+  renderMeasureContent(graphicalMeasure: GraphicalMeasure) {
     //  draw measure content
-    //  for demo purpose, render whole rest
-    this.renderer.drawGlyph(getText("U+E4E3"), this.x + graphicalMeasure.width / 2, this.y + this.renderParams.midStave)
+    this.renderTimeSignature(graphicalMeasure)
 
-    // time signature
-    if (graphicalMeasure.globalMeasure.time) {
-      const { count, unit } = graphicalMeasure.globalMeasure.time
-      this.renderer.drawGlyph(
-        getText(getTimeSignatureSymbol(count)),
-        this.x + this.renderParams.unit,
-        this.y + this.renderParams.midStave - this.renderParams.unit,
-      )
-      this.renderer.drawGlyph(
-        getText(getTimeSignatureSymbol(unit)),
-        this.x + this.renderParams.unit,
-        this.y + this.renderParams.midStave + this.renderParams.unit,
-      )
+    //  for demo purpose, render whole rest
+    this.renderer.drawGlyph(
+      this.getTextFromUnicode("U+E4E3"),
+      this.x + graphicalMeasure.width / 2,
+      this.y + this.renderParams.midStave,
+    )
+  }
+
+  renderTimeSignature(graphicalMeasure: GraphicalMeasure) {
+    if (graphicalMeasure.time) {
+      for (const positionedGlyph of graphicalMeasure.time.object) {
+        this.renderer.drawGlyph(
+          this.getTextFromUnicode(positionedGlyph.glyph.symbol),
+          this.x + this.renderParams.unit * TIME_SIGNATURE_MARGIN,
+          this.y + this.renderParams.midStave + this.renderParams.unit * positionedGlyph.shift,
+        )
+      }
     }
+  }
+
+  renderClef() {
+    // this.renderer.drawGlyph(
+    //   getText("U+E050"),
+    //   this.x + graphicalMeasure.width / 2 - 60,
+    //   this.y + this.renderParams.midStave + this.renderParams.unit,
+    // )
+    // this.renderer.drawGlyph(
+    //   getText("U+E062"),
+    //   this.x + graphicalMeasure.width / 2 + 60,
+    //   this.y + this.renderParams.midStave - this.renderParams.unit,
+    // )
+  }
+
+  getTextFromUnicode(unicodeSymbol: string) {
+    const codeString = parseInt(unicodeSymbol.replace("U+", ""), 16)
+    return String.fromCharCode(codeString)
   }
 }
 
