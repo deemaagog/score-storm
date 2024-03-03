@@ -1,6 +1,6 @@
 import { RenderParams } from "../BaseRenderer"
 import { Renderer } from "../interfaces"
-import { GlobalMeasure } from "../model/GlobalMeasure"
+import { TimeSignature } from "../model/GlobalMeasure"
 import { BaseGraphical } from "./BaseGraphical"
 import {
   TimeSig1,
@@ -14,8 +14,6 @@ import {
   TimeSig9,
 } from "./glyphs/time-signature"
 import { Glyph, IGraphical } from "./interfaces"
-
-const TIME_SIGNATURE_MARGIN = 1 // space between start barline and time signature
 
 export class GraphicalTimeSignature extends BaseGraphical implements IGraphical {
   height!: number
@@ -35,7 +33,7 @@ export class GraphicalTimeSignature extends BaseGraphical implements IGraphical 
     9: TimeSig9,
   }
 
-  constructor(time: GlobalMeasure["time"]) {
+  constructor(time: TimeSignature) {
     super()
     const { count, unit } = time!
 
@@ -59,16 +57,8 @@ export class GraphicalTimeSignature extends BaseGraphical implements IGraphical 
   }
 
   render(x: number, y: number, renderer: Renderer, params: RenderParams) {
-    renderer.drawGlyph(
-      this.getTextFromUnicode(this.countGlyph.symbol),
-      x + params.unit * TIME_SIGNATURE_MARGIN,
-      y + params.unit * -1,
-    )
+    renderer.drawGlyph(this.getTextFromUnicode(this.countGlyph.symbol), x, y + params.unit * -1)
 
-    renderer.drawGlyph(
-      this.getTextFromUnicode(this.unitGlyph.symbol),
-      x + params.unit * TIME_SIGNATURE_MARGIN,
-      y + params.unit * 1,
-    )
+    renderer.drawGlyph(this.getTextFromUnicode(this.unitGlyph.symbol), x, y + params.unit * 1)
   }
 }

@@ -35,32 +35,45 @@ export default defineConfig<TestOptions>({
 
   /* Configure projects for major browsers */
   projects: [
+    // smoke tests for various browsers
     {
       name: "chromium-svg",
+      testMatch: "default-score.spec.ts",
       use: { ...devices["Desktop Chrome"], renderer: "svg" },
     },
     {
       name: "chromium-canvas",
+      testMatch: "default-score.spec.ts",
       use: { ...devices["Desktop Chrome"], renderer: "canvas" },
     },
 
     {
       name: "firefox-svg",
+      testMatch: "default-score.spec.ts",
       use: { ...devices["Desktop Firefox"], renderer: "svg" },
     },
 
     {
       name: "firefox-canvas",
+      testMatch: "default-score.spec.ts",
       use: { ...devices["Desktop Firefox"], renderer: "canvas" },
     },
 
     {
       name: "webkit-svg",
+      testMatch: "default-score.spec.ts",
       use: { ...devices["Desktop Safari"], renderer: "svg" },
     },
     {
       name: "webkit-canvas",
+      testMatch: "default-score.spec.ts",
       use: { ...devices["Desktop Safari"], renderer: "canvas" },
+    },
+    // feature tests
+    {
+      name: "features",
+      testMatch: "features/*.spec.ts",
+      use: { ...devices["Desktop Chrome"] },
     },
   ],
 
