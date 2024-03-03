@@ -1,5 +1,8 @@
 /* eslint-disable no-unused-vars */
 
+import { RenderParams } from "../BaseRenderer"
+import { Renderer } from "../interfaces"
+
 export interface GlyphBBoxes {
   bBoxNE: readonly [number, number]
   bBoxSW: readonly [number, number]
@@ -12,14 +15,14 @@ export interface Glyph {
   bBoxes: GlyphBBoxes
 }
 
-export interface PositionedGlyph {
-  glyph: Glyph
-  shift: number
-}
+export interface IGraphical {
+  width: number // TODO: do we need that?
+  height: number // TODO: do we need that?
 
-export interface GraphicalObject {
-  width: number
-  height: number
-
-  object: PositionedGlyph | PositionedGlyph[]
+  render(
+    x: number /*  measure start X coodinate */,
+    y: number /*  middle of stave */,
+    renderer: Renderer,
+    renderParams: RenderParams,
+  ): void
 }

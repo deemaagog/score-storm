@@ -1,4 +1,7 @@
+import { RenderParams } from "../BaseRenderer"
+import { Renderer } from "../interfaces"
 import { GlobalMeasure } from "../model/GlobalMeasure"
+import { BaseGraphical } from "./BaseGraphical"
 import {
   TimeSig1,
   TimeSig2,
@@ -10,12 +13,15 @@ import {
   TimeSig8,
   TimeSig9,
 } from "./glyphs/time-signature"
-import { GraphicalObject, PositionedGlyph } from "./interfaces"
+import { Glyph, IGraphical } from "./interfaces"
 
-export class GraphicalTimeSignature implements GraphicalObject {
+const TIME_SIGNATURE_MARGIN = 1 // space between start barline and time signature
+
+export class GraphicalTimeSignature extends BaseGraphical implements IGraphical {
   height!: number
   width!: number
-  object!: PositionedGlyph[]
+  countGlyph: Glyph
+  unitGlyph: Glyph
 
   static glyphMap = {
     1: TimeSig1,
@@ -30,29 +36,39 @@ export class GraphicalTimeSignature implements GraphicalObject {
   }
 
   constructor(time: GlobalMeasure["time"]) {
+    super()
     const { count, unit } = time!
 
-    const countGlyph = GraphicalTimeSignature.glyphMap[count as keyof typeof GraphicalTimeSignature.glyphMap]
+    this.countGlyph = GraphicalTimeSignature.glyphMap[count as keyof typeof GraphicalTimeSignature.glyphMap]
 
-    const unitGlyph = GraphicalTimeSignature.glyphMap[unit as keyof typeof GraphicalTimeSignature.glyphMap]
+    this.unitGlyph = GraphicalTimeSignature.glyphMap[unit as keyof typeof GraphicalTimeSignature.glyphMap]
 
-    if (!countGlyph || !unitGlyph) {
-      throw new Error("Invalid time signature")
+    if (!this.countGlyph || !this.unitGlyph) {
+      throw new Error(`Invalid time signature ${count}/${unit}`)
     }
 
-    const countGlyphHeight = countGlyph.bBoxes.bBoxNE[1] - countGlyph.bBoxes.bBoxSW[1]
-    const unitGlyphHeight = unitGlyph.bBoxes.bBoxNE[1] - unitGlyph.bBoxes.bBoxSW[1]
+    const countGlyphHeight = this.countGlyph.bBoxes.bBoxNE[1] - this.countGlyph.bBoxes.bBoxSW[1]
+    const unitGlyphHeight = this.unitGlyph.bBoxes.bBoxNE[1] - this.unitGlyph.bBoxes.bBoxSW[1]
 
     this.height = countGlyphHeight + unitGlyphHeight
 
-    const countGlyphWidth = countGlyph.bBoxes.bBoxNE[0] + countGlyph.bBoxes.bBoxSW[0]
-    const unitGlyphWidth = unitGlyph.bBoxes.bBoxNE[0] - unitGlyph.bBoxes.bBoxSW[0]
+    const countGlyphWidth = this.countGlyph.bBoxes.bBoxNE[0] + this.countGlyph.bBoxes.bBoxSW[0]
+    const unitGlyphWidth = this.unitGlyph.bBoxes.bBoxNE[0] - this.unitGlyph.bBoxes.bBoxSW[0]
 
     this.width = Math.max(countGlyphWidth, unitGlyphWidth)
+  }
 
-    this.object = [
-      { glyph: countGlyph, shift: -1 },
-      { glyph: unitGlyph, shift: 1 },
-    ]
+  render(x: number, y: number, renderer: Renderer, params: RenderParams) {
+    renderer.drawGlyph(
+      this.getTextFromUnicode(this.countGlyph.symbol),
+      x + params.unit * TIME_SIGNATURE_MARGIN,
+      y + params.unit * -1,
+    )
+
+    renderer.drawGlyph(
+      this.getTextFromUnicode(this.unitGlyph.symbol),
+      x + params.unit * TIME_SIGNATURE_MARGIN,
+      y + params.unit * 1,
+    )
   }
 }

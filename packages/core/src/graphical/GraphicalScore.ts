@@ -1,7 +1,7 @@
+import { Clef } from "../model/Measure"
 import { Score } from "../model/Score"
 import { GraphicalMeasure } from "./GraphicalMeasure"
 import { GraphicalRow } from "./GraphicalRow"
-import { GraphicalTimeSignature } from "./GraphicalTimeSignature"
 
 const SPACE_BETWEEN_STAVE_ROWS_COEF = 10 // space unit
 
@@ -20,6 +20,7 @@ export class GraphicalScore {
     let currentRowGraphicalMeasures: GraphicalMeasure[] = []
     let isFirstMeasureInRow = true
     let isFirstRow = true
+    let currentClef: Clef
 
     for (let i = 0; i < score.measures.length; i++) {
       if (currentRowWidth >= containerWidth) {
@@ -33,17 +34,18 @@ export class GraphicalScore {
       const globalMeasure = score.globalMeasures[i]
       currentRowWidth += measureWidth
 
-      const graphicalMeasure = new GraphicalMeasure()
-      graphicalMeasure.width = measureWidth
-
       if (isFirstRow) {
-        graphicalMeasure.time = new GraphicalTimeSignature(globalMeasure.time)
+        if (!measure.clef) {
+          throw new Error("Clef is not set in first measure")
+        }
+        currentClef = measure.clef
       }
 
-      if (isFirstMeasureInRow) {
-        graphicalMeasure.clef = measure.clef
-        graphicalMeasure.key = globalMeasure.key
-      }
+      const graphicalMeasure = new GraphicalMeasure({
+        width: measureWidth,
+        clef: isFirstMeasureInRow ? currentClef! : undefined,
+        time: isFirstRow ? globalMeasure.time : undefined,
+      })
 
       currentRowGraphicalMeasures.push(graphicalMeasure)
 
