@@ -24,6 +24,7 @@ export class GraphicalClef extends BaseGraphical implements IGraphical {
 
     this.clefGlyph = GraphicalClef.glyphMap[sign as keyof typeof GraphicalClef.glyphMap]
 
+    // TODO: this validation has to be done at score model level
     if (!this.clefGlyph) {
       throw new Error(`Invalid time signature ${sign}`)
     }
@@ -38,10 +39,6 @@ export class GraphicalClef extends BaseGraphical implements IGraphical {
   }
 
   render(x: number, y: number, renderer: Renderer, params: RenderParams) {
-    renderer.drawGlyph(
-      this.getTextFromUnicode(this.clefGlyph.symbol),
-      x + params.unit,
-      y + params.unit * this.verticalShift,
-    )
+    renderer.drawGlyph(this.getTextFromUnicode(this.clefGlyph.symbol), x, y + params.unit * this.verticalShift)
   }
 }

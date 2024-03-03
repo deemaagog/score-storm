@@ -9,7 +9,8 @@ export interface RenderParams {
   unit: number
   numberOfStaffLines: number
   staffLineThickness: number
-  clefPadding: number
+  clefMargin: number
+  timeSignatureMargin: number
   barLineThickness: number
   barlineHeight: number
   midStave: number
@@ -42,7 +43,8 @@ class BaseRenderer {
       unit,
       numberOfStaffLines: NUMBER_OF_STAFF_LINES,
       staffLineThickness,
-      clefPadding: unit,
+      clefMargin: 1,
+      timeSignatureMargin: 1,
       barLineThickness: staffLineThickness * 1.2,
       mainColor: "black",
       staveLineColor: "red",
@@ -156,8 +158,18 @@ class BaseRenderer {
 
   renderMeasureContent(graphicalMeasure: GraphicalMeasure) {
     //  draw measure content
-    // this.renderClef(graphicalMeasure)
-    this.renderTimeSignature(graphicalMeasure)
+    // temporarily do horizontal positioning here, but ultimately this should be done in GraphicalMeasure
+    let measureX = this.x
+    if (graphicalMeasure.clef) {
+      measureX += this.renderParams.unit * this.renderParams.clefMargin
+      graphicalMeasure.clef.render(measureX, this.y + this.renderParams.midStave, this.renderer, this.renderParams)
+      measureX += this.renderParams.unit * graphicalMeasure.clef.width
+    }
+
+    if (graphicalMeasure.time) {
+      measureX += this.renderParams.unit * this.renderParams.timeSignatureMargin
+      graphicalMeasure.time.render(measureX, this.y + this.renderParams.midStave, this.renderer, this.renderParams)
+    }
 
     //  for demo purpose, render whole rest
     this.renderer.drawGlyph(
@@ -165,18 +177,6 @@ class BaseRenderer {
       this.x + graphicalMeasure.width / 2,
       this.y + this.renderParams.midStave,
     )
-  }
-
-  renderTimeSignature(graphicalMeasure: GraphicalMeasure) {
-    if (graphicalMeasure.time) {
-      graphicalMeasure.time.render(this.x, this.y + this.renderParams.midStave, this.renderer, this.renderParams)
-    }
-  }
-
-  renderClef(graphicalMeasure: GraphicalMeasure) {
-    if (graphicalMeasure.clef) {
-      graphicalMeasure.clef.render(this.x + 100, this.y + this.renderParams.midStave, this.renderer, this.renderParams)
-    }
   }
 
   getTextFromUnicode(unicodeSymbol: string) {
