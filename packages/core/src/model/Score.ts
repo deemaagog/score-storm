@@ -16,8 +16,8 @@ export class Score {
     const measure = new Measure()
 
     measure.clef = {
-      position: 2,
       sign: "G",
+      position: -2,
     }
 
     score.measures.push(measure)
@@ -39,16 +39,8 @@ export class Score {
 
     for (const mnxMeasure of mnxScore.parts[0].measures!) {
       const measure = new Measure()
-      // clef changes will be implemented later
+      // TODO: clef changes
 
-      //   "clef": {
-      //     "position": -2,
-      //     "sign": "G"
-      //  }
-      //  "clef": {
-      //     "position": 2,
-      //     "sign": "F"
-      //   }
       if (mnxMeasure.clefs?.length && !mnxMeasure.clefs[0].position) {
         measure.clef = mnxMeasure.clefs[0].clef
       }

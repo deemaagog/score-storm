@@ -1,6 +1,8 @@
 export class Measure {
-  clef?: {
-    position: number
-    sign: string
-  }
+  clef?: Clef
+}
+
+export class Clef {
+  position!: number
+  sign!: string
 }

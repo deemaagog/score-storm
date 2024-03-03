@@ -19,7 +19,6 @@ export interface RenderParams {
 
 const SCALE_TO_FONT_RATIO = 64 / 100
 const NUMBER_OF_STAFF_LINES = 5 // hardcode for now
-const TIME_SIGNATURE_MARGIN = 1 // space between start barline and time signature
 
 /**
  * Main class responsible for rendering music score.
@@ -157,6 +156,7 @@ class BaseRenderer {
 
   renderMeasureContent(graphicalMeasure: GraphicalMeasure) {
     //  draw measure content
+    // this.renderClef(graphicalMeasure)
     this.renderTimeSignature(graphicalMeasure)
 
     //  for demo purpose, render whole rest
@@ -169,27 +169,14 @@ class BaseRenderer {
 
   renderTimeSignature(graphicalMeasure: GraphicalMeasure) {
     if (graphicalMeasure.time) {
-      for (const positionedGlyph of graphicalMeasure.time.object) {
-        this.renderer.drawGlyph(
-          this.getTextFromUnicode(positionedGlyph.glyph.symbol),
-          this.x + this.renderParams.unit * TIME_SIGNATURE_MARGIN,
-          this.y + this.renderParams.midStave + this.renderParams.unit * positionedGlyph.shift,
-        )
-      }
+      graphicalMeasure.time.render(this.x, this.y + this.renderParams.midStave, this.renderer, this.renderParams)
     }
   }
 
-  renderClef() {
-    // this.renderer.drawGlyph(
-    //   getText("U+E050"),
-    //   this.x + graphicalMeasure.width / 2 - 60,
-    //   this.y + this.renderParams.midStave + this.renderParams.unit,
-    // )
-    // this.renderer.drawGlyph(
-    //   getText("U+E062"),
-    //   this.x + graphicalMeasure.width / 2 + 60,
-    //   this.y + this.renderParams.midStave - this.renderParams.unit,
-    // )
+  renderClef(graphicalMeasure: GraphicalMeasure) {
+    if (graphicalMeasure.clef) {
+      graphicalMeasure.clef.render(this.x + 100, this.y + this.renderParams.midStave, this.renderer, this.renderParams)
+    }
   }
 
   getTextFromUnicode(unicodeSymbol: string) {
