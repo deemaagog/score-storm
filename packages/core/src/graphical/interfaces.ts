@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 
-import { RenderParams } from "../BaseRenderer"
+import { Settings } from "../BaseRenderer"
 import { Renderer } from "../interfaces"
 
 export interface GlyphBBoxes {
@@ -23,6 +23,6 @@ export interface IGraphical {
     x: number /*  measure start X coodinate */,
     y: number /*  middle of stave */,
     renderer: Renderer,
-    renderParams: RenderParams,
+    settings: Settings,
   ): void
 }

@@ -1,10 +1,10 @@
 import { Score } from "./model/Score"
 import { Renderer } from "./interfaces"
-import { ScoreStormOptions } from "./ScoreStorm"
+import { ScoreStormSettings } from "./ScoreStorm"
 import { GraphicalScore } from "./graphical/GraphicalScore"
 import { GraphicalMeasure } from "./graphical/GraphicalMeasure"
 
-export interface RenderParams {
+export type Settings = {
   fontSize: number
   unit: number
   numberOfStaffLines: number
@@ -16,7 +16,7 @@ export interface RenderParams {
   midStave: number
   mainColor: string
   staveLineColor: string
-}
+} & Pick<ScoreStormSettings, "debug">
 
 const SCALE_TO_FONT_RATIO = 64 / 100
 const NUMBER_OF_STAFF_LINES = 5 // hardcode for now
@@ -25,20 +25,24 @@ const NUMBER_OF_STAFF_LINES = 5 // hardcode for now
  * Main class responsible for rendering music score.
  */
 class BaseRenderer {
-  private renderParams: RenderParams
+  private settings!: Settings
   private renderer!: Renderer
   private graphicalScore!: GraphicalScore
   private x: number = 0
   private y: number = 0
 
-  constructor(options?: ScoreStormOptions) {
-    const scale = options?.scale || 100
+  constructor(options?: ScoreStormSettings) {
+    this.setSettings(options)
+  }
+
+  setSettings(options?: ScoreStormSettings) {
+    const { scale = 100, ...rest } = options || {}
     const fontSize = scale * SCALE_TO_FONT_RATIO
     const unit = fontSize / 4
     const staffLineThickness = unit / 8
     const barlineHeight = unit * 4 + staffLineThickness
 
-    this.renderParams = {
+    this.settings = {
       fontSize,
       unit,
       numberOfStaffLines: NUMBER_OF_STAFF_LINES,
@@ -50,6 +54,7 @@ class BaseRenderer {
       staveLineColor: "red",
       barlineHeight,
       midStave: barlineHeight / 2,
+      ...rest,
     }
   }
 
@@ -75,12 +80,12 @@ class BaseRenderer {
       this.renderer.init()
     }
 
-    this.graphicalScore = new GraphicalScore(score, this.renderer.containerWidth, this.renderParams.unit)
+    this.graphicalScore = new GraphicalScore(score, this.renderer.containerWidth, this.settings.unit)
 
     // clear
     this.renderer.clear()
     // set sizes and other stuff
-    this.renderer.preRender(this.graphicalScore.height, this.renderParams.fontSize)
+    this.renderer.preRender(this.graphicalScore.height, this.settings.fontSize)
     // loop through measures and draw
     this.renderScore()
     // do some stuff when socre is rendered
@@ -111,8 +116,8 @@ class BaseRenderer {
     this.renderStaveLines(graphicalMeasure)
 
     // draw start bar line
-    this.renderer.setColor(this.renderParams.mainColor)
-    this.renderer.drawRect(this.x, this.y, this.renderParams.barLineThickness, this.renderParams.barlineHeight)
+    this.renderer.setColor(this.settings.mainColor)
+    this.renderer.drawRect(this.x, this.y, this.settings.barLineThickness, this.settings.barlineHeight)
 
     this.renderMeasureContent(graphicalMeasure)
 
@@ -121,23 +126,23 @@ class BaseRenderer {
     if (latestMeasureInRow) {
       if (latestRow) {
         this.renderer.drawRect(
-          this.x - this.renderParams.unit,
+          this.x - this.settings.unit,
           this.y,
-          this.renderParams.barLineThickness,
-          this.renderParams.barlineHeight,
+          this.settings.barLineThickness,
+          this.settings.barlineHeight,
         )
         this.renderer.drawRect(
-          this.x - this.renderParams.barLineThickness * 3.8,
+          this.x - this.settings.barLineThickness * 3.8,
           this.y,
-          this.renderParams.barLineThickness * 3.8,
-          this.renderParams.barlineHeight,
+          this.settings.barLineThickness * 3.8,
+          this.settings.barlineHeight,
         )
       } else {
         this.renderer.drawRect(
-          this.x - this.renderParams.barLineThickness,
+          this.x - this.settings.barLineThickness,
           this.y,
-          this.renderParams.barLineThickness,
-          this.renderParams.barlineHeight,
+          this.settings.barLineThickness,
+          this.settings.barlineHeight,
         )
       }
     }
@@ -145,13 +150,13 @@ class BaseRenderer {
 
   renderStaveLines(graphicalMeasure: GraphicalMeasure) {
     this.renderer.setColor("#666666")
-    const half = Math.floor(this.renderParams.numberOfStaffLines / 2)
+    const half = Math.floor(this.settings.numberOfStaffLines / 2)
     for (let index = -half; index <= half; index++) {
       this.renderer.drawRect(
         this.x,
-        this.y + this.renderParams.midStave + this.renderParams.unit * index - this.renderParams.staffLineThickness / 2,
+        this.y + this.settings.midStave + this.settings.unit * index - this.settings.staffLineThickness / 2,
         graphicalMeasure.width,
-        this.renderParams.staffLineThickness,
+        this.settings.staffLineThickness,
       )
     }
   }
@@ -161,21 +166,22 @@ class BaseRenderer {
     // temporarily do horizontal positioning here, but ultimately this should be done in GraphicalMeasure
     let measureX = this.x
     if (graphicalMeasure.clef) {
-      measureX += this.renderParams.unit * this.renderParams.clefMargin
-      graphicalMeasure.clef.render(measureX, this.y + this.renderParams.midStave, this.renderer, this.renderParams)
-      measureX += this.renderParams.unit * graphicalMeasure.clef.width
+      measureX += this.settings.unit * this.settings.clefMargin
+      graphicalMeasure.clef.render(measureX, this.y + this.settings.midStave, this.renderer, this.settings)
+      measureX += this.settings.unit * graphicalMeasure.clef.width
     }
 
     if (graphicalMeasure.time) {
-      measureX += this.renderParams.unit * this.renderParams.timeSignatureMargin
-      graphicalMeasure.time.render(measureX, this.y + this.renderParams.midStave, this.renderer, this.renderParams)
+      measureX += this.settings.unit * this.settings.timeSignatureMargin
+      graphicalMeasure.time.render(measureX, this.y + this.settings.midStave, this.renderer, this.settings)
     }
 
     //  for demo purpose, render whole rest
+    const bboxes = { bBoxNE: [1.128, 0.036], bBoxSW: [0, -0.54] }
     this.renderer.drawGlyph(
       this.getTextFromUnicode("U+E4E3"),
-      this.x + graphicalMeasure.width / 2,
-      this.y + this.renderParams.midStave,
+      this.x + graphicalMeasure.width / 2 - bboxes.bBoxSW[0] * this.settings.unit,
+      this.y + this.settings.midStave,
     )
   }
 
