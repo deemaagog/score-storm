@@ -1,4 +1,4 @@
-import { RenderParams } from "../BaseRenderer"
+import { Settings } from "../BaseRenderer"
 import { Renderer } from "../interfaces"
 import { TimeSignature } from "../model/GlobalMeasure"
 import { BaseGraphical } from "./BaseGraphical"
@@ -45,20 +45,45 @@ export class GraphicalTimeSignature extends BaseGraphical implements IGraphical 
       throw new Error(`Invalid time signature ${count}/${unit}`)
     }
 
+    // TODO: two digit time signatures, like 12/8
+
     const countGlyphHeight = this.countGlyph.bBoxes.bBoxNE[1] - this.countGlyph.bBoxes.bBoxSW[1]
     const unitGlyphHeight = this.unitGlyph.bBoxes.bBoxNE[1] - this.unitGlyph.bBoxes.bBoxSW[1]
 
     this.height = countGlyphHeight + unitGlyphHeight
 
-    const countGlyphWidth = this.countGlyph.bBoxes.bBoxNE[0] + this.countGlyph.bBoxes.bBoxSW[0]
+    const countGlyphWidth = this.countGlyph.bBoxes.bBoxNE[0] - this.countGlyph.bBoxes.bBoxSW[0]
     const unitGlyphWidth = this.unitGlyph.bBoxes.bBoxNE[0] - this.unitGlyph.bBoxes.bBoxSW[0]
 
     this.width = Math.max(countGlyphWidth, unitGlyphWidth)
   }
 
-  render(x: number, y: number, renderer: Renderer, params: RenderParams) {
-    renderer.drawGlyph(this.getTextFromUnicode(this.countGlyph.symbol), x, y + params.unit * -1)
+  render(x: number, y: number, renderer: Renderer, settings: Settings) {
+    renderer.drawGlyph(
+      this.getTextFromUnicode(this.countGlyph.symbol),
+      x -
+        this.countGlyph.bBoxes.bBoxSW[0] * settings.unit +
+        ((this.width - (this.countGlyph.bBoxes.bBoxNE[0] - this.countGlyph.bBoxes.bBoxSW[0])) / 2) * settings.unit,
+      y + settings.unit * -1,
+    )
 
-    renderer.drawGlyph(this.getTextFromUnicode(this.unitGlyph.symbol), x, y + params.unit * 1)
+    renderer.drawGlyph(
+      this.getTextFromUnicode(this.unitGlyph.symbol),
+      x -
+        this.unitGlyph.bBoxes.bBoxSW[0] * settings.unit +
+        ((this.width - (this.unitGlyph.bBoxes.bBoxNE[0] - this.unitGlyph.bBoxes.bBoxSW[0])) / 2) * settings.unit,
+      y + settings.unit * 1,
+    )
+
+    if (settings.debug?.bBoxes) {
+      renderer.setColor("#ff8a8a80")
+      renderer.drawRect(
+        x,
+        y - (this.countGlyph.bBoxes.bBoxNE[1] - this.countGlyph.bBoxes.bBoxSW[1]) * settings.unit,
+        this.width * settings.unit,
+        this.height * settings.unit,
+      )
+      renderer.setColor("black")
+    }
   }
 }

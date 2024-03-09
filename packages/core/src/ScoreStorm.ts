@@ -4,8 +4,11 @@ import { Renderer } from "./interfaces"
 import { Score } from "./model/Score"
 export { Score, type Renderer, GraphicalScore }
 
-export interface ScoreStormOptions {
+export interface ScoreStormSettings {
   scale: number
+  debug?: {
+    bBoxes: boolean
+  }
 }
 
 /**
@@ -13,26 +16,37 @@ export interface ScoreStormOptions {
  */
 export class ScoreStorm {
   private score: Score
-  private baseRenderer: BaseRenderer
+  private baseRenderer!: BaseRenderer
+  private settings?: ScoreStormSettings
 
-  constructor(options?: ScoreStormOptions) {
+  constructor(settings?: ScoreStormSettings) {
     this.score = Score.createDefaultScore()
-    this.baseRenderer = new BaseRenderer(options)
+    this.settings = settings
+    this.baseRenderer = new BaseRenderer(settings)
   }
 
-  setScore(score: Score) {
+  public setScore(score: Score) {
     this.score = score
   }
 
-  getScore() {
+  public getScore() {
     return this.score
   }
 
-  setRenderer(renderer: Renderer) {
+  public getSettings() {
+    return this.settings
+  }
+
+  public setSettings(settings?: ScoreStormSettings) {
+    this.settings = settings
+    this.baseRenderer.setSettings(settings)
+  }
+
+  public setRenderer(renderer: Renderer) {
     this.baseRenderer.setRenderer(renderer)
   }
 
-  render() {
+  public render() {
     this.baseRenderer.render(this.score)
   }
 }
