@@ -7,7 +7,7 @@ sidebar_position: 1
 Score-storm core aims to be decoupled from environments specific renderer.
 Library provides a set of renderers : HTML5 Canvas Renderer, SVG Renderer.
 
-Below is an example of the same music score rendered on Canvas and SVG
+Below is an example of the same music score rendered on Canvas and SVG. Rendered music srores are nearly identical, some minor differences are caused by how various browsers handle antialiasing/subpixeling
 
 import Tabs from "@theme/Tabs"
 import TabItem from "@theme/TabItem"
@@ -18,13 +18,13 @@ import FontLoader from "@site/src/components/FontLoader"
   <TabItem value="Canvas" default>
     This score is rendered on canvas
     <FontLoader>
-      <Demo renderer="canvas" />
+      <Demo renderer="canvas" scale={80} />
     </FontLoader>
   </TabItem>
   <TabItem value="SVG">
     This score is rendered as SVG
     <FontLoader>
-      <Demo renderer="svg" />
+      <Demo renderer="svg" scale={80} />
     </FontLoader>
   </TabItem>
 </Tabs>

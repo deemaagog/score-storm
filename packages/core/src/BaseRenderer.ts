@@ -51,7 +51,7 @@ class BaseRenderer {
       timeSignatureMargin: 1,
       barLineThickness: staffLineThickness * 1.2,
       mainColor: "black",
-      staveLineColor: "red",
+      staveLineColor: "#666666",
       barlineHeight,
       midStave: barlineHeight / 2,
       ...rest,
@@ -80,7 +80,7 @@ class BaseRenderer {
       this.renderer.init()
     }
 
-    this.graphicalScore = new GraphicalScore(score, this.renderer.containerWidth, this.settings.unit)
+    this.graphicalScore = new GraphicalScore(score, this.renderer.containerWidth, this.settings)
 
     // clear
     this.renderer.clear()
@@ -99,6 +99,7 @@ class BaseRenderer {
     for (let ri = 0; ri < this.graphicalScore.rows.length; ri++) {
       const latestRow = ri === this.graphicalScore.rows.length - 1
       const row = this.graphicalScore.rows[ri]
+      this.y = row.yPosition
 
       for (let mi = 0; mi < row.measures.length; mi++) {
         const latestMeasureInRow = mi === row.measures.length - 1
@@ -106,7 +107,6 @@ class BaseRenderer {
         this.renderMeasure(graphicalMeasure, latestRow, latestMeasureInRow)
       }
       this.x = 0
-      this.y += row.height
     }
   }
 
@@ -149,7 +149,7 @@ class BaseRenderer {
   }
 
   renderStaveLines(graphicalMeasure: GraphicalMeasure) {
-    this.renderer.setColor("#666666")
+    this.renderer.setColor(this.settings.staveLineColor)
     const half = Math.floor(this.settings.numberOfStaffLines / 2)
     for (let index = -half; index <= half; index++) {
       this.renderer.drawRect(

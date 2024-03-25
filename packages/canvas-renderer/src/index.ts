@@ -58,7 +58,16 @@ class CanvasRenderer implements Renderer {
   }
 
   drawRect(x: number, y: number, width: number, height: number) {
-    this.context.fillRect(x, y, width, height)
+    // this.context.fillRect(x, y, width, height)
+
+    this.context.beginPath()
+    // this.context.rect(x, y, width, height)
+    this.context.moveTo(x, y)
+    this.context.lineTo(x + width, y)
+    this.context.lineTo(x + width, y + height)
+    this.context.lineTo(x, y + height)
+    this.context.lineTo(x, y)
+    this.context.fill()
   }
 
   drawGlyph(glyph: string, x: number, y: number) {
