@@ -1,6 +1,6 @@
 import { GraphicalMeasure } from "./GraphicalMeasure"
 
 export class GraphicalRow {
-  height!: number
+  yPosition!: number
   measures!: GraphicalMeasure[]
 }

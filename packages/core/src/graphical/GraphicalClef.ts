@@ -42,7 +42,7 @@ export class GraphicalClef extends BaseGraphical implements IGraphical {
     renderer.drawGlyph(
       this.getTextFromUnicode(this.clefGlyph.symbol),
       x - this.clefGlyph.bBoxes.bBoxSW[0] * settings.unit,
-      y + settings.unit * this.verticalShift,
+      y + this.verticalShift * settings.unit,
     )
 
     if (settings.debug?.bBoxes) {
@@ -58,5 +58,19 @@ export class GraphicalClef extends BaseGraphical implements IGraphical {
       // renderer.drawRect(x, y, settings.unit / 32, settings.barlineHeight)
       renderer.setColor("black")
     }
+  }
+
+  getMaxY(settings: Settings) {
+    return Math.max(
+      this.clefGlyph.bBoxes.bBoxNE[1] * settings.unit - this.verticalShift * settings.unit - settings.midStave,
+      0,
+    )
+  }
+
+  getMinY(settings: Settings) {
+    return Math.max(
+      -this.clefGlyph.bBoxes.bBoxSW[1] * settings.unit + this.verticalShift * settings.unit - settings.midStave,
+      0,
+    )
   }
 }
