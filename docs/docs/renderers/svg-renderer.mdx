@@ -9,9 +9,10 @@ Meant to be used in browser apps, renders score as [SVG](https://developer.mozil
 import React from "react"
 import Demo from "@site/src/components/Demo"
 import FontLoader from "@site/src/components/FontLoader"
+import xml from "@site/src/components/Demo/musicxml/test-stem"
 
 <FontLoader>
-  <Demo renderer="svg" />
+  <Demo renderer="svg" musicXml={xml} />
 </FontLoader>
 
 Usage in code:

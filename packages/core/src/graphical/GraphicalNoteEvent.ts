@@ -10,6 +10,7 @@ export class GraphicalNoteEvent extends BaseGraphical implements IGraphical {
   width!: number
   noteheadGlyph: Glyph
   verticalShift: number // value in stave spaces
+  drawStem!: boolean
 
   static glyphMap = {
     whole: NoteheadWhole,
@@ -20,6 +21,10 @@ export class GraphicalNoteEvent extends BaseGraphical implements IGraphical {
   constructor(noteEvent: NoteEvent) {
     super()
     const duration = noteEvent.duration?.base
+
+    if (duration !== "whole") {
+      this.drawStem = true
+    }
 
     this.verticalShift = 0 // TODO: respect pitch
 
@@ -45,6 +50,16 @@ export class GraphicalNoteEvent extends BaseGraphical implements IGraphical {
       x - this.noteheadGlyph.bBoxes.bBoxSW[0] * settings.unit,
       y + this.verticalShift * settings.unit,
     )
+
+    if (this.drawStem) {
+      const stemThickness = 0.12 * settings.unit
+      renderer.drawRect(
+        x + this.width * settings.unit - stemThickness,
+        y - settings.barlineHeight,
+        stemThickness,
+        settings.barlineHeight,
+      )
+    }
 
     if (settings.debug?.bBoxes) {
       renderer.setColor("#ff8a8a80")
