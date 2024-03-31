@@ -21,7 +21,7 @@ export class GraphicalRestEvent extends BaseGraphical implements IGraphical {
     super()
     const duration = noteEvent.duration?.base
 
-    this.verticalShift = 0 // TODO: respect rest position
+    this.verticalShift = duration === "whole" ? -1 : 0 // TODO: respect rest position
 
     this.restGlyph = GraphicalRestEvent.glyphMap[duration as keyof typeof GraphicalRestEvent.glyphMap]
 
