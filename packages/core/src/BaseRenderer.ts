@@ -50,7 +50,7 @@ class BaseRenderer {
       staffLineThickness,
       clefMargin: 1,
       timeSignatureMargin: 1,
-      contentMargin: 1,
+      contentMargin: 2,
       barLineThickness: staffLineThickness * 1.2,
       mainColor: "black",
       staveLineColor: "#666666",

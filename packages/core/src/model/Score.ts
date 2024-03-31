@@ -55,6 +55,7 @@ export class Score {
 
     for (const mnxMeasure of mnxScore.parts[0].measures!) {
       const measure = new Measure()
+      measure.events = []
       // TODO: clef changes
 
       if (mnxMeasure.clefs?.length && !mnxMeasure.clefs[0].position) {

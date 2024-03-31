@@ -6,7 +6,7 @@ import SvgRenderer from "@score-storm/svg-renderer"
 function Demo({ renderer = "canvas", musicXml = undefined, bordered = false, scale = 100 }) {
   const rootElementRef = useRef(null)
 
-  const scoreStorm = useRef(new ScoreStorm({scale, /* debug: {bBoxes: true} */ contentMargin: 2}))
+  const scoreStorm = useRef(new ScoreStorm({scale, /* debug: {bBoxes: true} */ }))
 
   useEffect(() => {
     if (!rootElementRef.current) {
