@@ -6,7 +6,7 @@ import SvgRenderer from "@score-storm/svg-renderer"
 function Demo({ renderer = "canvas", musicXml = undefined, bordered = false, scale = 100 }) {
   const rootElementRef = useRef(null)
 
-  const scoreStorm = useRef(new ScoreStorm({scale, debug: {bBoxes: true}}))
+  const scoreStorm = useRef(new ScoreStorm({scale, /* debug: {bBoxes: true} */ contentMargin: 2}))
 
   useEffect(() => {
     if (!rootElementRef.current) {
@@ -17,7 +17,7 @@ function Demo({ renderer = "canvas", musicXml = undefined, bordered = false, sca
       renderer === "canvas" ? new CanvasRenderer(rootElementRef.current) : new SvgRenderer(rootElementRef.current),
     )
 
-    const score = musicXml ? Score.fromMusicXML(musicXml) : Score.createQuickScore({numberOfMeasures: 3})
+    const score = musicXml ? Score.fromMusicXML(musicXml) : Score.createQuickScore({numberOfMeasures: 3, timeSignature: {count: 4, unit: 4}})
     scoreStorm.current.setScore(score)
     scoreStorm.current.render()
   }, [rootElementRef, musicXml, renderer])

@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react"
 
 const fontName = "Bravura"
-const fontCDN = "https://cdn.jsdelivr.net/gh/steinbergmedia/bravura/redist/woff/Bravura.woff2"
+const fontUrl =  "/fonts/Bravura.woff2"
 export const FontContext = React.createContext()
 
 // swizzled Root
@@ -11,7 +11,7 @@ export default function Root({ children }) {
 
   useEffect(() => {
     const loadFont = async () => {
-      const font = new FontFace(fontName, `url(${fontCDN}) format(woff2)`, {
+      const font = new FontFace(fontName, `url(${fontUrl}) format(woff2)`, {
         style: "normal",
         weight: "400",
       })

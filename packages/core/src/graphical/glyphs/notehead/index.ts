@@ -1,6 +1,5 @@
 import { Glyph } from "../../interfaces"
 
-// TODO: Alto, Tenor and other clefs
 export const NoteheadWhole: Glyph = {
   symbol: "U+E0A2",
   smuflName: "noteheadWhole",

@@ -2,6 +2,7 @@ import { GlobalMeasure, TimeSignature } from "../model/GlobalMeasure"
 import { Clef, NoteEvent } from "../model/Measure"
 import { GraphicalClef } from "./GraphicalClef"
 import { GraphicalNoteEvent } from "./GraphicalNoteEvent"
+import { GraphicalRestEvent } from "./GraphicalRestEvent"
 import { GraphicalTimeSignature } from "./GraphicalTimeSignature"
 
 interface GraphicalMeasureParams {
@@ -17,7 +18,7 @@ export class GraphicalMeasure {
   time?: GraphicalTimeSignature
   // key?: GlobalMeasure["key"]
   clef?: GraphicalClef
-  events: GraphicalNoteEvent[]
+  events: (GraphicalNoteEvent | GraphicalRestEvent)[]
 
   constructor(params: GraphicalMeasureParams) {
     this.width = params.width
@@ -34,6 +35,8 @@ export class GraphicalMeasure {
       this.time = new GraphicalTimeSignature(params.time)
     }
 
-    this.events = params.events.map((event) => new GraphicalNoteEvent(event))
+    this.events = params.events.map((event) =>
+      event.rest ? new GraphicalRestEvent(event) : new GraphicalNoteEvent(event),
+    )
   }
 }

@@ -179,18 +179,9 @@ class BaseRenderer {
       measureX += this.settings.unit * graphicalMeasure.time.width
     }
 
-    //  for demo purpose, render whole rest
-    // measureX += this.settings.unit * this.settings.contentMargin
-    // const bboxes = { bBoxNE: [1.128, 0.036], bBoxSW: [0, -0.54] }
-    // this.renderer.drawGlyph(
-    //   this.getTextFromUnicode("U+E4E3"),
-    //   // this.x + graphicalMeasure.width / 2 - bboxes.bBoxSW[0] * this.settings.unit,
-    //   measureX,
-    //   this.y + this.settings.midStave,
-    // )
-
+    measureX += this.settings.unit * this.settings.contentMargin
     const availableWidth = graphicalMeasure.width - (measureX - this.x)
-    for (let i = 1; i <= graphicalMeasure.events.length; i++) {
+    for (let i = 0; i < graphicalMeasure.events.length; i++) {
       const event = graphicalMeasure.events[i]
       event.render(
         measureX + (availableWidth * i) / graphicalMeasure.events.length,
