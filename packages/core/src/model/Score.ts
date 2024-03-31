@@ -1,26 +1,42 @@
 import { getMNXScore, getScoreFromMusicXml } from "mnxconverter"
-import { GlobalMeasure } from "./GlobalMeasure"
-import { Measure } from "./Measure"
+import { GlobalMeasure, TimeSignature } from "./GlobalMeasure"
+import { Measure, NoteEvent } from "./Measure"
+
+type QuickScoreOptions = {
+  numberOfMeasures?: number
+  timeSignature?: TimeSignature
+}
 
 export class Score {
-  static createDefaultScore(): Score {
+  static createQuickScore(options?: QuickScoreOptions): Score {
+    const defaultOptions = {
+      numberOfMeasures: 1,
+      timeSignature: {
+        count: 2,
+        unit: 4,
+      },
+    }
+    options = { ...defaultOptions, ...options }
+
     const score = new Score()
 
-    const globalMeasure = new GlobalMeasure()
-    globalMeasure.time = {
-      count: 2,
-      unit: 4,
+    for (let i = 0; i < options.numberOfMeasures!; i++) {
+      const globalMeasure = new GlobalMeasure()
+      const measure = new Measure()
+
+      if (i === 0) {
+        globalMeasure.time = options.timeSignature
+        measure.clef = {
+          sign: "G",
+          position: -2,
+        }
+      }
+
+      measure.events = Array<NoteEvent>(options.timeSignature!.count).fill({ duration: { base: "quarter" }, rest: {} })
+
+      score.globalMeasures.push(globalMeasure)
+      score.measures.push(measure)
     }
-    score.globalMeasures.push(globalMeasure)
-
-    const measure = new Measure()
-
-    measure.clef = {
-      sign: "G",
-      position: -2,
-    }
-
-    score.measures.push(measure)
 
     return score
   }
@@ -44,6 +60,23 @@ export class Score {
       if (mnxMeasure.clefs?.length && !mnxMeasure.clefs[0].position) {
         measure.clef = mnxMeasure.clefs[0].clef
       }
+
+      const firstVoice = mnxMeasure.sequences[0]
+
+      for (const event of firstVoice.content) {
+        if (event.type === "event") {
+          if (!["whole", "half", "quarter"].includes(event.duration!.base)) {
+            throw new Error(`Note duration ${event.duration!.base} is not supported`)
+          }
+          if (event.notes && event.notes.length > 1) {
+            throw new Error(`Chords are not supported`)
+          }
+          measure.events.push(event)
+        } else {
+          throw new Error(`Event type ${event.type} is not supported`)
+        }
+      }
+
       score.measures.push(measure)
     }
 
@@ -60,7 +93,9 @@ export class Score {
   addMeasure() {
     this.globalMeasures.push(new GlobalMeasure())
     // assuming only one instrument with one stave for now
-    this.measures.push(new Measure())
+    const measure = new Measure()
+    measure.events = Array<NoteEvent>(2).fill({ duration: { base: "quarter" }, rest: {} })
+    this.measures.push(measure)
     return this
   }
 

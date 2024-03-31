@@ -11,6 +11,7 @@ export type Settings = {
   staffLineThickness: number
   clefMargin: number
   timeSignatureMargin: number
+  contentMargin: number // distanse between barline (or clef, or time signaure and first note)
   barLineThickness: number
   barlineHeight: number
   midStave: number
@@ -49,6 +50,7 @@ class BaseRenderer {
       staffLineThickness,
       clefMargin: 1,
       timeSignatureMargin: 1,
+      contentMargin: 1,
       barLineThickness: staffLineThickness * 1.2,
       mainColor: "black",
       staveLineColor: "#666666",
@@ -174,15 +176,34 @@ class BaseRenderer {
     if (graphicalMeasure.time) {
       measureX += this.settings.unit * this.settings.timeSignatureMargin
       graphicalMeasure.time.render(measureX, this.y + this.settings.midStave, this.renderer, this.settings)
+      measureX += this.settings.unit * graphicalMeasure.time.width
     }
 
     //  for demo purpose, render whole rest
-    const bboxes = { bBoxNE: [1.128, 0.036], bBoxSW: [0, -0.54] }
-    this.renderer.drawGlyph(
-      this.getTextFromUnicode("U+E4E3"),
-      this.x + graphicalMeasure.width / 2 - bboxes.bBoxSW[0] * this.settings.unit,
-      this.y + this.settings.midStave,
-    )
+    // measureX += this.settings.unit * this.settings.contentMargin
+    // const bboxes = { bBoxNE: [1.128, 0.036], bBoxSW: [0, -0.54] }
+    // this.renderer.drawGlyph(
+    //   this.getTextFromUnicode("U+E4E3"),
+    //   // this.x + graphicalMeasure.width / 2 - bboxes.bBoxSW[0] * this.settings.unit,
+    //   measureX,
+    //   this.y + this.settings.midStave,
+    // )
+
+    const availableWidth = graphicalMeasure.width - (measureX - this.x)
+    for (let i = 1; i <= graphicalMeasure.events.length; i++) {
+      const event = graphicalMeasure.events[i]
+      event.render(
+        measureX + (availableWidth * i) / graphicalMeasure.events.length,
+        this.y + this.settings.midStave,
+        this.renderer,
+        this.settings,
+      )
+    }
+
+    // content bbox
+    // this.renderer.setColor("#ff8a8a80")
+    // this.renderer.drawRect(measureX, this.y, graphicalMeasure.width - (measureX - this.x), this.settings.barlineHeight)
+    // this.renderer.setColor("black")
   }
 
   getTextFromUnicode(unicodeSymbol: string) {

@@ -20,7 +20,7 @@ export class ScoreStorm {
   private settings?: ScoreStormSettings
 
   constructor(settings?: ScoreStormSettings) {
-    this.score = Score.createDefaultScore()
+    this.score = Score.createQuickScore()
     this.settings = settings
     this.baseRenderer = new BaseRenderer(settings)
   }
