@@ -67,6 +67,7 @@ export class GraphicalScore {
         width: measureWidth,
         clef: isFirstMeasureInRow ? currentClef! : undefined,
         time: isFirstRow ? globalMeasure.time : undefined,
+        events: measure.events,
       })
 
       if (graphicalMeasure.clef) {
