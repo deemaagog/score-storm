@@ -24,6 +24,20 @@ class CanvasRenderer implements Renderer {
     this.context = this.canvasElement.getContext("2d")!
     this.containerElement.appendChild(this.canvasElement)
     this.isInitialized = true
+
+    // function getMousePosition(event: MouseEvent) {
+    //   let rect = this.canvas.getBoundingClientRect()
+    //   let x = event.clientX - rect.left
+    //   let y = event.clientY - rect.top
+    //   console.log("Coordinate x: " + x, "Coordinate y: " + y)
+    // }
+
+    this.canvasElement.addEventListener("mouseover", (event: MouseEvent) {
+      let rect = this.canvasElement.getBoundingClientRect()
+      let x = event.clientX - rect.left
+      let y = event.clientY - rect.top
+      console.log("Coordinate x: " + x, "Coordinate y: " + y)
+    })
   }
 
   destroy() {
