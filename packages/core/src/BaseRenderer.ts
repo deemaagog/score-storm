@@ -1,8 +1,9 @@
 import { Score } from "./model/Score"
-import { Renderer } from "./interfaces"
+import { IRenderer } from "./interfaces"
 import { ScoreStormSettings } from "./ScoreStorm"
 import { GraphicalScore } from "./graphical/GraphicalScore"
 import { GraphicalMeasure } from "./graphical/GraphicalMeasure"
+import { BBox } from "./graphical/interfaces"
 
 export type Settings = {
   fontSize: number
@@ -17,7 +18,7 @@ export type Settings = {
   midStave: number
   mainColor: string
   staveLineColor: string
-} & Pick<ScoreStormSettings, "debug">
+} & Pick<ScoreStormSettings, "debug" | "editor">
 
 const SCALE_TO_FONT_RATIO = 64 / 100
 const NUMBER_OF_STAFF_LINES = 5 // hardcode for now
@@ -27,7 +28,7 @@ const NUMBER_OF_STAFF_LINES = 5 // hardcode for now
  */
 class BaseRenderer {
   private settings!: Settings
-  private renderer!: Renderer
+  private renderer!: IRenderer
   private graphicalScore!: GraphicalScore
   private x: number = 0
   private y: number = 0
@@ -37,7 +38,7 @@ class BaseRenderer {
   }
 
   setSettings(options?: ScoreStormSettings) {
-    const { scale = 100, ...rest } = options || {}
+    const { scale = 100, editor, ...rest } = options || {}
     const fontSize = scale * SCALE_TO_FONT_RATIO
     const unit = fontSize / 4
     const staffLineThickness = unit / 8
@@ -56,17 +57,28 @@ class BaseRenderer {
       staveLineColor: "#666666",
       barlineHeight,
       midStave: barlineHeight / 2,
+      // default editor settings
+      editor: {
+        enable: false,
+        styles: {
+          hoverColor: "royalblue"
+        },
+        ...editor,
+      },
       ...rest,
     }
+
+    // this.onMouseMoveHandler = this.onMouseMoveHandler.bind(this)
   }
 
-  setRenderer(renderer: Renderer) {
+  setRenderer(renderer: IRenderer) {
     if (this.renderer) {
       // eslint-disable-next-line no-console
       console.log("destroying...")
       this.renderer.destroy()
     }
     this.renderer = renderer
+    this.renderer.settings = this.settings // TODO: make settings singleton or use dependency injection
   }
 
   render(score: Score) {
@@ -80,6 +92,10 @@ class BaseRenderer {
       // eslint-disable-next-line no-console
       console.log("initializing...")
       this.renderer.init()
+
+      // if (this.renderer.setOnMouseMoveHandler) {
+      //   this.renderer.setOnMouseMoveHandler(this.onMouseMoveHandler)
+      // }
     }
 
     this.graphicalScore = new GraphicalScore(score, this.renderer.containerWidth, this.settings)
@@ -163,19 +179,37 @@ class BaseRenderer {
     }
   }
 
+  renderBBox(bBox: BBox) {
+    if (this.settings.debug?.bBoxes) {
+      this.renderer.setColor("#ff8a8a80")
+      this.renderer.drawRect(bBox.x, bBox.y, bBox.width, bBox.height)
+      this.renderer.setColor("black")
+    }
+  }
+
   renderMeasureContent(graphicalMeasure: GraphicalMeasure) {
     //  draw measure content
     // temporarily do horizontal positioning here, but ultimately this should be done in GraphicalMeasure
     let measureX = this.x
     if (graphicalMeasure.clef) {
       measureX += this.settings.unit * this.settings.clefMargin
-      graphicalMeasure.clef.render(measureX, this.y + this.settings.midStave, this.renderer, this.settings)
+      graphicalMeasure.clef.setCoordinates(measureX, this.y + this.settings.midStave, this.settings)
+      const bBox = graphicalMeasure.clef.getBBox(this.settings)
+      this.renderer.registerInteractionArea(graphicalMeasure.clef, bBox, () =>
+        graphicalMeasure.clef!.render(this.renderer, this.settings),
+      )
+      this.renderBBox(bBox)
       measureX += this.settings.unit * graphicalMeasure.clef.width
     }
 
     if (graphicalMeasure.time) {
       measureX += this.settings.unit * this.settings.timeSignatureMargin
-      graphicalMeasure.time.render(measureX, this.y + this.settings.midStave, this.renderer, this.settings)
+      graphicalMeasure.time.setCoordinates(measureX, this.y + this.settings.midStave)
+      const bBox = graphicalMeasure.time.getBBox(this.settings)
+      this.renderer.registerInteractionArea(graphicalMeasure.time, bBox, () =>
+        graphicalMeasure.time!.render(this.renderer, this.settings),
+      )
+      this.renderBBox(bBox)
       measureX += this.settings.unit * graphicalMeasure.time.width
     }
 
@@ -183,23 +217,20 @@ class BaseRenderer {
     const availableWidth = graphicalMeasure.width - (measureX - this.x)
     for (let i = 0; i < graphicalMeasure.events.length; i++) {
       const event = graphicalMeasure.events[i]
-      event.render(
+      event.setCoordinates(
         measureX + (availableWidth * i) / graphicalMeasure.events.length,
         this.y + this.settings.midStave,
-        this.renderer,
         this.settings,
       )
+      const bBox = event.getBBox(this.settings)
+      this.renderer.registerInteractionArea(event, bBox, () => event.render(this.renderer, this.settings))
+      this.renderBBox(bBox)
     }
 
     // content bbox
     // this.renderer.setColor("#ff8a8a80")
     // this.renderer.drawRect(measureX, this.y, graphicalMeasure.width - (measureX - this.x), this.settings.barlineHeight)
     // this.renderer.setColor("black")
-  }
-
-  getTextFromUnicode(unicodeSymbol: string) {
-    const codeString = parseInt(unicodeSymbol.replace("U+", ""), 16)
-    return String.fromCharCode(codeString)
   }
 }
 

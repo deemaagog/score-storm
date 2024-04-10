@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 
 import { Settings } from "../BaseRenderer"
-import { Renderer } from "../interfaces"
+import { IRenderer } from "../interfaces"
 
 export interface GlyphBBoxes {
   bBoxNE: readonly [number, number]
@@ -15,14 +15,23 @@ export interface Glyph {
   bBoxes: GlyphBBoxes
 }
 
+export type BBox = {
+  x: number
+  y: number
+  width: number
+  height: number
+}
+
 export interface IGraphical {
+  id: string
   width: number // TODO: do we need that?
   height: number // TODO: do we need that?
+  x: number
+  y: number
 
-  render(
-    x: number /*  measure start X coodinate */,
-    y: number /*  middle of stave */,
-    renderer: Renderer,
-    settings: Settings,
-  ): void
+  setCoordinates(x: number, y: number, settings: Settings): void
+
+  render(renderer: IRenderer, settings: Settings): void
+
+  getBBox(settings: Settings): BBox
 }

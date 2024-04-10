@@ -1,15 +1,17 @@
 import { Settings } from "../BaseRenderer"
-import { Renderer } from "../interfaces"
+import { IRenderer } from "../interfaces"
 import { NoteEvent } from "../model/Measure"
 import { BaseGraphical } from "./BaseGraphical"
 import { RestHalf, RestWhole, RestQuarter } from "./glyphs/rest"
-import { Glyph, IGraphical } from "./interfaces"
+import { BBox, Glyph, IGraphical } from "./interfaces"
 
 export class GraphicalRestEvent extends BaseGraphical implements IGraphical {
   height!: number
   width!: number
   restGlyph: Glyph
   verticalShift: number // value in stave spaces
+  x!: number
+  y!: number
 
   static glyphMap = {
     whole: RestWhole,
@@ -39,23 +41,25 @@ export class GraphicalRestEvent extends BaseGraphical implements IGraphical {
     this.width = glyphWidth
   }
 
-  render(x: number, y: number, renderer: Renderer, settings: Settings) {
+  setCoordinates(x: number, y: number, settings: Settings): void {
+    this.x = x
+    this.y = y + this.verticalShift * settings.unit
+  }
+
+  getBBox(settings: Settings): BBox {
+    return {
+      x: this.x,
+      y: this.y - this.restGlyph.bBoxes.bBoxNE[1] * settings.unit,
+      width: this.width * settings.unit,
+      height: this.height * settings.unit,
+    }
+  }
+
+  render(renderer: IRenderer, settings: Settings) {
     renderer.drawGlyph(
       this.getTextFromUnicode(this.restGlyph.symbol),
-      x - this.restGlyph.bBoxes.bBoxSW[0] * settings.unit,
-      y + this.verticalShift * settings.unit,
+      this.x - this.restGlyph.bBoxes.bBoxSW[0] * settings.unit,
+      this.y,
     )
-
-    if (settings.debug?.bBoxes) {
-      renderer.setColor("#ff8a8a80")
-      renderer.drawRect(
-        x,
-        y + this.verticalShift * settings.unit - this.restGlyph.bBoxes.bBoxNE[1] * settings.unit,
-        this.width * settings.unit,
-        this.height * settings.unit,
-      )
-
-      renderer.setColor("black")
-    }
   }
 }

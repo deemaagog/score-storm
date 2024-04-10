@@ -1,9 +1,9 @@
 import { Settings } from "../BaseRenderer"
-import { Renderer } from "../interfaces"
+import { IRenderer } from "../interfaces"
 import { NoteEvent } from "../model/Measure"
 import { BaseGraphical } from "./BaseGraphical"
 import { NoteheadHalf, NoteheadQuarter, NoteheadWhole } from "./glyphs/notehead"
-import { Glyph, IGraphical } from "./interfaces"
+import { BBox, Glyph, IGraphical } from "./interfaces"
 
 export class GraphicalNoteEvent extends BaseGraphical implements IGraphical {
   height!: number
@@ -11,6 +11,8 @@ export class GraphicalNoteEvent extends BaseGraphical implements IGraphical {
   noteheadGlyph: Glyph
   verticalShift: number // value in stave spaces
   drawStem!: boolean
+  x!: number
+  y!: number
 
   static glyphMap = {
     whole: NoteheadWhole,
@@ -44,11 +46,25 @@ export class GraphicalNoteEvent extends BaseGraphical implements IGraphical {
     this.width = glyphWidth
   }
 
-  render(x: number, y: number, renderer: Renderer, settings: Settings) {
+  setCoordinates(x: number, y: number, settings: Settings): void {
+    this.x = x
+    this.y = y + this.verticalShift * settings.unit
+  }
+
+  getBBox(settings: Settings): BBox {
+    return {
+      x: this.x,
+      y: this.y - this.noteheadGlyph.bBoxes.bBoxNE[1] * settings.unit,
+      width: this.width * settings.unit,
+      height: this.height * settings.unit,
+    }
+  }
+
+  render(renderer: IRenderer, settings: Settings) {
     renderer.drawGlyph(
       this.getTextFromUnicode(this.noteheadGlyph.symbol),
-      x - this.noteheadGlyph.bBoxes.bBoxSW[0] * settings.unit,
-      y + this.verticalShift * settings.unit,
+      this.x - this.noteheadGlyph.bBoxes.bBoxSW[0] * settings.unit,
+      this.y,
     )
 
     if (this.drawStem) {
@@ -56,23 +72,11 @@ export class GraphicalNoteEvent extends BaseGraphical implements IGraphical {
       const stemHeight = 3.5 * settings.unit
       const stemHeightCut = 0.17 * settings.unit
       renderer.drawRect(
-        x + this.width * settings.unit - stemThickness,
-        y - stemHeight,
+        this.x + this.width * settings.unit - stemThickness,
+        this.y - stemHeight,
         stemThickness,
         stemHeight - stemHeightCut,
       )
-    }
-
-    if (settings.debug?.bBoxes) {
-      renderer.setColor("#ff8a8a80")
-      renderer.drawRect(
-        x,
-        y + this.verticalShift * settings.unit - this.noteheadGlyph.bBoxes.bBoxNE[1] * settings.unit,
-        this.width * settings.unit,
-        this.height * settings.unit,
-      )
-
-      renderer.setColor("black")
     }
   }
 }

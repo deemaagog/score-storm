@@ -1,13 +1,17 @@
 import BaseRenderer from "./BaseRenderer"
-import { GraphicalScore } from "./graphical/GraphicalScore"
-import { Renderer } from "./interfaces"
+import { IRenderer } from "./interfaces"
 import { Score } from "./model/Score"
-export { Score, type Renderer, GraphicalScore }
 
 export interface ScoreStormSettings {
   scale: number
   debug?: {
     bBoxes: boolean
+  }
+  editor?: {
+    enable: boolean,
+    styles: {
+      hoverColor: string
+    }
   }
 }
 
@@ -42,7 +46,7 @@ export class ScoreStorm {
     this.baseRenderer.setSettings(settings)
   }
 
-  public setRenderer(renderer: Renderer) {
+  public setRenderer(renderer: IRenderer) {
     this.baseRenderer.setRenderer(renderer)
   }
 
