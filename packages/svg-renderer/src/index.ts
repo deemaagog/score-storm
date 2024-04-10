@@ -1,14 +1,17 @@
-import { Renderer } from "@score-storm/core"
+import { BBox, IRenderer, Settings } from "@score-storm/core"
+import { IGraphical } from "@score-storm/core"
 
 const NS = "http://www.w3.org/2000/svg"
 
-class SvgRenderer implements Renderer {
+class SvgRenderer implements IRenderer {
   containerElement: HTMLDivElement
   containerWidth: number
   svgElement!: SVGElement
   currentColor: string
   resizeObserver: ResizeObserver
   isInitialized: boolean = false
+  openedGroup: SVGGElement | null = null
+  settings!: Settings
 
   constructor(containerElement: HTMLDivElement) {
     this.containerElement = containerElement
@@ -50,6 +53,11 @@ class SvgRenderer implements Renderer {
         text-anchor: start;
         user-select: none;
       }
+      .clickable:hover {
+        fill: ${this.settings.editor!.styles.hoverColor};
+        transition: fill 0.2s;
+        cursor: pointer;
+      }
     `)
     style.appendChild(node)
     this.svgElement.appendChild(style)
@@ -81,7 +89,18 @@ class SvgRenderer implements Renderer {
     text.setAttributeNS(null, "y", `${y}`)
     text.setAttributeNS(null, "class", "glyph")
     text.textContent = glyph
-    this.svgElement.appendChild(text)
+    const parent = this.openedGroup || this.svgElement
+    parent.appendChild(text)
+  }
+
+  registerInteractionArea(graphicalObject: IGraphical, bBox: BBox, renderCallback: () => void): void {
+    const group = document.createElementNS(NS, "g")
+    group.setAttributeNS(null, "id", graphicalObject.id)
+    group.setAttributeNS(null, "class", "clickable")
+    this.svgElement.appendChild(group)
+    this.openedGroup = group
+    renderCallback()
+    this.openedGroup = null
   }
 }
 

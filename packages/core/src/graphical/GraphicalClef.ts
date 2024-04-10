@@ -1,5 +1,5 @@
 import { Settings } from "../BaseRenderer"
-import { Renderer } from "../interfaces"
+import { IRenderer } from "../interfaces"
 import { Clef } from "../model/Measure"
 import { BaseGraphical } from "./BaseGraphical"
 import { ClefG, ClefF } from "./glyphs/clef"
@@ -10,6 +10,8 @@ export class GraphicalClef extends BaseGraphical implements IGraphical {
   width!: number
   clefGlyph: Glyph
   verticalShift: number // value in stave spaces
+  x!: number // todo : create Poind2d type
+  y!: number
 
   static glyphMap = {
     G: ClefG,
@@ -38,26 +40,26 @@ export class GraphicalClef extends BaseGraphical implements IGraphical {
     this.width = clefGlyphWidth
   }
 
-  render(x: number, y: number, renderer: Renderer, settings: Settings) {
+  setCoordinates(x: number, y: number, settings: Settings): void {
+    this.x = x
+    this.y = y + this.verticalShift * settings.unit
+  }
+
+  getBBox(settings: Settings) {
+    return {
+      x: this.x,
+      y: this.y - this.clefGlyph.bBoxes.bBoxNE[1] * settings.unit,
+      width: this.width * settings.unit,
+      height: this.height * settings.unit,
+    }
+  }
+
+  render(renderer: IRenderer, settings: Settings) {
     renderer.drawGlyph(
       this.getTextFromUnicode(this.clefGlyph.symbol),
-      x - this.clefGlyph.bBoxes.bBoxSW[0] * settings.unit,
-      y + this.verticalShift * settings.unit,
+      this.x - this.clefGlyph.bBoxes.bBoxSW[0] * settings.unit,
+      this.y,
     )
-
-    if (settings.debug?.bBoxes) {
-      renderer.setColor("#ff8a8a80")
-      renderer.drawRect(
-        x,
-        y + this.verticalShift * settings.unit - this.clefGlyph.bBoxes.bBoxNE[1] * settings.unit,
-        this.width * settings.unit,
-        this.height * settings.unit,
-      )
-
-      // renderer.setColor("#ff0000a6")
-      // renderer.drawRect(x, y, settings.unit / 32, settings.barlineHeight)
-      renderer.setColor("black")
-    }
   }
 
   getMaxY(settings: Settings) {

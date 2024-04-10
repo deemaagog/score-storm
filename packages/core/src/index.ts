@@ -1,4 +1,6 @@
-export { type Renderer } from "./interfaces"
+export { type IRenderer } from "./interfaces"
 export { ScoreStorm as default } from "./ScoreStorm"
 export { Score } from "./model/Score"
 export { GraphicalScore } from "./graphical/GraphicalScore"
+export { type IGraphical, type BBox } from "./graphical/interfaces"
+export { type Settings } from "./BaseRenderer"

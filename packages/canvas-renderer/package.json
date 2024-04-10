@@ -11,11 +11,13 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@score-storm/core": "workspace:*"
+    "@score-storm/core": "workspace:*",
+    "rbush": "^3.0.1"
   },
   "devDependencies": {
-    "@score-storm/typescript-config": "workspace:*",
     "@score-storm/eslint-config": "workspace:*",
+    "@score-storm/typescript-config": "workspace:*",
+    "@types/rbush": "^3.0.3",
     "typescript": "^5.3.3"
   }
 }
