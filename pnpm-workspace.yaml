@@ -3,3 +3,4 @@ packages:
   - "tooling/*"
   - "docs"
   - "e2e"
+  - "full-featured-editor"
