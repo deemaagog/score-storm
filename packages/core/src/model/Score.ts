@@ -92,17 +92,34 @@ export class Score {
   constructor() {}
 
   addMeasure() {
+    const currentTimeSignature = this.getMeasureTimeSignature(this.globalMeasures.length - 1)
+    if (!currentTimeSignature) {
+      throw new Error("Failed to determine time sinature")
+    }
     this.globalMeasures.push(new GlobalMeasure())
     // assuming only one instrument with one stave for now
     const measure = new Measure()
-    measure.events = Array<NoteEvent>(2).fill({ duration: { base: "quarter" }, rest: {} })
+    measure.events = Array<NoteEvent>(currentTimeSignature.count).fill({ duration: { base: "quarter" }, rest: {} })
     this.measures.push(measure)
     return this
   }
 
   removeMeasure(index: number) {
+    if (this.globalMeasures.length === 1) {
+      throw new Error("Failed to remove measure. There should be at least one measure in music score")
+    }
     this.globalMeasures.splice(index)
     this.measures.splice(index)
     return this
+  }
+
+  getMeasureTimeSignature(index: number): TimeSignature | undefined {
+    for (let i = index; i >= 0; i--) {
+      const globalMeasure = this.globalMeasures[i]
+      if (globalMeasure.time) {
+        return globalMeasure.time
+      }
+    }
+    return
   }
 }
