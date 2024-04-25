@@ -1,4 +1,5 @@
 import BaseRenderer from "./BaseRenderer"
+import { EventManager } from "./EventManager"
 import { IRenderer } from "./interfaces"
 import { Score } from "./model/Score"
 
@@ -8,7 +9,7 @@ export interface ScoreStormSettings {
     bBoxes: boolean
   }
   editor?: {
-    enable: boolean,
+    enable: boolean
     styles: {
       hoverColor: string
     }
@@ -22,11 +23,13 @@ export class ScoreStorm {
   private score: Score
   private baseRenderer!: BaseRenderer
   private settings?: ScoreStormSettings
+  private eventManager!: EventManager
 
   constructor(settings?: ScoreStormSettings) {
     this.score = Score.createQuickScore()
     this.settings = settings
-    this.baseRenderer = new BaseRenderer(settings)
+    this.eventManager = new EventManager()
+    this.baseRenderer = new BaseRenderer(this.eventManager, this.settings)
   }
 
   public setScore(score: Score) {
@@ -52,5 +55,14 @@ export class ScoreStorm {
 
   public render() {
     this.baseRenderer.render(this.score)
+  }
+
+  public destroy() {
+    this.baseRenderer.destroy()
+    this.eventManager.clear()
+  }
+
+  public setEventListener(...args: Parameters<typeof EventManager.prototype.on>) {
+    this.eventManager.on(...args)
   }
 }

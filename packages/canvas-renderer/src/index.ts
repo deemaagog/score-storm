@@ -1,5 +1,5 @@
-import { BBox, IRenderer, Settings } from "@score-storm/core"
-import { IGraphical } from "@score-storm/core"
+import { BBox, EventType, IRenderer, Settings } from "@score-storm/core"
+import { IGraphical, EventManager } from "@score-storm/core"
 import RBush from "rbush"
 
 type SpatialIndexItem = {
@@ -18,10 +18,10 @@ class CanvasRenderer implements IRenderer {
   canvasElement!: HTMLCanvasElement
   context!: CanvasRenderingContext2D
 
-  // main canvas and it's contenxt
+  // interaction canvas and it's contenxt
   interactionsCanvasElement!: HTMLCanvasElement
   interactionsContext!: CanvasRenderingContext2D
-  objectDetected!: boolean
+  detectedObject: IGraphical | null = null
 
   // current context
   currentContext!: CanvasRenderingContext2D
@@ -30,6 +30,7 @@ class CanvasRenderer implements IRenderer {
   isInitialized: boolean = false
 
   settings!: Settings
+  eventManager!: EventManager
 
   private spatialSearchTree!: RBush<SpatialIndexItem>
 
@@ -67,9 +68,6 @@ class CanvasRenderer implements IRenderer {
 
     this.isInitialized = true
 
-    this.spatialSearchTree.clear()
-
-    this.objectDetected = true
     this.canvasElement.addEventListener("mousemove", (event: MouseEvent) => {
       let rect = this.canvasElement.getBoundingClientRect() // TODO: make it a class member and update on resize
       let x = event.clientX - rect.left
@@ -82,19 +80,20 @@ class CanvasRenderer implements IRenderer {
         maxY: y,
       })
       if (result.length) {
-        if (this.objectDetected) {
+        if (this.detectedObject) {
           return
         }
-        this.canvasElement.style.cursor = "pointer"
         this.currentContext = this.interactionsContext
+        this.canvasElement.style.cursor = "pointer"
+
         this.setColor(this.settings.editor!.styles.hoverColor)
-        const detectedObject = result[0]
-        detectedObject.object.render(this, this.settings)
-        this.objectDetected = true
+        this.detectedObject = result[0].object
+        this.detectedObject.render(this, this.settings)
       } else {
-        if (!this.objectDetected) {
+        if (!this.detectedObject) {
           return
         }
+        this.currentContext = this.interactionsContext
         this.interactionsContext.clearRect(
           0,
           0,
@@ -102,7 +101,18 @@ class CanvasRenderer implements IRenderer {
           this.interactionsCanvasElement.height,
         )
         this.canvasElement.style.cursor = "default"
-        this.objectDetected = false
+        this.detectedObject = null
+      }
+
+      this.currentContext = this.context
+    })
+
+    this.canvasElement.addEventListener("click", (event: MouseEvent) => {
+      let rect = this.canvasElement.getBoundingClientRect() // TODO: make it a class member and update on resize
+      let x = event.clientX - rect.left
+      let y = event.clientY - rect.top
+      if (this.detectedObject) {
+        this.eventManager.dispatch(EventType.CLICK, { x, y, object: this.detectedObject })
       }
     })
 
@@ -142,7 +152,7 @@ class CanvasRenderer implements IRenderer {
   }
 
   clear() {
-    // noop for now
+    this.spatialSearchTree.clear()
   }
 
   postRender(): void {}

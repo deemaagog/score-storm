@@ -1,5 +1,5 @@
-import { BBox, IRenderer, Settings } from "@score-storm/core"
-import { IGraphical } from "@score-storm/core"
+import { BBox, EventType, IRenderer, Settings } from "@score-storm/core"
+import { IGraphical, EventManager } from "@score-storm/core"
 
 const NS = "http://www.w3.org/2000/svg"
 
@@ -12,6 +12,8 @@ class SvgRenderer implements IRenderer {
   isInitialized: boolean = false
   openedGroup: SVGGElement | null = null
   settings!: Settings
+  eventManager!: EventManager
+  objectByElement: Map<SVGElement, IGraphical> = new Map()
 
   constructor(containerElement: HTMLDivElement) {
     this.containerElement = containerElement
@@ -29,6 +31,27 @@ class SvgRenderer implements IRenderer {
     this.svgElement = document.createElementNS(NS, "svg")
     this.containerElement.appendChild(this.svgElement)
     this.isInitialized = true
+
+    this.svgElement.addEventListener("click", (event: MouseEvent) => {
+      // unfortunately, user click can not be caught on svr group.
+      // There is a hack with pointers-event:boundin-box, but it works only in Chrome as for now
+      // So, the solution is listen for click on elements, and then get group using parentNode
+      const element = event.target as SVGElement
+      const group = element.parentNode as SVGElement
+
+      if (!group.matches(".clickable")) {
+        return
+      }
+
+      let rect = this.svgElement.getBoundingClientRect() // TODO: make it a class member and update on resize
+      let x = event.clientX - rect.left
+      let y = event.clientY - rect.top
+
+      const graphicalObject = this.objectByElement.get(group)
+      if (graphicalObject) {
+        this.eventManager.dispatch(EventType.CLICK, { x, y, object: graphicalObject })
+      }
+    })
   }
 
   destroy() {
@@ -65,6 +88,7 @@ class SvgRenderer implements IRenderer {
 
   clear() {
     this.svgElement.innerHTML = ""
+    this.objectByElement.clear()
   }
 
   postRender(): void {}
@@ -101,6 +125,7 @@ class SvgRenderer implements IRenderer {
     this.openedGroup = group
     renderCallback()
     this.openedGroup = null
+    this.objectByElement.set(group, graphicalObject)
   }
 }
 
