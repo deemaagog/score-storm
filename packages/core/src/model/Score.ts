@@ -122,4 +122,19 @@ export class Score {
     }
     return
   }
+
+  setClef() {
+    const firstMeasure = this.measures[0]
+    if (firstMeasure.clef?.sign === "G") {
+      firstMeasure.clef = {
+        sign: "F",
+        position: 2,
+      }
+    } else {
+      firstMeasure.clef = {
+        sign: "G",
+        position: -2,
+      }
+    }
+  }
 }

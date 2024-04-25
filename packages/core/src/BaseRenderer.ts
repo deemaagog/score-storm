@@ -4,6 +4,7 @@ import { ScoreStormSettings } from "./ScoreStorm"
 import { GraphicalScore } from "./graphical/GraphicalScore"
 import { GraphicalMeasure } from "./graphical/GraphicalMeasure"
 import { BBox } from "./graphical/interfaces"
+import { EventManager } from "./EventManager"
 
 export type Settings = {
   fontSize: number
@@ -28,12 +29,14 @@ const NUMBER_OF_STAFF_LINES = 5 // hardcode for now
  */
 class BaseRenderer {
   private settings!: Settings
+  private eventManager!: EventManager
   private renderer!: IRenderer
   private graphicalScore!: GraphicalScore
   private x: number = 0
   private y: number = 0
 
-  constructor(options?: ScoreStormSettings) {
+  constructor(eventManager: EventManager, options?: ScoreStormSettings) {
+    this.eventManager = eventManager
     this.setSettings(options)
   }
 
@@ -61,14 +64,12 @@ class BaseRenderer {
       editor: {
         enable: false,
         styles: {
-          hoverColor: "royalblue"
+          hoverColor: "royalblue",
         },
         ...editor,
       },
       ...rest,
     }
-
-    // this.onMouseMoveHandler = this.onMouseMoveHandler.bind(this)
   }
 
   setRenderer(renderer: IRenderer) {
@@ -76,9 +77,17 @@ class BaseRenderer {
       // eslint-disable-next-line no-console
       console.log("destroying...")
       this.renderer.destroy()
+      // this.eventManager.clear()
     }
     this.renderer = renderer
-    this.renderer.settings = this.settings // TODO: make settings singleton or use dependency injection
+
+    // TODO: make settings singleton or use dependency injection
+    this.renderer.settings = this.settings
+    this.renderer.eventManager = this.eventManager
+  }
+
+  destroy() {
+    this.renderer.destroy()
   }
 
   render(score: Score) {
@@ -92,10 +101,6 @@ class BaseRenderer {
       // eslint-disable-next-line no-console
       console.log("initializing...")
       this.renderer.init()
-
-      // if (this.renderer.setOnMouseMoveHandler) {
-      //   this.renderer.setOnMouseMoveHandler(this.onMouseMoveHandler)
-      // }
     }
 
     this.graphicalScore = new GraphicalScore(score, this.renderer.containerWidth, this.settings)

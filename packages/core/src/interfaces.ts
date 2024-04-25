@@ -1,11 +1,15 @@
 import { Settings } from './BaseRenderer'
+import { EventManager } from './EventManager'
 import { BBox, IGraphical } from "./graphical/interfaces"
 
 /* eslint-disable no-unused-vars */
 export interface IRenderer {
   containerWidth: number
   isInitialized: boolean
-  settings: Settings // adding this temporarily. TODO: make settings singlton or use dependency injection
+
+  // adding this temporarily. TODO: make settings singlton and eventManager or use dependency injection
+  settings: Settings 
+  eventManager: EventManager 
 
   init(): void
 

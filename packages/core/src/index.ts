@@ -1,6 +1,6 @@
 export { type IRenderer } from "./interfaces"
 export { ScoreStorm as default } from "./ScoreStorm"
+export { type InteractionEvent, EventType, EventManager } from "./EventManager"
 export { Score } from "./model/Score"
-export { GraphicalScore } from "./graphical/GraphicalScore"
-export { type IGraphical, type BBox } from "./graphical/interfaces"
+export * from "./graphical"
 export { type Settings } from "./BaseRenderer"
