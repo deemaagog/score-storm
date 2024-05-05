@@ -15,7 +15,7 @@ export default function App() {
   const theme = useMantineTheme()
   const rootElementRef = useRef(null)
   const scoreStorm = useRef<ScoreStorm>()
-  const [ssInitialized, setSSInitialized] = useState(false)
+  const [initialized, setInitialized] = useState(false)
 
   const handleClick = (event: InteractionEvent) => {
     if (event.object instanceof GraphicalClef) {
@@ -24,30 +24,29 @@ export default function App() {
     }
   }
 
-  console.log("scoreStorm", scoreStorm.current)
-
   useEffect(() => {
-    if (!rootElementRef.current) {
-      return
-    }
+    console.log("mount", rootElementRef.current)
+
     scoreStorm.current! = new ScoreStorm({
       scale: 80,
       editor: { enable: true, styles: { hoverColor: theme.colors.blue[6] } },
     })
     scoreStorm.current!.setEventListener(EventType.CLICK, handleClick)
-    scoreStorm.current!.setRenderer(new Renderer(rootElementRef.current))
+    scoreStorm.current!.setRenderer(new Renderer(rootElementRef.current!))
 
     const score = Score.createQuickScore({ numberOfMeasures: 1, timeSignature: { count: 4, unit: 4 } })
     scoreStorm.current!.setScore(score)
     scoreStorm.current!.render()
 
-    // setSSInitialized(true)
+    setInitialized(true)
 
     return () => {
       // destroy on unmount
       scoreStorm.current!.destroy()
     }
-  }, [rootElementRef, theme])
+  }, [theme])
+
+  console.log("App render")
 
   return (
     <AppShell
@@ -58,7 +57,7 @@ export default function App() {
         <div id="ss-container" ref={rootElementRef} />
       </AppShell.Main>
       <AppShell.Aside className={styles.ssEditorAside} p="xl">
-        {rootElementRef.current && (
+        {initialized && (
           <ScoreStormContext.Provider value={{ scoreStorm: scoreStorm.current! }}>
             <Aside />
           </ScoreStormContext.Provider>
