@@ -2,7 +2,7 @@ import { getMNXScore, getScoreFromMusicXml } from "mnxconverter"
 import { GlobalMeasure, TimeSignature } from "./GlobalMeasure"
 import { Measure, NoteEvent } from "./Measure"
 
-type QuickScoreOptions = {
+export type QuickScoreOptions = {
   numberOfMeasures?: number
   timeSignature?: TimeSignature
 }

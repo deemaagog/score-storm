@@ -1,51 +1,12 @@
 import "@mantine/core/styles.css"
 import "./App.css"
-import { AppShell, useMantineTheme } from "@mantine/core"
-import { createContext, useEffect, useRef, useState } from "react"
-import ScoreStorm, { EventType, InteractionEvent, Score, GraphicalClef } from "@score-storm/core"
-// import Renderer from "@score-storm/svg-renderer"
-import Renderer from "@score-storm/canvas-renderer"
-import styles from "./App.module.css"
+import { AppShell } from "@mantine/core"
 import Aside from "./Aside"
 
-type ScoreStormContextValue = { scoreStorm: ScoreStorm }
-export const ScoreStormContext = createContext<ScoreStormContextValue>({} as ScoreStormContextValue)
+import styles from "./App.module.css"
+import Container from "./Container"
 
 export default function App() {
-  const theme = useMantineTheme()
-  const rootElementRef = useRef(null)
-  const scoreStorm = useRef<ScoreStorm>()
-  const [initialized, setInitialized] = useState(false)
-
-  const handleClick = (event: InteractionEvent) => {
-    if (event.object instanceof GraphicalClef) {
-      scoreStorm.current!.getScore().setClef()
-      scoreStorm.current!.render()
-    }
-  }
-
-  useEffect(() => {
-    console.log("mount", rootElementRef.current)
-
-    scoreStorm.current! = new ScoreStorm({
-      scale: 80,
-      editor: { enable: true, styles: { hoverColor: theme.colors.blue[6] } },
-    })
-    scoreStorm.current!.setEventListener(EventType.CLICK, handleClick)
-    scoreStorm.current!.setRenderer(new Renderer(rootElementRef.current!))
-
-    const score = Score.createQuickScore({ numberOfMeasures: 1, timeSignature: { count: 4, unit: 4 } })
-    scoreStorm.current!.setScore(score)
-    scoreStorm.current!.render()
-
-    setInitialized(true)
-
-    return () => {
-      // destroy on unmount
-      scoreStorm.current!.destroy()
-    }
-  }, [theme])
-
   console.log("App render")
 
   return (
@@ -54,14 +15,10 @@ export default function App() {
       padding="xl"
     >
       <AppShell.Main>
-        <div id="ss-container" ref={rootElementRef} />
+        <Container />
       </AppShell.Main>
       <AppShell.Aside className={styles.ssEditorAside} p="xl">
-        {initialized && (
-          <ScoreStormContext.Provider value={{ scoreStorm: scoreStorm.current! }}>
-            <Aside />
-          </ScoreStormContext.Provider>
-        )}
+        <Aside />
       </AppShell.Aside>
     </AppShell>
   )

@@ -1,6 +1,6 @@
 import { Button, Stack } from "@mantine/core"
 import { useContext, useState } from "react"
-import { ScoreStormContext } from "./App"
+import { ScoreStormContext } from "./ScoreStormProvider"
 
 export default function Aside() {
   const { scoreStorm } = useContext(ScoreStormContext)
