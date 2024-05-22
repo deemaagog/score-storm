@@ -12,6 +12,7 @@ export class GraphicalRestEvent extends BaseGraphical implements IGraphical {
   verticalShift: number // value in stave spaces
   x!: number
   y!: number
+  noteEvent: NoteEvent
 
   static glyphMap = {
     whole: RestWhole,
@@ -21,6 +22,7 @@ export class GraphicalRestEvent extends BaseGraphical implements IGraphical {
 
   constructor(noteEvent: NoteEvent) {
     super()
+    this.noteEvent = noteEvent
     const duration = noteEvent.duration?.base
 
     this.verticalShift = duration === "whole" ? -1 : 0 // TODO: respect rest position

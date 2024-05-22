@@ -65,6 +65,7 @@ class BaseRenderer {
         enable: false,
         styles: {
           hoverColor: "royalblue",
+          selectColor: "green",
         },
         ...editor,
       },
@@ -87,7 +88,9 @@ class BaseRenderer {
   }
 
   destroy() {
-    this.renderer.destroy()
+    if (this.renderer) {
+      this.renderer.destroy()
+    }
   }
 
   render(score: Score) {

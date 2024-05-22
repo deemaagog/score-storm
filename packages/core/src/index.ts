@@ -1,6 +1,6 @@
 export { type IRenderer } from "./interfaces"
-export { ScoreStorm as default } from "./ScoreStorm"
+export { ScoreStorm as default, type ScoreStormSettings } from "./ScoreStorm"
 export { type InteractionEvent, EventType, EventManager } from "./EventManager"
-export { Score } from "./model/Score"
+export { Score, type QuickScoreOptions } from "./model/Score"
 export * from "./graphical"
 export { type Settings } from "./BaseRenderer"

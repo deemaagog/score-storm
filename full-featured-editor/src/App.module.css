@@ -1,0 +1,60 @@
+.sidebarActions {
+  padding: var(--mantine-spacing-sm);
+  border-radius: 12px 0 0 12px;
+  box-shadow: 1px 0px 10px 4px rgba(128,128,128,0.21);
+  transition: box-shadow 0.3s ease-in-out;
+  background-color: var(--mantine-color-blue-9);
+}
+
+.noShadows {
+  /* box-shadow: none; */
+  box-shadow: inset 1px 0px 10px 4px rgb(23 93 159);
+}
+
+.drawer  section {
+  margin-right: 0;
+  border-radius: 12px 0 0 12px;
+  box-shadow: inset 4px 0px 12px 0px rgb(197 213 233 / 21%);
+  padding: var(--mantine-spacing-md);
+  padding-right: 68px;
+  background-color: var(--mantine-color-blue-0);
+}
+
+.actionButton {
+  /* &:active {
+    transform: none;
+  } */
+
+  width: rem(36px);
+  height: rem(36px);
+  border-radius: var(--mantine-radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--mantine-color-white);
+  background-color: var(--mantine-color-blue-9);
+
+  &:hover {
+    background-color: lighten(var(--mantine-color-blue-9), 0.2);
+  }
+
+  &[data-active] {
+    /* &,
+    &:hover {
+      box-shadow: var(--mantine-shadow-sm);
+      background-color: var(--mantine-color-blue-1);
+      color: var(--mantine-color-blue-6);
+    } */
+    background-color: lighten(var(--mantine-color-blue-9), 0.2);
+  }
+}
+
+
+/* legacy remove */
+.ssEditorAside {
+  top: calc(var(--app-shell-header-offset, 0rem) + 64px);
+  height: calc(100dvh - 128px - var(--app-shell-header-offset, 0rem) - var(--app-shell-footer-offset, 0rem));
+  border-radius: 12px 0 0 12px;
+    box-shadow: 1px 0px 10px 4px rgba(128,128,128,0.21);
+    overflow-y: auto;
+}

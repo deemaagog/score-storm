@@ -1,6 +1,7 @@
 import { BBox, EventType, IRenderer, Settings } from "@score-storm/core"
 import { IGraphical, EventManager } from "@score-storm/core"
 import RBush from "rbush"
+import { Layer } from "./Layer"
 
 type SpatialIndexItem = {
   minX: number
@@ -14,17 +15,19 @@ class CanvasRenderer implements IRenderer {
   containerElement: HTMLDivElement
   containerWidth: number
 
-  // main canvas and it's contenxt
-  canvasElement!: HTMLCanvasElement
-  context!: CanvasRenderingContext2D
+  // *** LAYERS ***
+  // main layer meant for rendering music scores
+  mainLayer!: Layer
+  // layer meant for rendering current hovered object
+  hoverLayer!: Layer
+  // layer meant for rendering selected object
+  selectionLayer!: Layer
 
-  // interaction canvas and it's contenxt
-  interactionsCanvasElement!: HTMLCanvasElement
-  interactionsContext!: CanvasRenderingContext2D
-  detectedObject: IGraphical | null = null
+  hoveredObject: IGraphical | null = null
+  selectedObject: IGraphical | null = null
 
-  // current context
-  currentContext!: CanvasRenderingContext2D
+  // current layer
+  currentLayer!: Layer
 
   resizeObserver: ResizeObserver
   isInitialized: boolean = false
@@ -52,24 +55,15 @@ class CanvasRenderer implements IRenderer {
     if (containerPosition !== "relative") {
       this.containerElement.style.setProperty("position", "relative")
     }
-    // the main canvas for rendering music scores
-    this.canvasElement = document.createElement("canvas")
-    this.context = this.canvasElement.getContext("2d")!
-    this.containerElement.appendChild(this.canvasElement)
-
-    // a separate canvas for interactions
-    this.interactionsCanvasElement = document.createElement("canvas")
-    this.interactionsContext = this.interactionsCanvasElement.getContext("2d")!
-    this.containerElement.appendChild(this.interactionsCanvasElement)
-    this.interactionsCanvasElement.style.setProperty("position", "absolute")
-    this.interactionsCanvasElement.style.setProperty("left", "0")
-    this.interactionsCanvasElement.style.setProperty("top", "0")
-    this.interactionsCanvasElement.style.setProperty("pointer-events", "none")
+    // layers initialization
+    this.mainLayer = new Layer(this.containerElement)
+    this.hoverLayer = new Layer(this.containerElement, true)
+    this.selectionLayer = new Layer(this.containerElement, true)
 
     this.isInitialized = true
 
-    this.canvasElement.addEventListener("mousemove", (event: MouseEvent) => {
-      let rect = this.canvasElement.getBoundingClientRect() // TODO: make it a class member and update on resize
+    this.mainLayer.canvasElement.addEventListener("mousemove", (event: MouseEvent) => {
+      let rect = this.mainLayer.canvasElement.getBoundingClientRect() // TODO: make it a class member and update on resize
       let x = event.clientX - rect.left
       let y = event.clientY - rect.top
 
@@ -80,43 +74,48 @@ class CanvasRenderer implements IRenderer {
         maxY: y,
       })
       if (result.length) {
-        if (this.detectedObject) {
+        if (this.hoveredObject) {
           return
         }
-        this.currentContext = this.interactionsContext
-        this.canvasElement.style.cursor = "pointer"
+        this.currentLayer = this.hoverLayer
+        this.mainLayer.setCursorType("pointer")
 
         this.setColor(this.settings.editor!.styles.hoverColor)
-        this.detectedObject = result[0].object
-        this.detectedObject.render(this, this.settings)
+        this.hoveredObject = result[0].object
+        this.hoveredObject.render(this, this.settings)
       } else {
-        if (!this.detectedObject) {
+        if (!this.hoveredObject) {
           return
         }
-        this.currentContext = this.interactionsContext
-        this.interactionsContext.clearRect(
-          0,
-          0,
-          this.interactionsCanvasElement.width,
-          this.interactionsCanvasElement.height,
-        )
-        this.canvasElement.style.cursor = "default"
-        this.detectedObject = null
+        this.currentLayer = this.hoverLayer
+        this.hoverLayer.clear()
+        this.mainLayer.setCursorType("default")
+        this.hoveredObject = null
       }
 
-      this.currentContext = this.context
+      this.currentLayer = this.mainLayer
     })
 
-    this.canvasElement.addEventListener("click", (event: MouseEvent) => {
-      let rect = this.canvasElement.getBoundingClientRect() // TODO: make it a class member and update on resize
+    this.mainLayer.canvasElement.addEventListener("click", (event: MouseEvent) => {
+      let rect = this.mainLayer.canvasElement.getBoundingClientRect() // TODO: make it a class member and update on resize
       let x = event.clientX - rect.left
       let y = event.clientY - rect.top
-      if (this.detectedObject) {
-        this.eventManager.dispatch(EventType.CLICK, { x, y, object: this.detectedObject })
+      this.selectedObject = this.hoveredObject
+
+      this.currentLayer = this.selectionLayer
+      if (this.selectedObject) {
+        this.currentLayer.clear()
+        this.setColor(this.settings.editor!.styles.selectColor)
+        this.selectedObject.render(this, this.settings)
+      } else {
+        this.currentLayer.clear()
       }
+      this.currentLayer = this.mainLayer
+
+      this.eventManager.dispatch(EventType.CLICK, { x, y, object: this.hoveredObject })
     })
 
-    this.currentContext = this.context
+    this.currentLayer = this.mainLayer
   }
 
   destroy() {
@@ -126,29 +125,9 @@ class CanvasRenderer implements IRenderer {
   }
 
   preRender(height: number, fontSize: number) {
-    const scale = window.devicePixelRatio // Change to 1 on retina screens to see blurry canvas.
-
-    this.canvasElement.style.width = this.containerWidth + "px"
-    this.canvasElement.style.height = height + "px"
-    // Set actual size in memory (scaled to account for extra pixel density).
-    this.canvasElement.width = this.containerWidth * scale
-    this.canvasElement.height = height * scale
-    // Normalize coordinate system to use css pixels.
-    this.context.scale(scale, scale)
-
-    this.context.font = `${fontSize}px Bravura`
-    this.context.textBaseline = "alphabetic" // middle
-    this.context.textAlign = "start"
-
-    // interaction canvas
-    this.interactionsCanvasElement.style.width = this.containerWidth + "px"
-    this.interactionsCanvasElement.style.height = height + "px"
-    this.interactionsCanvasElement.width = this.containerWidth * scale
-    this.interactionsCanvasElement.height = height * scale
-    this.interactionsContext.scale(scale, scale)
-    this.interactionsContext.font = `${fontSize}px Bravura`
-    this.interactionsContext.textBaseline = "alphabetic" // middle
-    this.interactionsContext.textAlign = "start"
+    for (const layer of [this.mainLayer, this.hoverLayer, this.selectionLayer]) {
+      layer.preRender(this.containerWidth, height, fontSize)
+    }
   }
 
   clear() {
@@ -158,25 +137,24 @@ class CanvasRenderer implements IRenderer {
   postRender(): void {}
 
   setColor(color: string) {
-    this.currentContext.fillStyle = color
+    this.currentLayer.context.fillStyle = color
   }
 
   drawRect(x: number, y: number, width: number, height: number) {
     // this.currentContext.fillRect(x, y, width, height)
 
-    this.currentContext.beginPath()
+    this.currentLayer.context.beginPath()
     // this.currentContext.rect(x, y, width, height)
-    this.currentContext.moveTo(x, y)
-    this.currentContext.lineTo(x + width, y)
-    this.currentContext.lineTo(x + width, y + height)
-    this.currentContext.lineTo(x, y + height)
-    this.currentContext.lineTo(x, y)
-    this.currentContext.fill()
+    this.currentLayer.context.moveTo(x, y)
+    this.currentLayer.context.lineTo(x + width, y)
+    this.currentLayer.context.lineTo(x + width, y + height)
+    this.currentLayer.context.lineTo(x, y + height)
+    this.currentLayer.context.lineTo(x, y)
+    this.currentLayer.context.fill()
   }
 
   drawGlyph(glyph: string, x: number, y: number) {
-    // console.log(JSON.stringify(glyph), x, y)
-    this.currentContext.fillText(glyph, x, y)
+    this.currentLayer.context.fillText(glyph, x, y)
   }
 
   registerInteractionArea(graphicalObject: IGraphical, bBox: BBox, renderCallback: () => void): void {

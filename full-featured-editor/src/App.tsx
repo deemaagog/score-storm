@@ -1,78 +1,102 @@
 import "@mantine/core/styles.css"
 import "./App.css"
-import { Button, AppShell, Stack, useMantineTheme } from "@mantine/core"
-import { useEffect, useRef, useState } from "react"
-import ScoreStorm, { EventType, InteractionEvent, Score, GraphicalClef } from "@score-storm/core"
-// import Renderer from "@score-storm/svg-renderer"
-import Renderer from "@score-storm/canvas-renderer"
+import { Affix, AppShell, Drawer, Stack, Text, Title, Tooltip, UnstyledButton, rem } from "@mantine/core"
+import { useDisclosure } from "@mantine/hooks"
+import { IconActivityHeartbeat, IconArticle, IconMathGreater, IconPlaylist } from "@tabler/icons-react"
+import classNames from "classnames"
+import { useState } from "react"
+import { Measure } from "./aside-components/Measure"
+import { Note } from "./aside-components/Note"
+import styles from "./App.module.css"
+import Container from "./Container"
 
-export default function App() {
-  const theme = useMantineTheme()
-  const rootElementRef = useRef(null)
-  const scoreStorm = useRef<ScoreStorm>()
-  const [removeMeasureDisabled, setRemoveMeasureDisabled] = useState(true)
+const actions = [
+  {
+    label: "Measure",
+    icon: IconArticle,
+    content: <Measure />,
+  },
+  {
+    label: "Note",
+    icon: IconPlaylist,
+    content: <Note />,
+  },
+  {
+    label: "Dynamics",
+    icon: IconActivityHeartbeat,
+    content: <Text>TBD</Text>,
+  },
+  {
+    label: "Articulations",
+    icon: IconMathGreater,
+    content: <Text>TBD</Text>,
+  },
+]
 
-  const handleClick = (event: InteractionEvent) => {
-    if (event.object instanceof GraphicalClef) {
-      scoreStorm.current!.getScore().setClef()
-      scoreStorm.current!.render()
-    }
-  }
+export const App = () => {
+  const [opened, { open, close }] = useDisclosure(false)
+  const [activeAction, setActiveAction] = useState<null | string>(null)
 
-  useEffect(() => {
-    if (!rootElementRef.current) {
+  const handleClick = (action: string) => {
+    if (activeAction === action) {
+      close()
+      setActiveAction(null)
       return
     }
-    scoreStorm.current! = new ScoreStorm({
-      scale: 100,
-      editor: { enable: true, styles: { hoverColor: theme.colors.blue[6] } },
-    })
-    scoreStorm.current!.setEventListener(EventType.CLICK, handleClick)
-    scoreStorm.current!.setRenderer(new Renderer(rootElementRef.current))
-
-    const score = Score.createQuickScore({ numberOfMeasures: 1, timeSignature: { count: 4, unit: 4 } })
-    scoreStorm.current!.setScore(score)
-    scoreStorm.current!.render()
-
-    return () => {
-      // destroy on unmount
-      scoreStorm.current!.destroy()
+    setActiveAction(action)
+    if (!opened) {
+      open()
+      return
     }
-  }, [rootElementRef, theme])
-
-  const updateRemoveMeasureDisabled = () => {
-    const score = scoreStorm.current!.getScore()
-    const numberOfMeasures = score.globalMeasures.length
-    setRemoveMeasureDisabled(numberOfMeasures === 1)
-  }
-
-  const handleAddMeasureClick = () => {
-    scoreStorm.current!.getScore().addMeasure()
-    scoreStorm.current!.render()
-    updateRemoveMeasureDisabled()
-  }
-
-  const handleRemoveMeasureClick = () => {
-    const score = scoreStorm.current!.getScore()
-    const numberOfMeasures = score.globalMeasures.length
-    score.removeMeasure(numberOfMeasures - 1)
-    scoreStorm.current!.render()
-    updateRemoveMeasureDisabled()
   }
 
   return (
-    <AppShell aside={{ width: 300, breakpoint: "md", collapsed: { desktop: false, mobile: true } }} padding="xl">
-      <AppShell.Main>
-        <div id="ss-container" ref={rootElementRef} />
-      </AppShell.Main>
-      <AppShell.Aside p="xl">
-        <Stack bg="var(--mantine-color-body)" align="stretch" justify="center" gap="md">
-          <Button onClick={handleAddMeasureClick}>+ Add measure</Button>
-          <Button disabled={removeMeasureDisabled} onClick={handleRemoveMeasureClick}>
-            - Remove measure
-          </Button>
+    <>
+      <AppShell
+        aside={{
+          width: 60,
+          breakpoint: "",
+          collapsed: { desktop: false, mobile: false },
+        }}
+        padding={{ md: "xl", xl: "xl", sm: "sm", xs: "sm", base: "sm" }}
+      >
+        <AppShell.Main>
+          <Container />
+        </AppShell.Main>
+        <AppShell.Aside withBorder={false}></AppShell.Aside>
+      </AppShell>
+      <Drawer
+        position="right"
+        offset={64}
+        radius="md"
+        opened={opened}
+        onClose={close}
+        removeScrollProps={{ enabled: false }}
+        size={300}
+        withOverlay={false}
+        className={styles.drawer}
+        withCloseButton={false}
+      >
+        <Title c={"var(--mantine-color-blue-9)"} mb={"xl"} fw={800} order={2}>
+          {activeAction}
+        </Title>
+        {activeAction && actions.find((a) => a.label === activeAction)?.content}
+      </Drawer>
+      <Affix position={{ bottom: "50%", right: 0 }} style={{ transform: "translateY(50%)" }}>
+        <Stack className={classNames({ [styles.sidebarActions]: true, [styles.noShadows]: opened })}>
+          {actions.map(({ icon: Icon, ...action }) => (
+            <Tooltip label={action.label} position="left" openDelay={500} key={action.label}>
+              <UnstyledButton
+                onClick={() => handleClick(action.label)}
+                className={styles.actionButton}
+                data-active={activeAction === action.label || undefined}
+              >
+                <Icon style={{ width: rem(24), height: rem(24) }} stroke={1.7} />
+              </UnstyledButton>
+            </Tooltip>
+          ))}
         </Stack>
-      </AppShell.Aside>
-    </AppShell>
+      </Affix>
+    </>
   )
 }
