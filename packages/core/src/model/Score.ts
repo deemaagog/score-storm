@@ -2,7 +2,7 @@ import { getMNXScore, getScoreFromMusicXml } from "mnxconverter"
 import { GlobalMeasure, TimeSignature } from "./GlobalMeasure"
 import { Measure, NoteEvent } from "./Measure"
 
-type QuickScoreOptions = {
+export type QuickScoreOptions = {
   numberOfMeasures?: number
   timeSignature?: TimeSignature
 }
@@ -32,7 +32,10 @@ export class Score {
         }
       }
 
-      measure.events = Array<NoteEvent>(options.timeSignature!.count).fill({ duration: { base: "quarter" }, rest: {} })
+      measure.events = Array.from({ length: options.timeSignature!.count }, () => ({
+        duration: { base: "quarter" },
+        rest: {},
+      }))
 
       score.globalMeasures.push(globalMeasure)
       score.measures.push(measure)
@@ -99,7 +102,10 @@ export class Score {
     this.globalMeasures.push(new GlobalMeasure())
     // assuming only one instrument with one stave for now
     const measure = new Measure()
-    measure.events = Array<NoteEvent>(currentTimeSignature.count).fill({ duration: { base: "quarter" }, rest: {} })
+    measure.events = Array.from({ length: currentTimeSignature.count }, () => ({
+      duration: { base: "quarter" },
+      rest: {},
+    }))
     this.measures.push(measure)
     return this
   }
@@ -135,6 +141,15 @@ export class Score {
         sign: "G",
         position: -2,
       }
+    }
+  }
+
+  // if rest, make it note and vice versa
+  swithNoteType(noteEvent: NoteEvent) {
+    if (noteEvent.rest) {
+      noteEvent.rest = undefined
+    } else {
+      noteEvent.rest = {}
     }
   }
 }

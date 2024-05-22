@@ -1,0 +1,8 @@
+.control {
+  display: block;
+  width: 100%;
+}
+
+.chevron {
+  transition: transform 200ms ease;
+}

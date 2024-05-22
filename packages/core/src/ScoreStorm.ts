@@ -12,6 +12,7 @@ export interface ScoreStormSettings {
     enable: boolean
     styles: {
       hoverColor: string
+      selectColor: string
     }
   }
 }

@@ -13,6 +13,7 @@ export class GraphicalNoteEvent extends BaseGraphical implements IGraphical {
   drawStem!: boolean
   x!: number
   y!: number
+  noteEvent: NoteEvent
 
   static glyphMap = {
     whole: NoteheadWhole,
@@ -22,6 +23,7 @@ export class GraphicalNoteEvent extends BaseGraphical implements IGraphical {
 
   constructor(noteEvent: NoteEvent) {
     super()
+    this.noteEvent = noteEvent
     const duration = noteEvent.duration?.base
 
     if (duration !== "whole") {
