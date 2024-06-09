@@ -12,6 +12,7 @@ export class GraphicalClef extends BaseGraphical implements IGraphical {
   verticalShift: number // value in stave spaces
   x!: number // todo : create Poind2d type
   y!: number
+  clef: Clef
 
   static glyphMap = {
     G: ClefG,
@@ -20,6 +21,7 @@ export class GraphicalClef extends BaseGraphical implements IGraphical {
 
   constructor(clef: Clef) {
     super()
+    this.clef = clef
     const { position, sign } = clef
 
     this.verticalShift = position * -0.5

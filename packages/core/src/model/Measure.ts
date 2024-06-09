@@ -3,7 +3,10 @@ export type Note = {
     alter?: number
     octave: number
     step: string
-  }
+  },
+  accidentalDisplay?: {
+    show: boolean
+  },
 }
 
 export type NoteDuration = {

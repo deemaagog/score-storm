@@ -1,15 +1,15 @@
 export class Layer {
   canvasElement!: HTMLCanvasElement
   context!: CanvasRenderingContext2D
-  constructor(containerElement: HTMLDivElement, disablePointerEvents = false) {
+  constructor(containerElement: HTMLDivElement, isInteractionsLayer = false) {
     this.canvasElement = document.createElement("canvas")
     this.context = this.canvasElement.getContext("2d")!
     containerElement.appendChild(this.canvasElement)
 
-    this.canvasElement.style.setProperty("position", "absolute")
-    this.canvasElement.style.setProperty("left", "0")
-    this.canvasElement.style.setProperty("top", "0")
-    if (disablePointerEvents) {
+    if (isInteractionsLayer) {
+      this.canvasElement.style.setProperty("position", "absolute")
+      this.canvasElement.style.setProperty("left", "0")
+      this.canvasElement.style.setProperty("top", "0")
       this.canvasElement.style.setProperty("pointer-events", "none")
     }
   }

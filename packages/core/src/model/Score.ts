@@ -1,6 +1,6 @@
 import { getMNXScore, getScoreFromMusicXml } from "mnxconverter"
 import { GlobalMeasure, TimeSignature } from "./GlobalMeasure"
-import { Measure, NoteEvent } from "./Measure"
+import { Measure, Note, NoteEvent } from "./Measure"
 
 export type QuickScoreOptions = {
   numberOfMeasures?: number
@@ -148,8 +148,30 @@ export class Score {
   swithNoteType(noteEvent: NoteEvent) {
     if (noteEvent.rest) {
       noteEvent.rest = undefined
+      noteEvent.notes = [
+        {
+          pitch: {
+            octave: 4,
+            step: "B",
+          },
+        },
+      ]
     } else {
       noteEvent.rest = {}
+      noteEvent.notes = undefined
     }
+  }
+
+  changeNoteAccidental(note: Note, newAlter?: number) {
+    // taking into account key signature is out of scope for now
+    const { alter, ...rest } = note.pitch
+    const alterChanged = alter !== newAlter
+    if(!alterChanged) {
+      newAlter = undefined
+    }
+    note.accidentalDisplay = {
+      show: typeof newAlter === "number",
+    }
+    note.pitch = { ...rest, ...(newAlter !== 0 && { alter: newAlter }) }
   }
 }
