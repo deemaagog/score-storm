@@ -1,3 +1,6 @@
 export { GraphicalScore } from "./GraphicalScore"
 export { GraphicalClef } from "./GraphicalClef"
+export { GraphicalRestEvent } from "./GraphicalRestEvent"
+export { GraphicalNoteEvent } from "./GraphicalNoteEvent"
+export { GraphicalTimeSignature } from "./GraphicalTimeSignature"
 export { type IGraphical, type BBox } from "./interfaces"

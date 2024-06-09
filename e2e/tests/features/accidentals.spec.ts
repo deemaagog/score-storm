@@ -1,7 +1,7 @@
 import { expect } from "@playwright/test"
 import fs from "fs"
 import path from "path"
-import { test } from "./parametrized-test"
+import { test } from "../parametrized-test"
 
 // todo: move to global setup
 test.beforeEach(async ({ page, renderer }) => {
@@ -20,16 +20,8 @@ test.afterEach(async ({ page }) => {
   await expect(page.locator("#ss-container")).toHaveScreenshot()
 })
 
-test("renders default score", async () => {})
-
-test("renders 3 measures", async ({ page }) => {
-  await page.evaluate(() => {
-    window.scoreStorm.getScore().addMeasure().addMeasure()
-  })
-})
-
-test("renders score from musicxml", async ({ page }) => {
-  const inputXmlString = fs.readFileSync(path.join(__dirname, "basic-durations.musicxml"), "utf8")
+test("renders accidentals", async ({ page }) => {
+  const inputXmlString = fs.readFileSync(path.join(__dirname, "basic-accidentals.musicxml"), "utf8")
   await page.evaluate((xml) => {
     window.scoreStorm.setScore(window.getScoreFormMusicXml(xml))
   }, inputXmlString)

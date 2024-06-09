@@ -1,11 +1,13 @@
 import { Settings } from "../BaseRenderer"
 import { IRenderer } from "../interfaces"
-import { NoteEvent } from "../model/Measure"
+import { Note, NoteEvent } from "../model/Measure"
 import { BaseGraphical } from "./BaseGraphical"
+import { DoubleFlat, DoubleSharp, Flat, Natural, Sharp } from "./glyphs/accidental"
 import { NoteheadHalf, NoteheadQuarter, NoteheadWhole } from "./glyphs/notehead"
 import { BBox, Glyph, IGraphical } from "./interfaces"
 
 export class GraphicalNoteEvent extends BaseGraphical implements IGraphical {
+  noteEvent: NoteEvent
   height!: number
   width!: number
   noteheadGlyph: Glyph
@@ -13,12 +15,21 @@ export class GraphicalNoteEvent extends BaseGraphical implements IGraphical {
   drawStem!: boolean
   x!: number
   y!: number
-  noteEvent: NoteEvent
+  accidentalGlyph?: Glyph
+  accidentalWidth?: number
 
   static glyphMap = {
     whole: NoteheadWhole,
     half: NoteheadHalf,
     quarter: NoteheadQuarter,
+  }
+
+  static glyphAccidentalMap = {
+    [-2]: DoubleFlat,
+    [-1]: Flat,
+    [0]: Natural,
+    [1]: Sharp,
+    [2]: DoubleSharp,
   }
 
   constructor(noteEvent: NoteEvent) {
@@ -28,6 +39,19 @@ export class GraphicalNoteEvent extends BaseGraphical implements IGraphical {
 
     if (duration !== "whole") {
       this.drawStem = true
+    }
+
+    // for now only first note in chord
+    const firstNote = noteEvent.notes![0]
+    const showAccidentals = !!firstNote.accidentalDisplay?.show
+    const accidental = firstNote.pitch.alter || 0
+    const accidentalGlyph =
+      GraphicalNoteEvent.glyphAccidentalMap[accidental as keyof typeof GraphicalNoteEvent.glyphAccidentalMap]
+    if (typeof accidental === "number" && !accidentalGlyph) {
+      throw new Error(`Invalid accidental ${accidental}`)
+    }
+    if (showAccidentals) {
+      this.accidentalGlyph = accidentalGlyph
     }
 
     this.verticalShift = 0 // TODO: respect pitch
@@ -46,6 +70,11 @@ export class GraphicalNoteEvent extends BaseGraphical implements IGraphical {
     const glyphWidth = this.noteheadGlyph.bBoxes.bBoxNE[0] - this.noteheadGlyph.bBoxes.bBoxSW[0]
 
     this.width = glyphWidth
+
+    if (this.accidentalGlyph) {
+      const accidentalGlyphWidth = this.accidentalGlyph.bBoxes.bBoxNE[0] - this.accidentalGlyph.bBoxes.bBoxSW[0]
+      this.accidentalWidth = accidentalGlyphWidth
+    }
   }
 
   setCoordinates(x: number, y: number, settings: Settings): void {
@@ -54,18 +83,31 @@ export class GraphicalNoteEvent extends BaseGraphical implements IGraphical {
   }
 
   getBBox(settings: Settings): BBox {
+    let xShift = 0
+    if (this.accidentalGlyph) {
+      xShift = xShift + this.accidentalWidth! * settings.unit + 0.5 * settings.unit
+    }
     return {
-      x: this.x,
-      y: this.y - this.noteheadGlyph.bBoxes.bBoxNE[1] * settings.unit,
+      x: this.x + xShift,
+      y: this.y - this.noteheadGlyph.bBoxes.bBoxNE[1] * settings.unit ,
       width: this.width * settings.unit,
       height: this.height * settings.unit,
     }
   }
 
   render(renderer: IRenderer, settings: Settings) {
+    let xShift = 0
+    if (this.accidentalGlyph) {
+      renderer.drawGlyph(
+        this.getTextFromUnicode(this.accidentalGlyph.symbol),
+        this.x - this.accidentalGlyph.bBoxes.bBoxSW[0] * settings.unit,
+        this.y,
+      )
+      xShift = xShift + this.accidentalWidth! * settings.unit + 0.5 * settings.unit
+    }
     renderer.drawGlyph(
       this.getTextFromUnicode(this.noteheadGlyph.symbol),
-      this.x - this.noteheadGlyph.bBoxes.bBoxSW[0] * settings.unit,
+      this.x - this.noteheadGlyph.bBoxes.bBoxSW[0] * settings.unit + xShift,
       this.y,
     )
 
@@ -74,7 +116,7 @@ export class GraphicalNoteEvent extends BaseGraphical implements IGraphical {
       const stemHeight = 3.5 * settings.unit
       const stemHeightCut = 0.17 * settings.unit
       renderer.drawRect(
-        this.x + this.width * settings.unit - stemThickness,
+        this.x + this.width * settings.unit - stemThickness + xShift,
         this.y - stemHeight,
         stemThickness,
         stemHeight - stemHeightCut,
