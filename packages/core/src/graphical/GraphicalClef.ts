@@ -1,6 +1,6 @@
 import { Settings } from "../BaseRenderer"
 import { IRenderer } from "../interfaces"
-import { Clef } from "../model/Measure"
+import { Clef } from "../model/Clef"
 import { BaseGraphical } from "./BaseGraphical"
 import { ClefG, ClefF } from "./glyphs/clef"
 import { Glyph, IGraphical } from "./interfaces"

@@ -3,8 +3,9 @@ import { IRenderer } from "./interfaces"
 import { ScoreStormSettings } from "./ScoreStorm"
 import { GraphicalScore } from "./graphical/GraphicalScore"
 import { GraphicalMeasure } from "./graphical/GraphicalMeasure"
-import { BBox } from "./graphical/interfaces"
+import { BBox, IGraphical } from "./graphical/interfaces"
 import { EventManager } from "./EventManager"
+import { BaseEditor } from "./BaseEditor"
 
 export type Settings = {
   fontSize: number
@@ -34,8 +35,11 @@ class BaseRenderer {
   private graphicalScore!: GraphicalScore
   private x: number = 0
   private y: number = 0
+  private baseEditor: BaseEditor
 
   constructor(eventManager: EventManager, options?: ScoreStormSettings) {
+    this.baseEditor = new BaseEditor(eventManager)
+
     this.eventManager = eventManager
     this.setSettings(options)
   }
@@ -109,6 +113,7 @@ class BaseRenderer {
     this.graphicalScore = new GraphicalScore(score, this.renderer.containerWidth, this.settings)
 
     // clear
+    this.baseEditor.clear()
     this.renderer.clear()
     // set sizes and other stuff
     this.renderer.preRender(this.graphicalScore.height, this.settings.fontSize)
@@ -116,6 +121,7 @@ class BaseRenderer {
     this.renderScore()
     // do some stuff when socre is rendered
     this.renderer.postRender()
+    this.baseEditor.restoreSelection()
   }
 
   renderScore() {
@@ -203,9 +209,7 @@ class BaseRenderer {
       measureX += this.settings.unit * this.settings.clefMargin
       graphicalMeasure.clef.setCoordinates(measureX, this.y + this.settings.midStave, this.settings)
       const bBox = graphicalMeasure.clef.getBBox(this.settings)
-      this.renderer.registerInteractionArea(graphicalMeasure.clef, bBox, () =>
-        graphicalMeasure.clef!.render(this.renderer, this.settings),
-      )
+      this.renderInteractiveObject(graphicalMeasure.clef.clef, graphicalMeasure.clef, bBox)
       this.renderBBox(bBox)
       measureX += this.settings.unit * graphicalMeasure.clef.width
     }
@@ -214,9 +218,7 @@ class BaseRenderer {
       measureX += this.settings.unit * this.settings.timeSignatureMargin
       graphicalMeasure.time.setCoordinates(measureX, this.y + this.settings.midStave)
       const bBox = graphicalMeasure.time.getBBox(this.settings)
-      this.renderer.registerInteractionArea(graphicalMeasure.time, bBox, () =>
-        graphicalMeasure.time!.render(this.renderer, this.settings),
-      )
+      this.renderInteractiveObject(graphicalMeasure.time.time, graphicalMeasure.time, bBox)
       this.renderBBox(bBox)
       measureX += this.settings.unit * graphicalMeasure.time.width
     }
@@ -231,7 +233,7 @@ class BaseRenderer {
         this.settings,
       )
       const bBox = event.getBBox(this.settings)
-      this.renderer.registerInteractionArea(event, bBox, () => event.render(this.renderer, this.settings))
+      this.renderInteractiveObject(event.noteEvent, event, bBox)
       this.renderBBox(bBox)
     }
 
@@ -239,6 +241,11 @@ class BaseRenderer {
     // this.renderer.setColor("#ff8a8a80")
     // this.renderer.drawRect(measureX, this.y, graphicalMeasure.width - (measureX - this.x), this.settings.barlineHeight)
     // this.renderer.setColor("black")
+  }
+
+  renderInteractiveObject(object: object, grahicalObject: IGraphical, bBox: BBox) {
+    this.baseEditor.registerInteractionArea(object, grahicalObject, bBox)
+    this.renderer.renderInGroup(grahicalObject, () => grahicalObject.render(this.renderer, this.settings))
   }
 }
 

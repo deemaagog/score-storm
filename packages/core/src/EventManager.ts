@@ -1,8 +1,16 @@
 import { IGraphical } from "./graphical/interfaces"
 
 export enum EventType {
-  HOVER = "hover",
-  CLICK = "click",
+  HOVER = "HOVER",
+  HOVER_PROCESSED = "HOVER_PROCESSED",
+  SELECTION_STARTED = "SELECTION_STARTED",
+  SELECTION_ENDED = "SELECTION_ENDED",
+  SELECTION_PROCESSED = "SELECTION_PROCESSED",
+}
+
+export interface InteractionPosition {
+  x: number
+  y: number
 }
 
 export interface InteractionEvent {
@@ -11,9 +19,18 @@ export interface InteractionEvent {
   object: IGraphical | null
 }
 
+export interface HoverProcessedEvent {
+  object: IGraphical | null
+}
+
+export interface SelectionProcessedEvent extends HoverProcessedEvent {}
+
 interface EventMap {
-  [EventType.HOVER]: InteractionEvent
-  [EventType.CLICK]: InteractionEvent
+  [EventType.HOVER]: InteractionPosition
+  [EventType.HOVER_PROCESSED]: HoverProcessedEvent
+  [EventType.SELECTION_STARTED]: InteractionPosition
+  [EventType.SELECTION_ENDED]: InteractionPosition
+  [EventType.SELECTION_PROCESSED]: SelectionProcessedEvent
 }
 
 export type EventListenerCallback<K extends EventType> = (event: EventMap[K]) => void

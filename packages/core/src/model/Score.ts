@@ -1,6 +1,7 @@
 import { getMNXScore, getScoreFromMusicXml } from "mnxconverter"
 import { GlobalMeasure, TimeSignature } from "./GlobalMeasure"
 import { Measure, Note, NoteEvent } from "./Measure"
+import { Clef } from "./Clef"
 
 export type QuickScoreOptions = {
   numberOfMeasures?: number
@@ -26,10 +27,7 @@ export class Score {
 
       if (i === 0) {
         globalMeasure.time = options.timeSignature
-        measure.clef = {
-          sign: "G",
-          position: -2,
-        }
+        measure.clef = new Clef("G", -2)
       }
 
       measure.events = Array.from({ length: options.timeSignature!.count }, () => ({
@@ -62,7 +60,8 @@ export class Score {
       // TODO: clef changes
 
       if (mnxMeasure.clefs?.length && !mnxMeasure.clefs[0].position) {
-        measure.clef = mnxMeasure.clefs[0].clef
+        const { sign, position } = mnxMeasure.clefs[0].clef
+        measure.clef = new Clef(sign, position)
       }
 
       const firstVoice = mnxMeasure.sequences[0]
@@ -132,15 +131,9 @@ export class Score {
   setClef() {
     const firstMeasure = this.measures[0]
     if (firstMeasure.clef?.sign === "G") {
-      firstMeasure.clef = {
-        sign: "F",
-        position: 2,
-      }
+      firstMeasure.clef!.changeType("F", 2)
     } else {
-      firstMeasure.clef = {
-        sign: "G",
-        position: -2,
-      }
+      firstMeasure.clef!.changeType("G", -2)
     }
   }
 
@@ -166,7 +159,7 @@ export class Score {
     // taking into account key signature is out of scope for now
     const { alter, ...rest } = note.pitch
     const alterChanged = alter !== newAlter
-    if(!alterChanged) {
+    if (!alterChanged) {
       newAlter = undefined
     }
     note.accidentalDisplay = {

@@ -1,15 +1,6 @@
-import { BBox, EventType, IRenderer, Settings } from "@score-storm/core"
+import { BBox, EventType, HoverProcessedEvent, IRenderer, SelectionProcessedEvent, Settings } from "@score-storm/core"
 import { IGraphical, EventManager } from "@score-storm/core"
-import RBush from "rbush"
 import { Layer } from "./Layer"
-
-type SpatialIndexItem = {
-  minX: number
-  minY: number
-  maxX: number
-  maxY: number
-  object: IGraphical
-}
 
 class CanvasRenderer implements IRenderer {
   containerElement: HTMLDivElement
@@ -23,9 +14,6 @@ class CanvasRenderer implements IRenderer {
   // layer meant for rendering selected object
   selectionLayer!: Layer
 
-  hoveredObject: IGraphical | null = null
-  selectedObject: IGraphical | null = null
-
   // current layer
   currentLayer!: Layer
 
@@ -35,7 +23,7 @@ class CanvasRenderer implements IRenderer {
   settings!: Settings
   eventManager!: EventManager
 
-  private spatialSearchTree!: RBush<SpatialIndexItem>
+  boundingRect!: DOMRect
 
   constructor(containerElement: HTMLDivElement) {
     this.containerElement = containerElement
@@ -47,7 +35,37 @@ class CanvasRenderer implements IRenderer {
     })
     this.resizeObserver.observe(this.containerElement)
 
-    this.spatialSearchTree = new RBush()
+    this.handleHoverProcessed = this.handleHoverProcessed.bind(this)
+    this.handleSelectionProcessed = this.handleSelectionProcessed.bind(this)
+  }
+
+  handleHoverProcessed({ object }: HoverProcessedEvent) {
+    if (object) {
+      this.currentLayer = this.hoverLayer
+      this.mainLayer.setCursorType("pointer")
+
+      this.setColor(this.settings.editor!.styles.hoverColor)
+      object.render(this, this.settings)
+    } else {
+      this.currentLayer = this.hoverLayer
+      this.hoverLayer.clear()
+      this.mainLayer.setCursorType("default")
+    }
+
+    this.currentLayer = this.mainLayer
+  }
+
+  handleSelectionProcessed({ object }: SelectionProcessedEvent) {
+    this.currentLayer = this.selectionLayer
+    if (object) {
+      this.currentLayer.clear()
+      this.setColor(this.settings.editor!.styles.selectColor)
+      object.render(this, this.settings)
+    } else {
+      this.currentLayer.clear()
+    }
+
+    this.currentLayer = this.mainLayer
   }
 
   init() {
@@ -63,57 +81,20 @@ class CanvasRenderer implements IRenderer {
     this.isInitialized = true
 
     this.mainLayer.canvasElement.addEventListener("mousemove", (event: MouseEvent) => {
-      let rect = this.mainLayer.canvasElement.getBoundingClientRect() // TODO: make it a class member and update on resize
-      let x = event.clientX - rect.left
-      let y = event.clientY - rect.top
+      let x = event.clientX - this.boundingRect.left
+      let y = event.clientY - this.boundingRect.top
 
-      const result = this.spatialSearchTree.search({
-        minX: x,
-        minY: y,
-        maxX: x,
-        maxY: y,
-      })
-      if (result.length) {
-        if (this.hoveredObject) {
-          return
-        }
-        this.currentLayer = this.hoverLayer
-        this.mainLayer.setCursorType("pointer")
-
-        this.setColor(this.settings.editor!.styles.hoverColor)
-        this.hoveredObject = result[0].object
-        this.hoveredObject.render(this, this.settings)
-      } else {
-        if (!this.hoveredObject) {
-          return
-        }
-        this.currentLayer = this.hoverLayer
-        this.hoverLayer.clear()
-        this.mainLayer.setCursorType("default")
-        this.hoveredObject = null
-      }
-
-      this.currentLayer = this.mainLayer
+      this.eventManager.dispatch(EventType.HOVER, { x, y })
     })
 
     this.mainLayer.canvasElement.addEventListener("click", (event: MouseEvent) => {
-      let rect = this.mainLayer.canvasElement.getBoundingClientRect() // TODO: make it a class member and update on resize
-      let x = event.clientX - rect.left
-      let y = event.clientY - rect.top
-      this.selectedObject = this.hoveredObject
-
-      this.currentLayer = this.selectionLayer
-      if (this.selectedObject) {
-        this.currentLayer.clear()
-        this.setColor(this.settings.editor!.styles.selectColor)
-        this.selectedObject.render(this, this.settings)
-      } else {
-        this.currentLayer.clear()
-      }
-      this.currentLayer = this.mainLayer
-
-      this.eventManager.dispatch(EventType.CLICK, { x, y, object: this.hoveredObject })
+      let x = event.clientX - this.boundingRect.left
+      let y = event.clientY - this.boundingRect.top
+      this.eventManager.dispatch(EventType.SELECTION_ENDED, { x, y })
     })
+
+    this.eventManager.on(EventType.HOVER_PROCESSED, this.handleHoverProcessed)
+    this.eventManager.on(EventType.SELECTION_PROCESSED, this.handleSelectionProcessed)
 
     this.currentLayer = this.mainLayer
   }
@@ -128,11 +109,11 @@ class CanvasRenderer implements IRenderer {
     for (const layer of [this.mainLayer, this.hoverLayer, this.selectionLayer]) {
       layer.preRender(this.containerWidth, height, fontSize)
     }
+
+    this.boundingRect = this.mainLayer.canvasElement.getBoundingClientRect()
   }
 
-  clear() {
-    this.spatialSearchTree.clear()
-  }
+  clear() {}
 
   postRender(): void {}
 
@@ -157,14 +138,7 @@ class CanvasRenderer implements IRenderer {
     this.currentLayer.context.fillText(glyph, x, y)
   }
 
-  registerInteractionArea(graphicalObject: IGraphical, bBox: BBox, renderCallback: () => void): void {
-    this.spatialSearchTree.insert({
-      minX: bBox.x,
-      minY: bBox.y,
-      maxX: bBox.x + bBox.width,
-      maxY: bBox.y + bBox.height,
-      object: graphicalObject,
-    })
+  renderInGroup(_: IGraphical, renderCallback: () => void) {
     renderCallback()
   }
 }

@@ -1,12 +1,14 @@
+import { Clef } from "./Clef"
+
 export type Note = {
   pitch: {
     alter?: number
     octave: number
     step: string
-  },
+  }
   accidentalDisplay?: {
     show: boolean
-  },
+  }
 }
 
 export type NoteDuration = {
@@ -23,9 +25,4 @@ export class NoteEvent {
 export class Measure {
   clef?: Clef
   events!: NoteEvent[]
-}
-
-export class Clef {
-  position!: number
-  sign!: string
 }

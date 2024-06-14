@@ -18,7 +18,8 @@ export const SelectionProvider: React.FC<PropsWithChildren> = ({ children }) => 
   }
 
   useEffect(() => {
-    scoreStorm.setEventListener(EventType.CLICK, handleSelect)
+    // @ts-expect-error
+    scoreStorm.setEventListener(EventType.SELECTION_PROCESSED, handleSelect)
   }, [])
 
   return <SelectionContext.Provider value={{ selectedObject: selectedObject }}>{children}</SelectionContext.Provider>
