@@ -1,4 +1,4 @@
-import { BBox, EventType, IRenderer, Settings } from "@score-storm/core"
+import { EventType, IRenderer, SelectionProcessedEvent, Settings } from "@score-storm/core"
 import { IGraphical, EventManager } from "@score-storm/core"
 
 const NS = "http://www.w3.org/2000/svg"
@@ -13,7 +13,7 @@ class SvgRenderer implements IRenderer {
   openedGroup: SVGGElement | null = null
   settings!: Settings
   eventManager!: EventManager
-  objectByElement: Map<SVGElement, IGraphical> = new Map()
+  elementByObject: Map<IGraphical, SVGElement> = new Map()
 
   constructor(containerElement: HTMLDivElement) {
     this.containerElement = containerElement
@@ -25,6 +25,8 @@ class SvgRenderer implements IRenderer {
       this.containerWidth = entries[0].contentRect.width
     })
     this.resizeObserver.observe(this.containerElement)
+
+    this.handleSelectionProcessed = this.handleSelectionProcessed.bind(this)
   }
 
   init() {
@@ -33,25 +35,28 @@ class SvgRenderer implements IRenderer {
     this.isInitialized = true
 
     this.svgElement.addEventListener("click", (event: MouseEvent) => {
-      // unfortunately, user click can not be caught on svr group.
-      // There is a hack with pointers-event:boundin-box, but it works only in Chrome as for now
-      // So, the solution is listen for click on elements, and then get group using parentNode
-      const element = event.target as SVGElement
-      const group = element.parentNode as SVGElement
-
-      if (!group.matches(".clickable")) {
-        return
-      }
-
       let rect = this.svgElement.getBoundingClientRect() // TODO: make it a class member and update on resize
       let x = event.clientX - rect.left
       let y = event.clientY - rect.top
 
-      const graphicalObject = this.objectByElement.get(group)
-      if (graphicalObject) {
-        this.eventManager.dispatch(EventType.CLICK, { x, y, object: graphicalObject })
-      }
+      this.eventManager.dispatch(EventType.SELECTION_ENDED, { x, y })
     })
+
+    this.eventManager.on(EventType.SELECTION_PROCESSED, this.handleSelectionProcessed)
+  }
+
+  handleSelectionProcessed({ object }: SelectionProcessedEvent) {
+    const selectedElements = document.querySelectorAll(".selected")
+    for (let element of selectedElements) {
+      element.classList.remove("selected")
+    }
+    if (object) {
+      const element = this.elementByObject.get(object)
+      console.log("svg selection", object, this.elementByObject, element)
+      if (element) {
+        element.classList.add("selected")
+      }
+    }
   }
 
   destroy() {
@@ -78,8 +83,12 @@ class SvgRenderer implements IRenderer {
       }
       .clickable:hover {
         fill: ${this.settings.editor!.styles.hoverColor};
-        transition: fill 0.2s;
+        transition: fill 0.1s;
         cursor: pointer;
+      }
+      .selected {
+        fill: ${this.settings.editor!.styles.selectColor} !important;
+        transition: fill 0.1s;
       }
     `)
     style.appendChild(node)
@@ -88,7 +97,7 @@ class SvgRenderer implements IRenderer {
 
   clear() {
     this.svgElement.innerHTML = ""
-    this.objectByElement.clear()
+    this.elementByObject.clear()
   }
 
   postRender(): void {}
@@ -117,15 +126,15 @@ class SvgRenderer implements IRenderer {
     parent.appendChild(text)
   }
 
-  registerInteractionArea(graphicalObject: IGraphical, bBox: BBox, renderCallback: () => void): void {
+  renderInGroup(graphicalObject: IGraphical, renderCallback: () => void): void {
     const group = document.createElementNS(NS, "g")
-    group.setAttributeNS(null, "id", graphicalObject.id)
+    // group.setAttributeNS(null, "id", graphicalObject.id)
     group.setAttributeNS(null, "class", "clickable")
     this.svgElement.appendChild(group)
     this.openedGroup = group
     renderCallback()
     this.openedGroup = null
-    this.objectByElement.set(group, graphicalObject)
+    this.elementByObject.set(graphicalObject, group)
   }
 }
 

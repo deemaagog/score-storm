@@ -22,6 +22,7 @@ export class GraphicalTimeSignature extends BaseGraphical implements IGraphical 
   unitGlyph: Glyph
   x!: number
   y!: number
+  time!: TimeSignature
 
   static glyphMap = {
     1: TimeSig1,
@@ -37,6 +38,7 @@ export class GraphicalTimeSignature extends BaseGraphical implements IGraphical 
 
   constructor(time: TimeSignature) {
     super()
+    this.time = time
     const { count, unit } = time!
 
     this.countGlyph = GraphicalTimeSignature.glyphMap[count as keyof typeof GraphicalTimeSignature.glyphMap]

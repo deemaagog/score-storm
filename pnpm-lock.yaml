@@ -167,6 +167,22 @@ importers:
       '@score-storm/core':
         specifier: workspace:*
         version: link:../core
+    devDependencies:
+      '@score-storm/eslint-config':
+        specifier: workspace:*
+        version: link:../../tooling/eslint-config
+      '@score-storm/typescript-config':
+        specifier: workspace:*
+        version: link:../../tooling/typescript-config
+      typescript:
+        specifier: ^5.3.3
+        version: 5.3.3
+
+  packages/core:
+    dependencies:
+      mnxconverter:
+        specifier: ^1.0.1
+        version: 1.0.1
       rbush:
         specifier: ^3.0.1
         version: 3.0.1
@@ -180,22 +196,6 @@ importers:
       '@types/rbush':
         specifier: ^3.0.3
         version: 3.0.3
-      typescript:
-        specifier: ^5.3.3
-        version: 5.3.3
-
-  packages/core:
-    dependencies:
-      mnxconverter:
-        specifier: ^1.0.1
-        version: 1.0.1
-    devDependencies:
-      '@score-storm/eslint-config':
-        specifier: workspace:*
-        version: link:../../tooling/eslint-config
-      '@score-storm/typescript-config':
-        specifier: workspace:*
-        version: link:../../tooling/typescript-config
       typescript:
         specifier: ^5.3.3
         version: 5.3.3

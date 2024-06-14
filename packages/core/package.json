@@ -23,11 +23,13 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "mnxconverter": "^1.0.1"
+    "mnxconverter": "^1.0.1",
+    "rbush": "^3.0.1"
   },
   "devDependencies": {
-    "@score-storm/typescript-config": "workspace:*",
     "@score-storm/eslint-config": "workspace:*",
+    "@score-storm/typescript-config": "workspace:*",
+    "@types/rbush": "^3.0.3",
     "typescript": "^5.3.3"
   }
 }

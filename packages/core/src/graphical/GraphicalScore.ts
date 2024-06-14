@@ -1,5 +1,5 @@
 import { Settings } from "../BaseRenderer"
-import { Clef } from "../model/Measure"
+import { Clef } from "../model/Clef"
 import { Score } from "../model/Score"
 import { GraphicalMeasure } from "./GraphicalMeasure"
 import { GraphicalRow } from "./GraphicalRow"

@@ -6,7 +6,7 @@ import { IconColumnInsertLeft, IconColumnRemove } from "@tabler/icons-react"
 export const ManagementGroup: React.FC = () => {
   const { scoreStorm } = useContext(ScoreStormContext)
 
-  const [removeMeasureDisabled, setRemoveMeasureDisabled] = useState(true)
+  const [removeMeasureDisabled, setRemoveMeasureDisabled] = useState(()=> scoreStorm.getScore().globalMeasures.length === 1)
 
   const updateRemoveMeasureDisabled = () => {
     const score = scoreStorm.getScore()

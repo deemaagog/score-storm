@@ -1,5 +1,6 @@
 import { GlobalMeasure, TimeSignature } from "../model/GlobalMeasure"
-import { Clef, NoteEvent } from "../model/Measure"
+import { NoteEvent } from "../model/Measure"
+import { Clef } from "../model/Clef"
 import { GraphicalClef } from "./GraphicalClef"
 import { GraphicalNoteEvent } from "./GraphicalNoteEvent"
 import { GraphicalRestEvent } from "./GraphicalRestEvent"
