@@ -2,7 +2,7 @@ import { Settings } from "../BaseRenderer"
 import { IRenderer } from "../interfaces"
 import { NoteEvent } from "../model/Measure"
 import { BaseGraphical } from "./BaseGraphical"
-import { RestHalf, RestWhole, RestQuarter } from "./glyphs/rest"
+import { RestHalf, RestWhole, RestQuarter, RestEighth, Rest16th, Rest32nd, Rest64th } from "./glyphs/rest"
 import { BBox, Glyph, IGraphical } from "./interfaces"
 
 export class GraphicalRestEvent extends BaseGraphical implements IGraphical {
@@ -18,6 +18,10 @@ export class GraphicalRestEvent extends BaseGraphical implements IGraphical {
     whole: RestWhole,
     half: RestHalf,
     quarter: RestQuarter,
+    eighth: RestEighth,
+    "16th": Rest16th,
+    "32nd": Rest32nd,
+    "64th": Rest64th,
   }
 
   constructor(noteEvent: NoteEvent) {

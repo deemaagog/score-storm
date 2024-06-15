@@ -52,7 +52,6 @@ class SvgRenderer implements IRenderer {
     }
     if (object) {
       const element = this.elementByObject.get(object)
-      console.log("svg selection", object, this.elementByObject, element)
       if (element) {
         element.classList.add("selected")
       }

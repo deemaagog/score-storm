@@ -68,7 +68,7 @@ export class Score {
 
       for (const event of firstVoice.content) {
         if (event.type === "event") {
-          if (!["whole", "half", "quarter"].includes(event.duration!.base)) {
+          if (!["whole", "half", "quarter", "eighth", "16th", "32nd", "64th"].includes(event.duration!.base)) {
             throw new Error(`Note duration ${event.duration!.base} is not supported`)
           }
           if (event.notes && event.notes.length > 1) {
