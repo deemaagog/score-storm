@@ -110,7 +110,8 @@ class BaseRenderer {
       this.renderer.init()
     }
 
-    this.graphicalScore = new GraphicalScore(score, this.renderer.containerWidth, this.settings)
+    this.graphicalScore = new GraphicalScore(score)
+    this.graphicalScore.calculateLineBreaks(this.renderer.containerWidth, this.settings)
 
     // clear
     this.baseEditor.clear()
@@ -119,7 +120,7 @@ class BaseRenderer {
     this.renderer.preRender(this.graphicalScore.height, this.settings.fontSize)
     // loop through measures and draw
     this.renderScore()
-    // do some stuff when socre is rendered
+    // do some stuff when score is rendered
     this.renderer.postRender()
     this.baseEditor.restoreSelection()
   }
@@ -131,29 +132,38 @@ class BaseRenderer {
     for (let ri = 0; ri < this.graphicalScore.rows.length; ri++) {
       const latestRow = ri === this.graphicalScore.rows.length - 1
       const row = this.graphicalScore.rows[ri]
-      this.y = row.yPosition
 
-      for (let mi = 0; mi < row.measures.length; mi++) {
-        const latestMeasureInRow = mi === row.measures.length - 1
-        const graphicalMeasure = row.measures[mi]
-        this.renderMeasure(graphicalMeasure, latestRow, latestMeasureInRow)
+      for (let gmi = 0; gmi < row.graphicalGlobalMeasures.length; gmi++) {
+        const latestMeasureInRow = gmi === row.graphicalGlobalMeasures.length - 1
+        const graphicalGlobalMeasure = row.graphicalGlobalMeasures[gmi]
+        for (let i = 0; i < row.instrumentsPosition.length; i++) {
+          this.y = row.instrumentsPosition[i]
+
+          const graphicalMeasure = graphicalGlobalMeasure.graphicalMeasures[i]
+          this.renderMeasure(graphicalMeasure, latestRow, latestMeasureInRow, graphicalGlobalMeasure.width)
+        }
       }
       this.x = 0
     }
   }
 
-  renderMeasure(graphicalMeasure: GraphicalMeasure, latestRow: boolean, latestMeasureInRow: boolean) {
+  renderMeasure(
+    graphicalMeasure: GraphicalMeasure,
+    latestRow: boolean,
+    latestMeasureInRow: boolean,
+    measureWidth: number,
+  ) {
     // draw staff lines
 
-    this.renderStaveLines(graphicalMeasure)
+    this.renderStaveLines(measureWidth)
 
     // draw start bar line
     this.renderer.setColor(this.settings.mainColor)
     this.renderer.drawRect(this.x, this.y, this.settings.barLineThickness, this.settings.barlineHeight)
 
-    this.renderMeasureContent(graphicalMeasure)
+    this.renderMeasureContent(graphicalMeasure, measureWidth)
 
-    this.x += graphicalMeasure.width
+    this.x += measureWidth
     // draw end barline
     if (latestMeasureInRow) {
       if (latestRow) {
@@ -180,14 +190,14 @@ class BaseRenderer {
     }
   }
 
-  renderStaveLines(graphicalMeasure: GraphicalMeasure) {
+  renderStaveLines(measureWidth: number) {
     this.renderer.setColor(this.settings.staveLineColor)
     const half = Math.floor(this.settings.numberOfStaffLines / 2)
     for (let index = -half; index <= half; index++) {
       this.renderer.drawRect(
         this.x,
         this.y + this.settings.midStave + this.settings.unit * index - this.settings.staffLineThickness / 2,
-        graphicalMeasure.width,
+        measureWidth,
         this.settings.staffLineThickness,
       )
     }
@@ -201,7 +211,7 @@ class BaseRenderer {
     }
   }
 
-  renderMeasureContent(graphicalMeasure: GraphicalMeasure) {
+  renderMeasureContent(graphicalMeasure: GraphicalMeasure, measureWidth: number) {
     //  draw measure content
     // temporarily do horizontal positioning here, but ultimately this should be done in GraphicalMeasure
     let measureX = this.x
@@ -224,7 +234,7 @@ class BaseRenderer {
     }
 
     measureX += this.settings.unit * this.settings.contentMargin
-    const availableWidth = graphicalMeasure.width - (measureX - this.x)
+    const availableWidth = measureWidth - (measureX - this.x)
     for (let i = 0; i < graphicalMeasure.events.length; i++) {
       const event = graphicalMeasure.events[i]
       event.setCoordinates(
@@ -243,9 +253,9 @@ class BaseRenderer {
     // this.renderer.setColor("black")
   }
 
-  renderInteractiveObject(object: object, grahicalObject: IGraphical, bBox: BBox) {
-    this.baseEditor.registerInteractionArea(object, grahicalObject, bBox)
-    this.renderer.renderInGroup(grahicalObject, () => grahicalObject.render(this.renderer, this.settings))
+  renderInteractiveObject(object: object, graphicalObject: IGraphical, bBox: BBox) {
+    this.baseEditor.registerInteractionArea(object, graphicalObject, bBox)
+    this.renderer.renderInGroup(graphicalObject, () => graphicalObject.render(this.renderer, this.settings))
   }
 }
 

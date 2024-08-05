@@ -2,48 +2,61 @@ import { getMNXScore, getScoreFromMusicXml } from "mnxconverter"
 import { GlobalMeasure, TimeSignature } from "./GlobalMeasure"
 import { Measure, Note, NoteEvent } from "./Measure"
 import { Clef } from "./Clef"
+import { Instrument, InstrumentNames, InstrumentType } from "./Instrument"
 
 export type QuickScoreOptions = {
   numberOfMeasures?: number
   timeSignature?: TimeSignature
+  instruments?: InstrumentType[]
 }
 
 export class Score {
   static createQuickScore(options?: QuickScoreOptions): Score {
-    const defaultOptions = {
+    const defaultOptions: Required<QuickScoreOptions> = {
       numberOfMeasures: 1,
       timeSignature: {
         count: 2,
         unit: 4,
       },
+      instruments: [InstrumentType.PIANO],
     }
-    options = { ...defaultOptions, ...options }
+    const mergedOptions = { ...defaultOptions, ...options }
 
     const score = new Score()
 
-    for (let i = 0; i < options.numberOfMeasures!; i++) {
+    const measures: Measure[] = []
+
+    for (let i = 0; i < mergedOptions.numberOfMeasures!; i++) {
       const globalMeasure = new GlobalMeasure()
       const measure = new Measure()
 
       if (i === 0) {
-        globalMeasure.time = options.timeSignature
+        globalMeasure.time = mergedOptions.timeSignature
         measure.clef = new Clef("G", -2)
       }
 
-      measure.events = Array.from({ length: options.timeSignature!.count }, () => ({
+      measure.events = Array.from({ length: mergedOptions.timeSignature!.count }, () => ({
         duration: { base: "quarter" },
         rest: {},
       }))
 
       score.globalMeasures.push(globalMeasure)
-      score.measures.push(measure)
+      measures.push(measure)
     }
+
+    score.instruments = mergedOptions.instruments.map((type) => {
+      const instrument = new Instrument(InstrumentNames[type])
+      instrument.measures = measures
+      return instrument
+    })
 
     return score
   }
 
   static fromMusicXML(xml: string): Score {
     const mnxScore = getMNXScore(getScoreFromMusicXml(xml))
+
+    console.log("mnxScore", mnxScore)
     const score = new Score()
 
     for (const mnxGlobalMeasure of mnxScore.global.measures) {
@@ -54,33 +67,37 @@ export class Score {
       score.globalMeasures.push(globalMeasure)
     }
 
-    for (const mnxMeasure of mnxScore.parts[0].measures!) {
-      const measure = new Measure()
-      measure.events = []
-      // TODO: clef changes
+    for (const part of mnxScore.parts) {
+      const instrument = new Instrument({ name: part.name || "", shortName: part["short-name"] || "" })
+      for (const mnxMeasure of part.measures!) {
+        const measure = new Measure()
+        measure.events = []
+        // TODO: clef changes
 
-      if (mnxMeasure.clefs?.length && !mnxMeasure.clefs[0].position) {
-        const { sign, position } = mnxMeasure.clefs[0].clef
-        measure.clef = new Clef(sign, position)
-      }
-
-      const firstVoice = mnxMeasure.sequences[0]
-
-      for (const event of firstVoice.content) {
-        if (event.type === "event") {
-          if (!["whole", "half", "quarter", "eighth", "16th", "32nd", "64th"].includes(event.duration!.base)) {
-            throw new Error(`Note duration ${event.duration!.base} is not supported`)
-          }
-          if (event.notes && event.notes.length > 1) {
-            throw new Error(`Chords are not supported`)
-          }
-          measure.events.push(event)
-        } else {
-          throw new Error(`Event type ${event.type} is not supported`)
+        if (mnxMeasure.clefs?.length && !mnxMeasure.clefs[0].position) {
+          const { sign, position } = mnxMeasure.clefs[0].clef
+          measure.clef = new Clef(sign, position)
         }
-      }
 
-      score.measures.push(measure)
+        const firstVoice = mnxMeasure.sequences[0]
+
+        for (const event of firstVoice.content) {
+          if (event.type === "event") {
+            if (!["whole", "half", "quarter", "eighth", "16th", "32nd", "64th"].includes(event.duration!.base)) {
+              throw new Error(`Note duration ${event.duration!.base} is not supported`)
+            }
+            if (event.notes && event.notes.length > 1) {
+              throw new Error(`Chords are not supported`)
+            }
+            measure.events.push(event)
+          } else {
+            throw new Error(`Event type ${event.type} is not supported`)
+          }
+        }
+
+        instrument.measures.push(measure)
+      }
+      score.instruments.push(instrument)
     }
 
     return score
@@ -88,15 +105,15 @@ export class Score {
 
   globalMeasures: GlobalMeasure[] = []
 
-  // TODO: istruments/staves/measures
-  measures: Measure[] = []
+  // TODO: staves/measures
+  instruments: Instrument[] = []
 
   constructor() {}
 
   addMeasure() {
     const currentTimeSignature = this.getMeasureTimeSignature(this.globalMeasures.length - 1)
     if (!currentTimeSignature) {
-      throw new Error("Failed to determine time sinature")
+      throw new Error("Failed to determine time signature")
     }
     this.globalMeasures.push(new GlobalMeasure())
     // assuming only one instrument with one stave for now
@@ -105,7 +122,9 @@ export class Score {
       duration: { base: "quarter" },
       rest: {},
     }))
-    this.measures.push(measure)
+    for (const instrument of this.instruments) {
+      instrument.measures.push(measure)
+    }
     return this
   }
 
@@ -114,7 +133,9 @@ export class Score {
       throw new Error("Failed to remove measure. There should be at least one measure in music score")
     }
     this.globalMeasures.splice(index)
-    this.measures.splice(index)
+    for (const instrument of this.instruments) {
+      instrument.measures.splice(index)
+    }
     return this
   }
 
@@ -129,7 +150,7 @@ export class Score {
   }
 
   setClef() {
-    const firstMeasure = this.measures[0]
+    const firstMeasure = this.instruments[0].measures[0]
     if (firstMeasure.clef?.sign === "G") {
       firstMeasure.clef!.changeType("F", 2)
     } else {
