@@ -2,15 +2,21 @@ import "@mantine/core/styles.css"
 import "./App.css"
 import { Affix, AppShell, Drawer, Stack, Text, Title, Tooltip, UnstyledButton, rem } from "@mantine/core"
 import { useDisclosure } from "@mantine/hooks"
-import { IconActivityHeartbeat, IconArticle, IconMathGreater, IconPlaylist } from "@tabler/icons-react"
+import { IconActivityHeartbeat, IconArticle, IconFile, IconMathGreater, IconPlaylist } from "@tabler/icons-react"
 import classNames from "classnames"
 import { useState } from "react"
 import { Measure } from "./sidebar/measure"
 import { Note } from "./sidebar/note"
+import { File } from "./sidebar/file"
 import styles from "./App.module.css"
 import Container from "./Container"
 
 const actions = [
+  {
+    label: "File",
+    icon: IconFile,
+    content: <File />,
+  },
   {
     label: "Measure",
     icon: IconArticle,

@@ -1,6 +1,8 @@
-import { GraphicalMeasure } from "./GraphicalMeasure"
+import { GraphicalGlobalMeasure } from './GraphicalGlobalMeasure';
+
+export type InstrumentPosition = number
 
 export class GraphicalRow {
-  yPosition!: number
-  measures!: GraphicalMeasure[]
+  graphicalGlobalMeasures!: GraphicalGlobalMeasure[]
+  instrumentsPosition!: InstrumentPosition[]
 }
