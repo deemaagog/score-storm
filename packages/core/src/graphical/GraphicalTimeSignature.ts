@@ -62,7 +62,7 @@ export class GraphicalTimeSignature extends BaseGraphical implements IGraphical 
     this.width = Math.max(countGlyphWidth, unitGlyphWidth)
   }
 
-  setCoordinates(x: number, y: number): void {
+  setPosition(x: number, y: number): void {
     this.x = x
     this.y = y
   }

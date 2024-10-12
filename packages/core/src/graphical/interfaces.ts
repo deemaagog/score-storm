@@ -29,7 +29,7 @@ export interface IGraphical {
   x: number
   y: number
 
-  setCoordinates(x: number, y: number, settings: Settings): void
+  setPosition(x: number, y: number, settings: Settings): void
 
   render(renderer: IRenderer, settings: Settings): void
 

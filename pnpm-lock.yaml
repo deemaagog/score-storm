@@ -180,6 +180,9 @@ importers:
 
   packages/core:
     dependencies:
+      fraction.js:
+        specifier: 4.3.7
+        version: 4.3.7
       mnxconverter:
         specifier: ^1.0.1
         version: 1.0.1

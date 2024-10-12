@@ -21,16 +21,14 @@ export class GraphicalScore {
 
   constructor(score: Score) {
     this.score = score
-
-    for (let gm = 0; gm < score.globalMeasures.length; gm++) {
-      const globalMeasure = score.globalMeasures[gm]
+    for (let gm = 0; gm < this.score.globalMeasures.length; gm++) {
+      const globalMeasure = this.score.globalMeasures[gm]
       const graphicalGlobalMeasure = new GraphicalGlobalMeasure(globalMeasure)
-      for (let i = 0; i < score.instruments.length; i++) {
-        const instrument = score.instruments[i]
+      for (let i = 0; i < this.score.instruments.length; i++) {
+        const instrument = this.score.instruments[i]
         const measure = instrument.measures[gm]
         graphicalGlobalMeasure.graphicalMeasures.push(new GraphicalMeasure(measure))
       }
-      graphicalGlobalMeasure.calculateMinContentWidth()
       this.graphicalGlobalMeasures.push(graphicalGlobalMeasure)
     }
   }
@@ -38,11 +36,13 @@ export class GraphicalScore {
   calculateLineBreaks(containerWidth: number, settings: Settings) {
     // calculate line breaks
     const rows: Omit<GraphicalRow, "instrumentsPosition">[] = []
+    const instrumentsCurrentClefs: GraphicalClef[] = []
+    let currentTimeSignature: GraphicalTimeSignature
 
     let currentRowGraphicalGlobalMeasures: GraphicalGlobalMeasure[] = []
     let currentRowWidth = 0
 
-    for (let i = 0; i < this.graphicalGlobalMeasures.length; i++) {
+    for (let ggm = 0; ggm < this.graphicalGlobalMeasures.length; ggm++) {
       if (currentRowWidth >= containerWidth) {
         rows.push({
           graphicalGlobalMeasures: currentRowGraphicalGlobalMeasures,
@@ -52,7 +52,43 @@ export class GraphicalScore {
         currentRowGraphicalGlobalMeasures = []
       }
 
-      const graphicalGlobalMeasure = this.graphicalGlobalMeasures[i]
+      const graphicalGlobalMeasure = this.graphicalGlobalMeasures[ggm]
+      if (graphicalGlobalMeasure.globalMeasure.time) {
+        currentTimeSignature = new GraphicalTimeSignature(graphicalGlobalMeasure.globalMeasure.time)
+      }
+      // TODO: get time signature from GlobalMeasure  gm.getCurrentTimeSignature()
+      graphicalGlobalMeasure.calculateMinContentWidth(currentTimeSignature!.time)
+
+      // calculate measure attributes relative positions TODO: move to GraphicalGlobalMeasure
+      let timeSignatureRelativeWidth = 0,
+        clefRelativeWidth = 0
+      for (let i = 0; i < this.score.instruments.length; i++) {
+        const graphicalMeasure = graphicalGlobalMeasure.graphicalMeasures[i]
+        const measure = graphicalMeasure.measure
+        if (measure.clef) {
+          instrumentsCurrentClefs[i] = new GraphicalClef(measure.clef)
+        }
+
+        // first row
+        if (!currentRowGraphicalGlobalMeasures.length && ggm === 0) {
+          graphicalMeasure.time = currentTimeSignature! // we are certain that it's defined
+          if (graphicalMeasure.time.width > timeSignatureRelativeWidth) {
+            timeSignatureRelativeWidth = graphicalMeasure.time.width
+          }
+        }
+
+        // first measure in row
+        if (!currentRowGraphicalGlobalMeasures.length) {
+          graphicalMeasure.clef = instrumentsCurrentClefs[i]
+          if (graphicalMeasure.clef.width > clefRelativeWidth) {
+            clefRelativeWidth = graphicalMeasure.clef.width
+          }
+        }
+      }
+
+      graphicalGlobalMeasure.timeSignatureRelativeWidth = timeSignatureRelativeWidth
+      graphicalGlobalMeasure.clefRelativeWidth = clefRelativeWidth
+
       // const minContentWidth = graphicalGlobalMeasure.minContentWidth
       const minContentWidth = containerWidth / 2 // temp, just for demo
       // TODO: set graphical measure attributes, distribute available space , set actual width to graphicalGlobalMeasures
@@ -75,8 +111,6 @@ export class GraphicalScore {
     this.height = 0
     this.rows = []
     // calculate instruments Y position and total height
-    const instrumentsCurrentClefs: GraphicalClef[] = []
-    let currentTimeSignature: GraphicalTimeSignature
 
     let currentYPosition = 0
 
@@ -91,24 +125,6 @@ export class GraphicalScore {
           const graphicalGlobalMeasure = row.graphicalGlobalMeasures[gmi]
 
           const graphicalMeasure = graphicalGlobalMeasure.graphicalMeasures[i]
-          const measure = graphicalMeasure.measure
-          if (measure.clef) {
-            instrumentsCurrentClefs[i] = new GraphicalClef(measure.clef)
-          }
-
-          if (graphicalGlobalMeasure.globalMeasure.time) {
-            currentTimeSignature = new GraphicalTimeSignature(graphicalGlobalMeasure.globalMeasure.time)
-          }
-
-          // first row
-          if (ri === 0 && gmi === 0) {
-            graphicalMeasure.time = currentTimeSignature! // we are certain that it's defined
-          }
-
-          // first measure in row
-          if (gmi === 0) {
-            graphicalMeasure.clef = instrumentsCurrentClefs[i]
-          }
 
           if (ri === 0 && i === 0) {
             if (graphicalMeasure.clef) {
@@ -128,7 +144,7 @@ export class GraphicalScore {
 
         currentYPosition += settings.barlineHeight
         this.height += currentYTopShift + settings.barlineHeight + currentYBottomShift
-        
+
         if (i < this.score.instruments.length - 1) {
           currentYPosition += settings.unit * SPACE_BETWEEN_INSTRUMENTS_ROWS_COEF
           this.height += settings.unit * SPACE_BETWEEN_INSTRUMENTS_ROWS_COEF

@@ -1,6 +1,6 @@
 import { Settings } from "../BaseRenderer"
 import { IRenderer } from "../interfaces"
-import { NoteEvent } from "../model/Measure"
+import { Beat } from "../model/Beat"
 import { BaseGraphical } from "./BaseGraphical"
 import { RestHalf, RestWhole, RestQuarter, RestEighth, Rest16th, Rest32nd, Rest64th } from "./glyphs/rest"
 import { BBox, Glyph, IGraphical } from "./interfaces"
@@ -12,7 +12,7 @@ export class GraphicalRestEvent extends BaseGraphical implements IGraphical {
   verticalShift: number // value in stave spaces
   x!: number
   y!: number
-  noteEvent: NoteEvent
+  noteEvent: Beat
 
   static glyphMap = {
     whole: RestWhole,
@@ -24,7 +24,7 @@ export class GraphicalRestEvent extends BaseGraphical implements IGraphical {
     "64th": Rest64th,
   }
 
-  constructor(noteEvent: NoteEvent) {
+  constructor(noteEvent: Beat) {
     super()
     this.noteEvent = noteEvent
     const duration = noteEvent.duration?.base
@@ -47,7 +47,7 @@ export class GraphicalRestEvent extends BaseGraphical implements IGraphical {
     this.width = glyphWidth
   }
 
-  setCoordinates(x: number, y: number, settings: Settings): void {
+  setPosition(x: number, y: number, settings: Settings): void {
     this.x = x
     this.y = y + this.verticalShift * settings.unit
   }
@@ -67,5 +67,13 @@ export class GraphicalRestEvent extends BaseGraphical implements IGraphical {
       this.x - this.restGlyph.bBoxes.bBoxSW[0] * settings.unit,
       this.y,
     )
+  }
+
+  getBeatOffsetLeft(): number {
+    return 0
+  }
+
+  getBeatOffsetRight(): number {
+    return this.width
   }
 }

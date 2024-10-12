@@ -23,6 +23,7 @@
     "lint": "eslint ."
   },
   "dependencies": {
+    "fraction.js": "4.3.7",
     "mnxconverter": "^1.0.1",
     "rbush": "^3.0.1"
   },
