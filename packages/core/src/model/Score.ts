@@ -1,6 +1,7 @@
 import { getMNXScore, getScoreFromMusicXml } from "mnxconverter"
 import { GlobalMeasure, TimeSignature } from "./GlobalMeasure"
-import { Measure, Note, NoteEvent } from "./Measure"
+import { Measure } from "./Measure"
+import { Beat, Note } from "./Beat"
 import { Clef } from "./Clef"
 import { Instrument, InstrumentNames, InstrumentType } from "./Instrument"
 
@@ -35,10 +36,14 @@ export class Score {
         measure.clef = new Clef("G", -2)
       }
 
-      measure.events = Array.from({ length: mergedOptions.timeSignature!.count }, () => ({
-        duration: { base: "quarter" },
-        rest: {},
-      }))
+      measure.events = Array.from(
+        { length: mergedOptions.timeSignature!.count },
+        () =>
+          new Beat({
+            duration: { base: "quarter" },
+            rest: {},
+          }),
+      )
 
       score.globalMeasures.push(globalMeasure)
       measures.push(measure)
@@ -83,13 +88,7 @@ export class Score {
 
         for (const event of firstVoice.content) {
           if (event.type === "event") {
-            if (!["whole", "half", "quarter", "eighth", "16th", "32nd", "64th"].includes(event.duration!.base)) {
-              throw new Error(`Note duration ${event.duration!.base} is not supported`)
-            }
-            if (event.notes && event.notes.length > 1) {
-              throw new Error(`Chords are not supported`)
-            }
-            measure.events.push(event)
+            measure.events.push(new Beat(event))
           } else {
             throw new Error(`Event type ${event.type} is not supported`)
           }
@@ -118,10 +117,14 @@ export class Score {
     this.globalMeasures.push(new GlobalMeasure())
     // assuming only one instrument with one stave for now
     const measure = new Measure()
-    measure.events = Array.from({ length: currentTimeSignature.count }, () => ({
-      duration: { base: "quarter" },
-      rest: {},
-    }))
+    measure.events = Array.from(
+      { length: currentTimeSignature.count },
+      () =>
+        new Beat({
+          duration: { base: "quarter" },
+          rest: {},
+        }),
+    )
     for (const instrument of this.instruments) {
       instrument.measures.push(measure)
     }
@@ -159,7 +162,7 @@ export class Score {
   }
 
   // if rest, make it note and vice versa
-  swithNoteType(noteEvent: NoteEvent) {
+  swithNoteType(noteEvent: Beat) {
     if (noteEvent.rest) {
       noteEvent.rest = undefined
       noteEvent.notes = [

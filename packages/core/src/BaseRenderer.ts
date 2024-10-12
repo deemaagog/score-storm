@@ -6,6 +6,7 @@ import { GraphicalMeasure } from "./graphical/GraphicalMeasure"
 import { BBox, IGraphical } from "./graphical/interfaces"
 import { EventManager } from "./EventManager"
 import { BaseEditor } from "./BaseEditor"
+import { GraphicalGlobalMeasure } from "./graphical/GraphicalGlobalMeasure"
 
 export type Settings = {
   fontSize: number
@@ -136,11 +137,12 @@ class BaseRenderer {
       for (let gmi = 0; gmi < row.graphicalGlobalMeasures.length; gmi++) {
         const latestMeasureInRow = gmi === row.graphicalGlobalMeasures.length - 1
         const graphicalGlobalMeasure = row.graphicalGlobalMeasures[gmi]
+
         for (let i = 0; i < row.instrumentsPosition.length; i++) {
           this.y = row.instrumentsPosition[i]
 
           const graphicalMeasure = graphicalGlobalMeasure.graphicalMeasures[i]
-          this.renderMeasure(graphicalMeasure, latestRow, latestMeasureInRow, graphicalGlobalMeasure.width)
+          this.renderMeasure(graphicalMeasure, latestRow, latestMeasureInRow, graphicalGlobalMeasure)
         }
         this.x += graphicalGlobalMeasure.width // TODO: make X position a GraphicalGlobalMeasure property
       }
@@ -164,37 +166,36 @@ class BaseRenderer {
     graphicalMeasure: GraphicalMeasure,
     latestRow: boolean,
     latestMeasureInRow: boolean,
-    measureWidth: number,
+    graphicalGlobalMeasure: GraphicalGlobalMeasure,
   ) {
     // draw staff lines
 
-    this.renderStaveLines(measureWidth)
+    this.renderStaveLines(graphicalGlobalMeasure.width)
 
-
-    this.renderMeasureContent(graphicalMeasure, measureWidth)
+    this.renderMeasureContent(graphicalMeasure, graphicalGlobalMeasure)
 
     // draw end barline
-      if (latestRow && latestMeasureInRow) {
-        this.renderer.drawRect(
-          this.x + measureWidth - this.settings.unit,
-          this.y,
-          this.settings.barLineThickness,
-          this.settings.barlineHeight,
-        )
-        this.renderer.drawRect(
-          this.x + measureWidth - this.settings.barLineThickness * 3.8,
-          this.y,
-          this.settings.barLineThickness * 3.8,
-          this.settings.barlineHeight,
-        )
-      } else {
-        this.renderer.drawRect(
-          this.x + measureWidth - this.settings.barLineThickness,
-          this.y,
-          this.settings.barLineThickness,
-          this.settings.barlineHeight,
-        )
-      }
+    if (latestRow && latestMeasureInRow) {
+      this.renderer.drawRect(
+        this.x + graphicalGlobalMeasure.width - this.settings.unit,
+        this.y,
+        this.settings.barLineThickness,
+        this.settings.barlineHeight,
+      )
+      this.renderer.drawRect(
+        this.x + graphicalGlobalMeasure.width - this.settings.barLineThickness * 3.8,
+        this.y,
+        this.settings.barLineThickness * 3.8,
+        this.settings.barlineHeight,
+      )
+    } else {
+      this.renderer.drawRect(
+        this.x + graphicalGlobalMeasure.width - this.settings.barLineThickness,
+        this.y,
+        this.settings.barLineThickness,
+        this.settings.barlineHeight,
+      )
+    }
   }
 
   renderStaveLines(measureWidth: number) {
@@ -219,34 +220,35 @@ class BaseRenderer {
     }
   }
 
-  renderMeasureContent(graphicalMeasure: GraphicalMeasure, measureWidth: number) {
+  renderMeasureContent(graphicalMeasure: GraphicalMeasure, graphicalGlobalMeasure: GraphicalGlobalMeasure) {
     //  draw measure content
     // temporarily do horizontal positioning here, but ultimately this should be done in GraphicalMeasure
     let measureX = this.x
     if (graphicalMeasure.clef) {
       measureX += this.settings.unit * this.settings.clefMargin
-      graphicalMeasure.clef.setCoordinates(measureX, this.y + this.settings.midStave, this.settings)
+      graphicalMeasure.clef.setPosition(measureX, this.y + this.settings.midStave, this.settings)
       const bBox = graphicalMeasure.clef.getBBox(this.settings)
       this.renderInteractiveObject(graphicalMeasure.clef.clef, graphicalMeasure.clef, bBox)
       this.renderBBox(bBox)
-      measureX += this.settings.unit * graphicalMeasure.clef.width
+      measureX += this.settings.unit * graphicalGlobalMeasure.clefRelativeWidth
     }
 
     if (graphicalMeasure.time) {
       measureX += this.settings.unit * this.settings.timeSignatureMargin
-      graphicalMeasure.time.setCoordinates(measureX, this.y + this.settings.midStave)
+      graphicalMeasure.time.setPosition(measureX, this.y + this.settings.midStave)
       const bBox = graphicalMeasure.time.getBBox(this.settings)
       this.renderInteractiveObject(graphicalMeasure.time.time, graphicalMeasure.time, bBox)
       this.renderBBox(bBox)
-      measureX += this.settings.unit * graphicalMeasure.time.width
+      measureX += this.settings.unit * graphicalGlobalMeasure.timeSignatureRelativeWidth
     }
 
     measureX += this.settings.unit * this.settings.contentMargin
-    const availableWidth = measureWidth - (measureX - this.x)
+    const availableWidth = graphicalGlobalMeasure.width - (measureX - this.x)
     for (let i = 0; i < graphicalMeasure.events.length; i++) {
       const event = graphicalMeasure.events[i]
-      event.setCoordinates(
-        measureX + (availableWidth * i) / graphicalMeasure.events.length,
+      const graphicalGlobalBeat = graphicalGlobalMeasure.graphicalGlobalBeatByNote.get(event)!
+      event.setPosition(
+        measureX + availableWidth * graphicalGlobalBeat.fraction,
         this.y + this.settings.midStave,
         this.settings,
       )

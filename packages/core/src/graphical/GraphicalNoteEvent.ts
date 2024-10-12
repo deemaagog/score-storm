@@ -1,14 +1,18 @@
 import { Settings } from "../BaseRenderer"
 import { IRenderer } from "../interfaces"
-import { Note, NoteEvent } from "../model/Measure"
+import { Note, Beat } from "../model/Beat"
 import { BaseGraphical } from "./BaseGraphical"
 import { DoubleFlat, DoubleSharp, Flat, Natural, Sharp } from "./glyphs/accidental"
 import { NoteheadHalf, NoteheadQuarter, NoteheadWhole } from "./glyphs/notehead"
 import { Flag8thUp, Flag16thUp, Flag32ndUp, Flag64thUp } from "./glyphs/flag"
 import { BBox, Glyph, IGraphical } from "./interfaces"
 
+const STEM_THICKNESS = 0.12
+const STEM_HEIGHT = 3.5
+const STEM_HEIGHT_CUT = 0.17
+
 export class GraphicalNoteEvent extends BaseGraphical implements IGraphical {
-  noteEvent: NoteEvent
+  noteEvent: Beat
   height!: number
   width!: number
   noteheadGlyph: Glyph
@@ -45,7 +49,7 @@ export class GraphicalNoteEvent extends BaseGraphical implements IGraphical {
     [2]: DoubleSharp,
   }
 
-  constructor(noteEvent: NoteEvent) {
+  constructor(noteEvent: Beat) {
     super()
     this.noteEvent = noteEvent
     const duration = noteEvent.duration?.base
@@ -92,7 +96,7 @@ export class GraphicalNoteEvent extends BaseGraphical implements IGraphical {
     }
   }
 
-  setCoordinates(x: number, y: number, settings: Settings): void {
+  setPosition(x: number, y: number, settings: Settings): void {
     this.x = x
     this.y = y + this.verticalShift * settings.unit
   }
@@ -127,9 +131,9 @@ export class GraphicalNoteEvent extends BaseGraphical implements IGraphical {
     )
 
     if (this.drawStem) {
-      const stemThickness = 0.12 * settings.unit
-      const stemHeight = 3.5 * settings.unit
-      const stemHeightCut = 0.17 * settings.unit
+      const stemThickness = STEM_THICKNESS * settings.unit
+      const stemHeight = STEM_HEIGHT * settings.unit
+      const stemHeightCut = STEM_HEIGHT_CUT * settings.unit
 
       renderer.drawRect(
         this.x + this.width * settings.unit - stemThickness + xShift,
@@ -150,5 +154,26 @@ export class GraphicalNoteEvent extends BaseGraphical implements IGraphical {
         )
       }
     }
+  }
+
+  getBeatOffsetLeft(): number {
+    let offsetLeft = 0
+    if (this.accidentalGlyph) {
+      offsetLeft += this.accidentalWidth! + 0.5
+    }
+    return offsetLeft
+  }
+
+  getBeatOffsetRight(): number {
+    let offsetRight = this.width
+
+    if (this.flagGlyph) {
+      const stemThickness = STEM_THICKNESS
+      offsetRight = offsetRight - stemThickness
+
+      const flagWidth = this.flagGlyph.bBoxes.bBoxNE[0] - this.flagGlyph.bBoxes.bBoxSW[0]
+      offsetRight += flagWidth
+    }
+    return offsetRight
   }
 }

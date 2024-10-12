@@ -42,7 +42,7 @@ export class GraphicalClef extends BaseGraphical implements IGraphical {
     this.width = clefGlyphWidth
   }
 
-  setCoordinates(x: number, y: number, settings: Settings): void {
+  setPosition(x: number, y: number, settings: Settings): void {
     this.x = x
     this.y = y + this.verticalShift * settings.unit
   }
