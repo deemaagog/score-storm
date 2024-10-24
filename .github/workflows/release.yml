@@ -1,7 +1,6 @@
 name: Release @latest
 
 on:
-  #   pull_request: #For test purposes
   workflow_dispatch:
     inputs:
       version:
@@ -22,7 +21,8 @@ on:
       dryrun:
         type: boolean
         description: Dry-Run
-
+permissions:
+  contents: write
 jobs:
   # TODO: Test before releasing to ensure we don't release a broken version
 
@@ -38,9 +38,6 @@ jobs:
         with:
           token: ${{  github.token }}
           fetch-depth: 0
-          # For PRs, we need to checkout the branch that the PR is targeting
-        #   ref: ${{ github.event.pull_request.head.ref }}
-        #   clean: true
 
       - name: Use Node.js 18
         uses: actions/setup-node@v4
@@ -91,11 +88,11 @@ jobs:
           then
               echo "LERNA_VERSION_TYPE=🧪 Dry-Run Custom" >> $GITHUB_ENV
               echo "LERNA_VERSION_QUERY=lerna version ${{ github.event.inputs.custom_version }} --force-publish  --yes --dry-run" >> $GITHUB_ENV
-          elif ${{inputs.dryrun != true && inputs.version == 'custom' && inputs.custom_version != ''}}
+          elif ${{inputs.dryrun != true  && inputs.version != 'custom'}}
           then
               echo "LERNA_VERSION_TYPE=🚀 Prod Version Auto" >> $GITHUB_ENV
               echo "LERNA_VERSION_QUERY=lerna version ${{ github.event.inputs.version }} --force-publish --yes" >> $GITHUB_ENV
-          elif ${{inputs.dryrun != true && inputs.version != 'custom'}}
+          elif ${{inputs.dryrun != true && inputs.version == 'custom' && inputs.custom_version != ''}}
           then
               echo "LERNA_VERSION_TYPE=🚀 Prod Version Custom" >> $GITHUB_ENV
               echo "LERNA_VERSION_QUERY=lerna version ${{ github.event.inputs.custom_version }} --force-publish  --yes" >> $GITHUB_ENV
