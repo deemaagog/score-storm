@@ -1,0 +1,118 @@
+name: Release @latest
+
+on:
+  #   pull_request: #For test purposes
+  workflow_dispatch:
+    inputs:
+      version:
+        description: The version to bump (if you choose custom, please include it under custom version)
+        required: true
+        default: "patch"
+        type: choice
+        options:
+          - "patch"
+          - "minor"
+          - "major"
+          - "custom"
+      custom_version:
+        description: The custom version to bump to (only for "custom" type)
+        required: false
+        type: string
+        default: ""
+      dryrun:
+        type: boolean
+        description: Dry-Run
+
+jobs:
+  # TODO: Test before releasing to ensure we don't release a broken version
+
+  release:
+    name: "Bump Score-storm: ${{ inputs.version }} version (${{ inputs.custom_version || 'n/a' }} custom version)"
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    # needs: [build_and_test]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{  github.token }}
+          fetch-depth: 0
+          # For PRs, we need to checkout the branch that the PR is targeting
+        #   ref: ${{ github.event.pull_request.head.ref }}
+        #   clean: true
+
+      - name: Use Node.js 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+        #   registry-url: 'https://registry.npmjs.org/'
+        #   scope: "@lerna-lite"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 8
+          run_install: false
+
+      - name: Get pnpm store directory
+        run: echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Run pnpm install dependencies
+        run: pnpm install
+
+      - name: Run all workspace TSC builds
+        run: pnpm run build
+
+      - name: Setup git user and npm
+        run: |
+          git config --global user.name "Dzmitry Dzehtsiarou"
+          git config --global user.email "deemaagog@gmail.com"
+
+          echo "access=public" > .npmrc
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" >> .npmrc
+
+      - name: Lerna Version (build query)
+        shell: bash
+        run: |
+          if ${{inputs.dryrun == true && inputs.version != 'custom'}}
+          then
+              echo "LERNA_VERSION_TYPE=🧪 Dry-Run Auto" >> $GITHUB_ENV
+              echo "LERNA_VERSION_QUERY=lerna version ${{ github.event.inputs.version }} --force-publish --yes  --dry-run" >> $GITHUB_ENV
+          elif ${{inputs.dryrun == true && inputs.version == 'custom' && inputs.custom_version != ''}}
+          then
+              echo "LERNA_VERSION_TYPE=🧪 Dry-Run Custom" >> $GITHUB_ENV
+              echo "LERNA_VERSION_QUERY=lerna version ${{ github.event.inputs.custom_version }} --force-publish  --yes --dry-run" >> $GITHUB_ENV
+          elif ${{inputs.dryrun != true && inputs.version == 'custom' && inputs.custom_version != ''}}
+          then
+              echo "LERNA_VERSION_TYPE=🚀 Prod Version Auto" >> $GITHUB_ENV
+              echo "LERNA_VERSION_QUERY=lerna version ${{ github.event.inputs.version }} --force-publish --yes" >> $GITHUB_ENV
+          elif ${{inputs.dryrun != true && inputs.version != 'custom'}}
+          then
+              echo "LERNA_VERSION_TYPE=🚀 Prod Version Custom" >> $GITHUB_ENV
+              echo "LERNA_VERSION_QUERY=lerna version ${{ github.event.inputs.custom_version }} --force-publish  --yes" >> $GITHUB_ENV
+          fi
+
+      - name: Bump version to custom version
+        run: pnpm exec ${{ env.LERNA_VERSION_QUERY }}
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GIT_USER: "deemaagog@gmail.com:${{ github.token }}"
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Publish packages
+        if: ${{ inputs.dryrun != true }}
+        # run: pnpm publish -r
+        run: pnpm exec lerna publish from-package --yes
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GIT_USER: "deemaagog@gmail.com:${{ github.token }}"
+          GH_TOKEN: ${{ github.token }}

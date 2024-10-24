@@ -1,0 +1,21 @@
+{
+  "$schema": "node_modules/@lerna-lite/cli/schemas/lerna-schema.json",
+  "version": "0.0.1",
+  "packages": ["packages/*", "full-featured-editor"],
+  "loglevel": "verbose",
+  "npmClient": "pnpm",
+  "command": {
+    "publish": {
+      "cleanupTempFiles": true,
+      "removePackageFields": ["devDependencies", "scripts"]
+    },
+    "version": {
+      "allowPeerDependenciesUpdate": false,
+      "conventionalCommits": true,
+      "createRelease": "github",
+      "changelogIncludeCommitsClientLogin": " - by @%l",
+      "message": "chore(release): publish new version %s",
+      "syncWorkspaceLock": true
+    }
+  }
+}
