@@ -2,6 +2,10 @@
 
 A javascript package for rendering and editing music scores
 
+[![NPM version](https://img.shields.io/npm/v/@score-storm/core.svg)](https://www.npmjs.com/package/@score-storm/core)
+[![Downloads](https://img.shields.io/npm/dm/@score-storm/core.svg)](https://www.npmjs.com/package/@score-storm/core)
+[![Build Status](https://github.com/deemaagog/score-storm/actions/workflows/e2e.yml/badge.svg?branch=main)](https://github.com/deemaagog/score-storm/actions?workflow=e2e)
+
 ## Motivation
 
 Create a Music sheet renderer with first class support of editing
