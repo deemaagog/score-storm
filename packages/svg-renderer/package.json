@@ -1,6 +1,6 @@
 {
   "name": "@score-storm/svg-renderer",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "",
   "main": "./dist/index.js",
   "scripts": {
@@ -14,8 +14,8 @@
     "@score-storm/core": "workspace:*"
   },
   "devDependencies": {
-    "@score-storm/typescript-config": "workspace:*",
     "@score-storm/eslint-config": "workspace:*",
+    "@score-storm/typescript-config": "workspace:*",
     "typescript": "^5.3.3"
   }
 }

@@ -1,13 +1,19 @@
 {
   "$schema": "node_modules/@lerna-lite/cli/schemas/lerna-schema.json",
-  "version": "0.0.1",
-  "packages": ["packages/*", "full-featured-editor"],
+  "version": "0.1.0",
+  "packages": [
+    "packages/*",
+    "full-featured-editor"
+  ],
   "loglevel": "verbose",
   "npmClient": "pnpm",
   "command": {
     "publish": {
       "cleanupTempFiles": true,
-      "removePackageFields": ["devDependencies", "scripts"]
+      "removePackageFields": [
+        "devDependencies",
+        "scripts"
+      ]
     },
     "version": {
       "allowPeerDependenciesUpdate": false,
