@@ -1,7 +1,7 @@
 {
   "name": "@score-storm/svg-renderer",
   "version": "0.1.1",
-  "description": "",
+  "description": "SVG renderer, meant to be used for Web apps",
   "main": "./dist/index.js",
   "scripts": {
     "build": "tsc --build",
