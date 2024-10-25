@@ -23,6 +23,7 @@ on:
         description: Dry-Run
 permissions:
   contents: write
+  id-token: write
 jobs:
   # TODO: Test before releasing to ensure we don't release a broken version
 
