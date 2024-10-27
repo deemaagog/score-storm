@@ -3,7 +3,7 @@ import ScoreStorm from "@score-storm/core"
 import React, { PropsWithChildren } from "react"
 import { createContext } from "react"
 import { UseSSParams, useSS } from "./hooks"
-import { InstrumentType } from '@score-storm/core/dist/model/Instrument'
+import { InstrumentType } from '@score-storm/core'
 
 type ScoreStormContextValue = { scoreStorm: ScoreStorm }
 export const ScoreStormContext = createContext<ScoreStormContextValue>({} as ScoreStormContextValue)
