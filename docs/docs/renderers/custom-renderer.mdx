@@ -8,9 +8,38 @@ Feel free to create your own renderer.
 Renderer has to implement common interface
 
 import CodeBlock from "@theme/CodeBlock"
-import Renderer from "!!raw-loader!@score-storm/core/dist/interfaces.d.ts"
 
-<CodeBlock language="jsx">{Renderer}</CodeBlock>
+<CodeBlock language="ts">
+{`
+export interface IRenderer {
+
+containerWidth: number
+isInitialized: boolean
+
+settings: Settings
+eventManager: EventManager
+
+init(): void
+
+preRender(height: number, fontSize: number): void
+
+postRender(): void
+
+clear(): void
+
+destroy(): void
+
+setColor(color: string): void
+
+drawRect(x: number, y: number, width: number, height: number): void
+
+drawGlyph(glyph: string | number, x: number, y: number): void
+
+renderInGroup(object: object, renderCallback: () => void): void
+}
+`}
+
+</CodeBlock>
 
 Example:
 

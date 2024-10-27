@@ -2,7 +2,14 @@
   "name": "@score-storm/core",
   "version": "0.1.1",
   "description": "A javascript package for rendering and editing music scores",
-  "main": "./dist/index.js",
+  "main": "./dist/esm/index.js",
+  "types": "./dist/esm/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
+    }
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/deemaagog/score-storm.git"
@@ -19,7 +26,7 @@
   },
   "homepage": "http://score-storm.netlify.com",
   "scripts": {
-    "build": "tsc --build",
+    "build": "tsc --build tsconfig.esm.json tsconfig.cjs.json",
     "lint": "eslint ."
   },
   "dependencies": {
