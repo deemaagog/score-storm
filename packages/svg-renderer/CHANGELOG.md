@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.2.1](https://github.com/deemaagog/score-storm/compare/v0.1.1...v0.2.1) (2024-10-29)
+
+**Note:** Version bump only for package @score-storm/svg-renderer
+
 ## [0.1.1](https://github.com/deemaagog/score-storm/compare/v0.1.0...v0.1.1) (2024-10-24)
 
 **Note:** Version bump only for package @score-storm/svg-renderer
