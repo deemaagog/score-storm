@@ -15,8 +15,8 @@
     "lint": "eslint ."
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "deemaagog",
+  "license": "MIT",
   "dependencies": {
     "@napi-rs/canvas": "^0.1.59",
     "@score-storm/core": "workspace:*"
@@ -28,5 +28,9 @@
   },
   "publishConfig": {
     "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/deemaagog/score-storm.git"
   }
 }
