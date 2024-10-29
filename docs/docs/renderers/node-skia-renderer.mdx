@@ -1,0 +1,40 @@
+---
+sidebar_position: 5
+---
+
+# Node Skia Renderer
+
+While it's possible to use web renderers such as canvas-renderer in Node.js using JS-DOM
+or similar techniques, Score Storm offers a dedicated renderer optimized for the Node.js environment. It's powered by the amazing, high-performance SKIA graphics library.
+
+It leverages [@napi-rs/canvas](https://github.com/Brooooooklyn/canvas) under the hood. Read more on it's requirements [here](https://github.com/Brooooooklyn/canvas?tab=readme-ov-file#system-requirement).
+
+It can be used in Node.js code as follows:
+
+```ts
+import ScoreStorm, { Score } from "@score-storm/core"
+import NodeSkiaRenderer, { GlobalFonts } from "@score-storm/node-skia-renderer"
+import { writeFileSync } from "fs"
+import { join } from "path"
+
+// Register font
+GlobalFonts.registerFromPath(join(__dirname, "..", "fonts", "Bravura.woff2"), "Bravura")
+
+// Create a new instance of ScoreStorm
+const scoreStorm = new ScoreStorm()
+
+// Create a dead simple score with 2 measures of 4/4
+const score = Score.createQuickScore({ numberOfMeasures: 2, timeSignature: { count: 4, unit: 4 } })
+ss.setScore(score)
+
+// Create a new instance of NodeSkiaRenderer with a width of 600
+const renderer = new NodeSkiaRenderer(600)
+ss.setRenderer(renderer)
+
+// finally render the score
+ss.render()
+
+// get the buffer and save it to a file
+const buffer = renderer.canvas.toBuffer("image/png")
+writeFileSync(join(__dirname, "score-storm-test.png"), buffer)
+```
