@@ -1,0 +1,32 @@
+{
+  "name": "@score-storm/node-skia-renderer",
+  "version": "0.1.1",
+  "description": "A Score-Storm renderer for Node.js, powered by SKIA",
+  "main": "./dist/esm/index.js",
+  "types": "./dist/esm/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc --build tsconfig.esm.json tsconfig.cjs.json",
+    "lint": "eslint ."
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@napi-rs/canvas": "^0.1.59",
+    "@score-storm/core": "workspace:*"
+  },
+  "devDependencies": {
+    "@score-storm/eslint-config": "workspace:*",
+    "@score-storm/typescript-config": "workspace:*",
+    "typescript": "^5.3.3"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
