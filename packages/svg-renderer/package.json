@@ -1,6 +1,6 @@
 {
   "name": "@score-storm/svg-renderer",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "SVG renderer, meant to be used for Web apps",
   "main": "./dist/esm/index.js",
   "types": "./dist/esm/index.d.ts",
