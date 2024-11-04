@@ -1,23 +1,28 @@
-import { IRenderer, Settings } from "@score-storm/core"
-import { IGraphical, EventManager } from "@score-storm/core"
-import { Canvas, createCanvas, SKRSContext2D, GlobalFonts } from "@napi-rs/canvas"
+import { IRenderer, Settings, IGraphical, EventManager } from "@score-storm/core"
+import { Canvas, createCanvas, SKRSContext2D, GlobalFonts, SvgExportFlag, SvgCanvas } from "@napi-rs/canvas"
 
-class NodeSkiaRenderer implements IRenderer {
+type Options = {
+  width: number
+  svgExportFlag?: SvgExportFlag
+}
+
+type CanvasOrSvgCanvas<T extends Options> = T["svgExportFlag"] extends SvgExportFlag ? SvgCanvas : Canvas
+
+class NodeSkiaRenderer<T extends Options> implements IRenderer {
   containerWidth: number
-  canvas!: Canvas
+  canvas!: CanvasOrSvgCanvas<T>
   context!: SKRSContext2D
   isInitialized: boolean = false
   settings!: Settings
   eventManager!: EventManager
+  svgExportFlag?: SvgExportFlag
 
-  constructor(width: number) {
-    this.containerWidth = width
+  constructor(opts: T) {
+    this.containerWidth = opts.width
+    this.svgExportFlag = opts.svgExportFlag
   }
 
   init() {
-    // set initial canvas height to 0, it will be resized later
-    this.canvas = createCanvas(this.containerWidth, 0)
-    this.context = this.canvas.getContext("2d")
     this.isInitialized = true
   }
 
@@ -26,7 +31,13 @@ class NodeSkiaRenderer implements IRenderer {
   }
 
   preRender(height: number, fontSize: number) {
-    this.canvas.height = height
+    if (this.svgExportFlag) {
+      this.canvas = createCanvas(this.containerWidth, height, this.svgExportFlag) as CanvasOrSvgCanvas<T>
+    } else {
+      this.canvas = createCanvas(this.containerWidth, height) as CanvasOrSvgCanvas<T>
+    }
+    this.context = this.canvas.getContext("2d")
+
     this.context.font = `${fontSize}px Bravura`
     this.context.textBaseline = "alphabetic" // middle
     this.context.textAlign = "start"
@@ -58,4 +69,4 @@ class NodeSkiaRenderer implements IRenderer {
 }
 
 export default NodeSkiaRenderer
-export { GlobalFonts }
+export { GlobalFonts, SvgExportFlag }

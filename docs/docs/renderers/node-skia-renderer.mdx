@@ -4,6 +4,7 @@ sidebar_position: 5
 
 # Node Skia Renderer
 
+It's very common to render music scores in the browser, but sometimes you need to render them in a Node.js environment. A possible use cases are: generating images for a website, creating PDFs.
 While it's possible to use web renderers such as canvas-renderer in Node.js using JS-DOM
 or similar techniques, Score Storm offers a dedicated renderer optimized for the Node.js environment. It's powered by the amazing, high-performance SKIA graphics library.
 
@@ -28,7 +29,7 @@ const score = Score.createQuickScore({ numberOfMeasures: 2, timeSignature: { cou
 ss.setScore(score)
 
 // Create a new instance of NodeSkiaRenderer with a width of 600
-const renderer = new NodeSkiaRenderer(600)
+const renderer = new NodeSkiaRenderer({ width: 600 })
 ss.setRenderer(renderer)
 
 // finally render the score
@@ -37,4 +38,34 @@ ss.render()
 // get the buffer and save it to a file
 const buffer = renderer.canvas.toBuffer("image/png")
 writeFileSync(join(__dirname, "score-storm-test.png"), buffer)
+```
+
+It's also possible to generate self packaged SVGs with text converted to paths. This is useful when you want to render the score as SVG, but you want to avoid the need to load fonts.
+
+```ts
+import ScoreStorm, { Score } from "@score-storm/core"
+import NodeSkiaRenderer, { GlobalFonts, SvgExportFlag } from "@score-storm/node-skia-renderer"
+import { writeFileSync } from "fs"
+import { join } from "path"
+
+// Register font
+GlobalFonts.registerFromPath(join(__dirname, "..", "fonts", "Bravura.woff2"), "Bravura")
+
+// Create a new instance of ScoreStorm
+const scoreStorm = new ScoreStorm()
+
+// Create a dead simple score with 2 measures of 4/4
+const score = Score.createQuickScore({ numberOfMeasures: 2, timeSignature: { count: 4, unit: 4 } })
+ss.setScore(score)
+
+// Create a new instance of NodeSkiaRenderer, make sure to set the svgExportFlag
+const renderer = new NodeSkiaRenderer({ width: 600, svgExportFlag: SvgExportFlag.TextToPath })
+ss.setRenderer(renderer)
+
+// finally render the score
+ss.render()
+
+// get the buffer and save it to a file. Note that getContent method is used instead of toBuffer
+const buffer = renderer.canvas.getContent()
+writeFileSync(join(__dirname, "score-storm-test.svg"), buffer)
 ```
