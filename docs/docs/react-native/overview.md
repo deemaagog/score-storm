@@ -4,7 +4,7 @@ sidebar_position: 1
 
 # Overview
 
-There can be several ways to render Score Storm scores in React Native app. While this documentation is focused on native approaches ([React Native SVG](./react-native/react-native-svg) and [React Native SKIA](./react-native/react-native-skia)), you can also use web-based solutions like WebView or render scores as images.
+There can be several ways to render Score Storm scores in React Native app. While this documentation is focused on native approaches ([React Native SVG](./react-native-svg) and [React Native SKIA](./react-native-skia)), you can also use web-based solutions like WebView or render scores as images.
 
 ## WebView
 
@@ -25,7 +25,7 @@ export default ScoreStormWebView
 
 ## Render as image
 
-As simple as that. You can generate score image (PNG or SVG) on you server using [Node Skia Renderer](./renderers/node-skia-renderer) and then display it in your app.
+As simple as that. You can generate score image (PNG or SVG) on you server using [Node Skia Renderer](../renderers/node-skia-renderer) and then display it in your app.
 
 ```js
 import * as React from "react"
