@@ -54,6 +54,10 @@ export class ScoreStorm {
     this.baseRenderer.setRenderer(renderer)
   }
 
+  public getRenderer() {
+    return this.baseRenderer.getRenderer()
+  }
+
   public render() {
     this.baseRenderer.render(this.score)
   }

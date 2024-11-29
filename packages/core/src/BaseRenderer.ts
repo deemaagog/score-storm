@@ -92,6 +92,10 @@ class BaseRenderer {
     this.renderer.eventManager = this.eventManager
   }
 
+  getRenderer() {
+    return this.renderer
+  }
+
   destroy() {
     if (this.renderer) {
       this.renderer.destroy()
