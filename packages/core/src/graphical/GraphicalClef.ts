@@ -3,18 +3,20 @@ import { IRenderer } from "../interfaces"
 import { Clef } from "../model/Clef"
 import { BaseGraphical } from "./BaseGraphical"
 import { ClefG, ClefF } from "./glyphs/clef"
-import { Glyph, IGraphical } from "./interfaces"
+import { BBox, Glyph, IGraphical } from "./interfaces"
+
+type GlyphMap = Record<"G" | "F", Glyph>
 
 export class GraphicalClef extends BaseGraphical implements IGraphical {
   height!: number
   width!: number
   clefGlyph: Glyph
   verticalShift: number // value in stave spaces
-  x!: number // todo : create Poind2d type
+  x!: number // todo : create Point2d type
   y!: number
   clef: Clef
 
-  static glyphMap = {
+  static glyphMap: GlyphMap = {
     G: ClefG,
     F: ClefF,
   }
@@ -26,7 +28,7 @@ export class GraphicalClef extends BaseGraphical implements IGraphical {
 
     this.verticalShift = position * -0.5
 
-    this.clefGlyph = GraphicalClef.glyphMap[sign as keyof typeof GraphicalClef.glyphMap]
+    this.clefGlyph = GraphicalClef.glyphMap[sign as keyof GlyphMap]
 
     // TODO: this validation has to be done at score model level
     if (!this.clefGlyph) {
@@ -47,7 +49,7 @@ export class GraphicalClef extends BaseGraphical implements IGraphical {
     this.y = y + this.verticalShift * settings.unit
   }
 
-  getBBox(settings: Settings) {
+  getBBox(settings: Settings): BBox {
     return {
       x: this.x,
       y: this.y - this.clefGlyph.bBoxes.bBoxNE[1] * settings.unit,
