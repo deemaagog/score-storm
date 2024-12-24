@@ -1,12 +1,16 @@
-export type Note = {
-  pitch: {
-    alter?: number
+type Pitch = {
+  alter?: number
     octave: number
     step: string
-  }
-  accidentalDisplay?: {
-    show: boolean
-  }
+}
+
+type AccidentalDisplay = {
+  show: boolean
+}
+
+export type Note = {
+  pitch: Pitch
+  accidentalDisplay?: AccidentalDisplay
 }
 
 export type NoteDuration = {
@@ -14,13 +18,17 @@ export type NoteDuration = {
   dots?: number
 }
 
+type Rest = {
+  position?: number
+}
+
 export class Beat {
   duration: NoteDuration
   durationValue: number
   notes?: Note[]
-  rest?: {}
+  rest?: Rest
 
-  constructor(params: { duration?: NoteDuration; notes?: Note[]; rest?: {} }) {
+  constructor(params: { duration?: NoteDuration; notes?: Note[]; rest?: Rest }) {
     const { duration, notes, rest } = params
 
     if (!duration) {

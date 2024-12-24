@@ -5,6 +5,8 @@ import { BaseGraphical } from "./BaseGraphical"
 import { RestHalf, RestWhole, RestQuarter, RestEighth, Rest16th, Rest32nd, Rest64th } from "./glyphs/rest"
 import { BBox, Glyph, IGraphical } from "./interfaces"
 
+type GlyphMap = Record<string, Glyph>
+
 export class GraphicalRestEvent extends BaseGraphical implements IGraphical {
   height!: number
   width!: number
@@ -14,7 +16,7 @@ export class GraphicalRestEvent extends BaseGraphical implements IGraphical {
   y!: number
   noteEvent: Beat
 
-  static glyphMap = {
+  static glyphMap:GlyphMap = {
     whole: RestWhole,
     half: RestHalf,
     quarter: RestQuarter,
@@ -31,7 +33,7 @@ export class GraphicalRestEvent extends BaseGraphical implements IGraphical {
 
     this.verticalShift = duration === "whole" ? -1 : 0 // TODO: respect rest position
 
-    this.restGlyph = GraphicalRestEvent.glyphMap[duration as keyof typeof GraphicalRestEvent.glyphMap]
+    this.restGlyph = GraphicalRestEvent.glyphMap[duration as keyof GlyphMap]
 
     // TODO: this validation has to be done at score model level
     if (!this.restGlyph) {
