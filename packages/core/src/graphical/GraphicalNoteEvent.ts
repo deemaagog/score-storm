@@ -11,6 +11,10 @@ const STEM_THICKNESS = 0.12
 const STEM_HEIGHT = 3.5
 const STEM_HEIGHT_CUT = 0.17
 
+type GlyphMap = Record<string, Glyph>
+type FlagMap = Record<string, Glyph>
+type GlyphAccidentalMap = Record<number, Glyph>
+
 export class GraphicalNoteEvent extends BaseGraphical implements IGraphical {
   noteEvent: Beat
   height!: number
@@ -24,7 +28,7 @@ export class GraphicalNoteEvent extends BaseGraphical implements IGraphical {
   accidentalWidth?: number
   flagGlyph?: Glyph
 
-  static glyphMap = {
+  static glyphMap:GlyphMap = {
     whole: NoteheadWhole,
     half: NoteheadHalf,
     quarter: NoteheadQuarter,
@@ -34,14 +38,14 @@ export class GraphicalNoteEvent extends BaseGraphical implements IGraphical {
     "64th": NoteheadQuarter,
   }
 
-  static flagMap = {
+  static flagMap:FlagMap = {
     eighth: Flag8thUp,
     "16th": Flag16thUp,
     "32nd": Flag32ndUp,
     "64th": Flag64thUp,
   }
 
-  static glyphAccidentalMap = {
+  static glyphAccidentalMap: GlyphAccidentalMap = {
     [-2]: DoubleFlat,
     [-1]: Flat,
     [0]: Natural,
@@ -63,7 +67,7 @@ export class GraphicalNoteEvent extends BaseGraphical implements IGraphical {
     const showAccidentals = !!firstNote.accidentalDisplay?.show
     const accidental = firstNote.pitch.alter || 0
     const accidentalGlyph =
-      GraphicalNoteEvent.glyphAccidentalMap[accidental as keyof typeof GraphicalNoteEvent.glyphAccidentalMap]
+      GraphicalNoteEvent.glyphAccidentalMap[accidental as keyof GlyphAccidentalMap]
     if (typeof accidental === "number" && !accidentalGlyph) {
       throw new Error(`Invalid accidental ${accidental}`)
     }
@@ -73,9 +77,9 @@ export class GraphicalNoteEvent extends BaseGraphical implements IGraphical {
 
     this.verticalShift = 0 // TODO: respect pitch
 
-    this.noteheadGlyph = GraphicalNoteEvent.glyphMap[duration as keyof typeof GraphicalNoteEvent.glyphMap]
+    this.noteheadGlyph = GraphicalNoteEvent.glyphMap[duration as keyof GlyphMap]
 
-    this.flagGlyph = GraphicalNoteEvent.flagMap[duration as keyof typeof GraphicalNoteEvent.flagMap]
+    this.flagGlyph = GraphicalNoteEvent.flagMap[duration as keyof FlagMap]
 
     // TODO: this validation has to be done at score model level
     if (!this.noteheadGlyph) {

@@ -3,9 +3,11 @@ export interface TimeSignature {
   unit: number
 }
 
+interface KeySignature {
+  fifths: number
+}
+
 export class GlobalMeasure {
-  key?: {
-    fifths: number
-  }
+  key?: KeySignature
   time?: TimeSignature
 }

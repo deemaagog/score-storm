@@ -15,6 +15,8 @@ import {
 } from "./glyphs/time-signature"
 import { BBox, Glyph, IGraphical } from "./interfaces"
 
+type GlyphMap = Record<number, Glyph>
+
 export class GraphicalTimeSignature extends BaseGraphical implements IGraphical {
   height!: number
   width!: number
@@ -24,7 +26,7 @@ export class GraphicalTimeSignature extends BaseGraphical implements IGraphical 
   y!: number
   time!: TimeSignature
 
-  static glyphMap = {
+  static glyphMap:GlyphMap = {
     1: TimeSig1,
     2: TimeSig2,
     3: TimeSig3,
@@ -41,9 +43,9 @@ export class GraphicalTimeSignature extends BaseGraphical implements IGraphical 
     this.time = time
     const { count, unit } = time!
 
-    this.countGlyph = GraphicalTimeSignature.glyphMap[count as keyof typeof GraphicalTimeSignature.glyphMap]
+    this.countGlyph = GraphicalTimeSignature.glyphMap[count as keyof GlyphMap]
 
-    this.unitGlyph = GraphicalTimeSignature.glyphMap[unit as keyof typeof GraphicalTimeSignature.glyphMap]
+    this.unitGlyph = GraphicalTimeSignature.glyphMap[unit as keyof GlyphMap]
 
     if (!this.countGlyph || !this.unitGlyph) {
       throw new Error(`Invalid time signature ${count}/${unit}`)

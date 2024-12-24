@@ -75,7 +75,7 @@ export class GraphicalGlobalMeasure {
       }
     }
     const sorted = new Map([...graphicalGlobalBeats].sort((a, b) => new Fraction(a[0]).compare(new Fraction(b[0]))))
-    console.log("sorted graphicalGlobalBeats", sorted, timeSignature)
+    // console.log("sorted graphicalGlobalBeats", sorted, timeSignature)
     this.graphicalGlobalBeats = [...sorted.values()]
     this.minContentWidth = this.graphicalGlobalBeats.reduce((acc, { offsetLeft, offsetRight }) => {
       return acc + offsetLeft + offsetRight
