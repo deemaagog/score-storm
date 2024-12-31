@@ -10,6 +10,7 @@ import { Note } from "./sidebar/note"
 import { File } from "./sidebar/file"
 import styles from "./App.module.css"
 import Container from "./Container"
+import { PitchGroup } from './sidebar/note/PitchGroup'
 
 const actions = [
   {
@@ -103,6 +104,8 @@ export const App = () => {
           ))}
         </Stack>
       </Affix>
+      {/* event handlers */}
+      <PitchGroup/>
     </>
   )
 }

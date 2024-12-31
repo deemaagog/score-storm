@@ -1,3 +1,4 @@
+import { note } from "@tonaljs/pitch-note"
 import { Settings } from "../BaseRenderer"
 import { IRenderer } from "../interfaces"
 import { Note, Beat } from "../model/Beat"
@@ -28,7 +29,7 @@ export class GraphicalNoteEvent extends BaseGraphical implements IGraphical {
   accidentalWidth?: number
   flagGlyph?: Glyph
 
-  static glyphMap:GlyphMap = {
+  static glyphMap: GlyphMap = {
     whole: NoteheadWhole,
     half: NoteheadHalf,
     quarter: NoteheadQuarter,
@@ -38,7 +39,7 @@ export class GraphicalNoteEvent extends BaseGraphical implements IGraphical {
     "64th": NoteheadQuarter,
   }
 
-  static flagMap:FlagMap = {
+  static flagMap: FlagMap = {
     eighth: Flag8thUp,
     "16th": Flag16thUp,
     "32nd": Flag32ndUp,
@@ -66,8 +67,7 @@ export class GraphicalNoteEvent extends BaseGraphical implements IGraphical {
     const firstNote = noteEvent.notes![0]
     const showAccidentals = !!firstNote.accidentalDisplay?.show
     const accidental = firstNote.pitch.alter || 0
-    const accidentalGlyph =
-      GraphicalNoteEvent.glyphAccidentalMap[accidental as keyof GlyphAccidentalMap]
+    const accidentalGlyph = GraphicalNoteEvent.glyphAccidentalMap[accidental as keyof GlyphAccidentalMap]
     if (typeof accidental === "number" && !accidentalGlyph) {
       throw new Error(`Invalid accidental ${accidental}`)
     }
@@ -75,7 +75,7 @@ export class GraphicalNoteEvent extends BaseGraphical implements IGraphical {
       this.accidentalGlyph = accidentalGlyph
     }
 
-    this.verticalShift = 0 // TODO: respect pitch
+    this.verticalShift = this.calculateVerticalShift()
 
     this.noteheadGlyph = GraphicalNoteEvent.glyphMap[duration as keyof GlyphMap]
 
@@ -160,6 +160,22 @@ export class GraphicalNoteEvent extends BaseGraphical implements IGraphical {
     }
   }
 
+  calculateVerticalShift(): number {
+    const pitch = this.noteEvent.notes![0].pitch
+
+    // TODO: account for clef changes
+    const clef = this.noteEvent.getCurrentClef()
+
+    const middlePitch = clef.getMiddleLinePitch()
+
+    const pitchNote = note(`${pitch.step}${pitch.octave}`)
+    const middlePitchNote = note(`${middlePitch.step}${middlePitch.octave}`)
+
+    const distance = pitchNote.step - middlePitchNote.step + (pitchNote.oct! - middlePitchNote.oct!) * 7
+
+    return -distance / 2
+  }
+
   getBeatOffsetLeft(): number {
     let offsetLeft = 0
     if (this.accidentalGlyph) {
@@ -179,5 +195,28 @@ export class GraphicalNoteEvent extends BaseGraphical implements IGraphical {
       offsetRight += flagWidth
     }
     return offsetRight
+  }
+
+  getTopStaveOverflow(settings: Settings) {
+    if (this.drawStem) {
+      return STEM_HEIGHT * settings.unit - this.verticalShift * settings.unit - settings.midStave
+    }
+    return Math.max(
+      this.noteheadGlyph.bBoxes.bBoxNE[1] * settings.unit - this.verticalShift * settings.unit - settings.midStave,
+      0,
+    )
+  }
+
+  getBottomStaveOverflow(settings: Settings) {
+    if (this.accidentalGlyph) {
+      return Math.max(
+        -this.accidentalGlyph.bBoxes.bBoxSW[1] * settings.unit + this.verticalShift * settings.unit - settings.midStave,
+        0,
+      )
+    }
+    return Math.max(
+      -this.noteheadGlyph.bBoxes.bBoxSW[1] * settings.unit + this.verticalShift * settings.unit - settings.midStave,
+      0,
+    )
   }
 }

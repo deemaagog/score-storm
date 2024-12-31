@@ -1,5 +1,6 @@
 import Fraction from "fraction.js"
-import { GlobalMeasure, TimeSignature } from "../model/GlobalMeasure"
+import { GlobalMeasure } from "../model/GlobalMeasure"
+import { TimeSignature } from "../model/TimeSignature"
 import { GraphicalMeasure } from "./GraphicalMeasure"
 import { GraphicalGlobalBeat } from "./GraphicalGlobalBeat"
 import { GraphicalNoteEvent } from "./GraphicalNoteEvent"

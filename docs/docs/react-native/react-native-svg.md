@@ -137,7 +137,7 @@ export const Example = ({ width }) => {
     scoreStorm.setScore(
       Score.createQuickScore({
         numberOfMeasures: 16,
-        timeSignature: { count: 4, unit: 4 },
+        timeSignature: new TimeSignature(4, 4),
       }),
     )
     scoreStorm.render()

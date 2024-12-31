@@ -3,7 +3,7 @@ import ScoreStorm from "@score-storm/core"
 import React, { PropsWithChildren } from "react"
 import { createContext } from "react"
 import { UseSSParams, useSS } from "./hooks"
-import { InstrumentType } from '@score-storm/core'
+import { InstrumentType, TimeSignature } from '@score-storm/core'
 
 type ScoreStormContextValue = { scoreStorm: ScoreStorm }
 export const ScoreStormContext = createContext<ScoreStormContextValue>({} as ScoreStormContextValue)
@@ -13,7 +13,7 @@ const getDefaultParams = (theme: MantineTheme): UseSSParams => ({
     scale: 80,
     editor: { enable: true, styles: { hoverColor: theme.colors.blue[3], selectColor: theme.colors.blue[6] } },
   },
-  quickScoreOptions: { numberOfMeasures: 1, timeSignature: { count: 4, unit: 4 }, instruments: [InstrumentType.PIANO] },
+  quickScoreOptions: { numberOfMeasures: 1, timeSignature: new TimeSignature(4,4), instruments: [InstrumentType.PIANO, InstrumentType.PIANO] },
 })
 
 export const ScoreStormProvider: React.FC<PropsWithChildren> = ({ children }) => {

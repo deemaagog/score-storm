@@ -13,7 +13,7 @@ It leverages [@napi-rs/canvas](https://github.com/Brooooooklyn/canvas) under the
 It can be used in Node.js code as follows:
 
 ```ts
-import ScoreStorm, { Score } from "@score-storm/core"
+import ScoreStorm, { Score, TimeSignature } from "@score-storm/core"
 import NodeSkiaRenderer, { GlobalFonts } from "@score-storm/node-skia-renderer"
 import { writeFileSync } from "fs"
 import { join } from "path"
@@ -25,7 +25,7 @@ GlobalFonts.registerFromPath(join(__dirname, "..", "fonts", "Bravura.woff2"), "B
 const scoreStorm = new ScoreStorm()
 
 // Create a dead simple score with 2 measures of 4/4
-const score = Score.createQuickScore({ numberOfMeasures: 2, timeSignature: { count: 4, unit: 4 } })
+const score = Score.createQuickScore({ numberOfMeasures: 2, timeSignature: new TimeSignature(4, 4) })
 ss.setScore(score)
 
 // Create a new instance of NodeSkiaRenderer with a width of 600
@@ -43,7 +43,7 @@ writeFileSync(join(__dirname, "score-storm-test.png"), buffer)
 It's also possible to generate self packaged SVGs with text converted to paths. This is useful when you want to render the score as SVG, but you want to avoid the need to load fonts.
 
 ```ts
-import ScoreStorm, { Score } from "@score-storm/core"
+import ScoreStorm, { Score, TimeSignature } from "@score-storm/core"
 import NodeSkiaRenderer, { GlobalFonts, SvgExportFlag } from "@score-storm/node-skia-renderer"
 import { writeFileSync } from "fs"
 import { join } from "path"
@@ -55,7 +55,7 @@ GlobalFonts.registerFromPath(join(__dirname, "..", "fonts", "Bravura.woff2"), "B
 const scoreStorm = new ScoreStorm()
 
 // Create a dead simple score with 2 measures of 4/4
-const score = Score.createQuickScore({ numberOfMeasures: 2, timeSignature: { count: 4, unit: 4 } })
+const score = Score.createQuickScore({ numberOfMeasures: 2, timeSignature: new TimeSignature(4, 4) })
 ss.setScore(score)
 
 // Create a new instance of NodeSkiaRenderer, make sure to set the svgExportFlag

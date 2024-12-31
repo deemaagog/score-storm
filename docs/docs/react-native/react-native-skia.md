@@ -110,7 +110,7 @@ const SSCanvas = ({ width }: { width: number }) => {
     scoreStorm.setScore(
       Score.createQuickScore({
         numberOfMeasures: 1,
-        timeSignature: { count: 4, unit: 4 },
+        timeSignature: new TimeSignature(4, 4),
       })
     );
     scoreStorm.render();

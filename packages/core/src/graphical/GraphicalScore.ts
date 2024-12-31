@@ -127,14 +127,16 @@ export class GraphicalScore {
           const graphicalMeasure = graphicalGlobalMeasure.graphicalMeasures[i]
 
           if (ri === 0 && i === 0) {
-            if (graphicalMeasure.clef) {
-              currentYTopShift += graphicalMeasure.clef.getMaxY(settings)
+            const topStaveOverflow = graphicalMeasure.getTopStaveOverflow(settings)
+            if (topStaveOverflow > currentYTopShift) {
+              currentYTopShift = topStaveOverflow
             }
           }
 
           if (ri === rows.length - 1 && i === this.score.instruments.length - 1) {
-            if (graphicalMeasure.clef) {
-              currentYBottomShift += graphicalMeasure.clef.getMinY(settings)
+            const bottomStaveOverflow = graphicalMeasure.getBottomStaveOverflow(settings)
+            if (bottomStaveOverflow > currentYBottomShift) {
+              currentYBottomShift = bottomStaveOverflow
             }
           }
         }

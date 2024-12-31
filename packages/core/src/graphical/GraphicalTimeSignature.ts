@@ -1,6 +1,6 @@
 import { Settings } from "../BaseRenderer"
 import { IRenderer } from "../interfaces"
-import { TimeSignature } from "../model/GlobalMeasure"
+import { TimeSignature } from "../model/TimeSignature"
 import { BaseGraphical } from "./BaseGraphical"
 import {
   TimeSig1,
@@ -26,7 +26,7 @@ export class GraphicalTimeSignature extends BaseGraphical implements IGraphical 
   y!: number
   time!: TimeSignature
 
-  static glyphMap:GlyphMap = {
+  static glyphMap: GlyphMap = {
     1: TimeSig1,
     2: TimeSig2,
     3: TimeSig3,
