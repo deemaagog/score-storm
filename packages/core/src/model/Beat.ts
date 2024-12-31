@@ -1,7 +1,10 @@
-type Pitch = {
+import { Clef } from "./Clef"
+import { Measure } from "./Measure"
+
+export type Pitch = {
   alter?: number
-    octave: number
-    step: string
+  octave: number
+  step: string
 }
 
 type AccidentalDisplay = {
@@ -27,6 +30,7 @@ export class Beat {
   durationValue: number
   notes?: Note[]
   rest?: Rest
+  measure!: Measure
 
   constructor(params: { duration?: NoteDuration; notes?: Note[]; rest?: Rest }) {
     const { duration, notes, rest } = params
@@ -64,5 +68,10 @@ export class Beat {
       default:
         throw new Error(`Note duration ${base} is not supported`)
     }
+  }
+
+  getCurrentClef(): Clef {
+    // TODO: account for clef changes
+    return this.measure.instrument.measures[0].clef!
   }
 }

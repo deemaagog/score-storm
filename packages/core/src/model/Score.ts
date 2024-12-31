@@ -1,7 +1,8 @@
 import { getMNXScore, getScoreFromMusicXml } from "mnxconverter"
-import { GlobalMeasure, TimeSignature } from "./GlobalMeasure"
+import { GlobalMeasure } from "./GlobalMeasure"
+import { TimeSignature } from "./TimeSignature"
 import { Measure } from "./Measure"
-import { Beat, Note } from "./Beat"
+import { Beat, Note, Pitch } from "./Beat"
 import { Clef } from "./Clef"
 import { Instrument, InstrumentNames, InstrumentType } from "./Instrument"
 
@@ -15,45 +16,46 @@ export class Score {
   static createQuickScore(options?: QuickScoreOptions): Score {
     const defaultOptions: Required<QuickScoreOptions> = {
       numberOfMeasures: 1,
-      timeSignature: {
-        count: 2,
-        unit: 4,
-      },
+      timeSignature: new TimeSignature(2, 4),
       instruments: [InstrumentType.PIANO],
     }
     const mergedOptions = { ...defaultOptions, ...options }
 
     const score = new Score()
 
-    const measures: Measure[] = []
-
-    for (let i = 0; i < mergedOptions.numberOfMeasures!; i++) {
+    score.globalMeasures = Array.from({ length: mergedOptions.numberOfMeasures! }, (_, i) => {
       const globalMeasure = new GlobalMeasure()
-      const measure = new Measure()
-
       if (i === 0) {
         globalMeasure.time = mergedOptions.timeSignature
-        measure.clef = new Clef("G", -2)
       }
-
-      measure.events = Array.from(
-        { length: mergedOptions.timeSignature!.count },
-        () =>
-          new Beat({
-            duration: { base: "quarter" },
-            rest: {},
-          }),
-      )
-
-      score.globalMeasures.push(globalMeasure)
-      measures.push(measure)
-    }
-
-    score.instruments = mergedOptions.instruments.map((type) => {
-      const instrument = new Instrument(InstrumentNames[type])
-      instrument.measures = measures
-      return instrument
+      return globalMeasure
     })
+
+    for (let i = 0; i < mergedOptions.instruments.length; i++) {
+      const instrument = new Instrument(InstrumentNames[mergedOptions.instruments[i]])
+      for (let m = 0; m < mergedOptions.numberOfMeasures!; m++) {
+        const measure = new Measure()
+
+        if (m === 0) {
+          measure.clef = new Clef("G", -2)
+        }
+
+        measure.events = Array.from({ length: mergedOptions.timeSignature!.count }, () => {
+          const beat = new Beat({
+            duration: { base: mergedOptions.timeSignature.unitToDuration() },
+            rest: {},
+          })
+          beat.measure = measure
+          return beat
+        })
+
+        measure.instrument = instrument
+
+        instrument.measures.push(measure)
+        instrument.index = i
+      }
+      score.instruments.push(instrument)
+    }
 
     return score
   }
@@ -67,12 +69,15 @@ export class Score {
     for (const mnxGlobalMeasure of mnxScore.global.measures) {
       const globalMeasure = new GlobalMeasure()
       globalMeasure.key = mnxGlobalMeasure.key
-      globalMeasure.time = mnxGlobalMeasure.time
+      if (mnxGlobalMeasure.time) {
+        globalMeasure.time = new TimeSignature(mnxGlobalMeasure.time.count, mnxGlobalMeasure.time.unit)
+      }
 
       score.globalMeasures.push(globalMeasure)
     }
 
-    for (const part of mnxScore.parts) {
+    for (let i = 0; i < mnxScore.parts.length; i++) {
+      const part = mnxScore.parts[i]
       const instrument = new Instrument({ name: part.name || "", shortName: part["short-name"] || "" })
       for (const mnxMeasure of part.measures!) {
         const measure = new Measure()
@@ -88,13 +93,16 @@ export class Score {
 
         for (const event of firstVoice.content) {
           if (event.type === "event") {
-            measure.events.push(new Beat(event))
+            const beat = new Beat(event)
+            beat.measure = measure
+            measure.events.push(beat)
           } else {
             throw new Error(`Event type ${event.type} is not supported`)
           }
         }
-
+        measure.instrument = instrument
         instrument.measures.push(measure)
+        instrument.index = i
       }
       score.instruments.push(instrument)
     }
@@ -115,17 +123,18 @@ export class Score {
       throw new Error("Failed to determine time signature")
     }
     this.globalMeasures.push(new GlobalMeasure())
-    // assuming only one instrument with one stave for now
-    const measure = new Measure()
-    measure.events = Array.from(
-      { length: currentTimeSignature.count },
-      () =>
-        new Beat({
-          duration: { base: "quarter" },
-          rest: {},
-        }),
-    )
     for (const instrument of this.instruments) {
+      // assuming only one stave for now
+      const measure = new Measure()
+      measure.events = Array.from({ length: currentTimeSignature.count }, () => {
+        const beat = new Beat({
+          duration: { base: this.globalMeasures[0].time!.unitToDuration() },
+          rest: {},
+        })
+        beat.measure = measure
+        return beat
+      })
+      measure.instrument = instrument
       instrument.measures.push(measure)
     }
     return this
@@ -162,15 +171,12 @@ export class Score {
   }
 
   // if rest, make it note and vice versa
-  swithNoteType(noteEvent: Beat) {
+  switchNoteType(noteEvent: Beat) {
     if (noteEvent.rest) {
       noteEvent.rest = undefined
       noteEvent.notes = [
         {
-          pitch: {
-            octave: 4,
-            step: "B",
-          },
+          pitch: noteEvent.getCurrentClef().getMiddleLinePitch(),
         },
       ]
     } else {
@@ -190,5 +196,13 @@ export class Score {
       show: typeof newAlter === "number",
     }
     note.pitch = { ...rest, ...(newAlter !== 0 && { alter: newAlter }) }
+  }
+
+  changeNotePitch(note: Note, newPitch: Pitch) {
+    // TODO: check equality
+    note.pitch = newPitch
+    note.accidentalDisplay = {
+      show: !!newPitch.alter,
+    }
   }
 }

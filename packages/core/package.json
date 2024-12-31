@@ -30,6 +30,9 @@
     "lint": "eslint ."
   },
   "dependencies": {
+    "@tonaljs/note": "^4.11.0",
+    "@tonaljs/pitch-distance": "^5.0.4",
+    "@tonaljs/pitch-note": "^6.0.0",
     "fraction.js": "4.3.7",
     "mnxconverter": "^1.0.1",
     "rbush": "^3.0.1"

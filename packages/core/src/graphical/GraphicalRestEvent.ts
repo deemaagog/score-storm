@@ -16,7 +16,7 @@ export class GraphicalRestEvent extends BaseGraphical implements IGraphical {
   y!: number
   noteEvent: Beat
 
-  static glyphMap:GlyphMap = {
+  static glyphMap: GlyphMap = {
     whole: RestWhole,
     half: RestHalf,
     quarter: RestQuarter,
@@ -77,5 +77,19 @@ export class GraphicalRestEvent extends BaseGraphical implements IGraphical {
 
   getBeatOffsetRight(): number {
     return this.width
+  }
+
+  getTopStaveOverflow(settings: Settings) {
+    return Math.max(
+      this.restGlyph.bBoxes.bBoxNE[1] * settings.unit - this.verticalShift * settings.unit - settings.midStave,
+      0,
+    )
+  }
+
+  getBottomStaveOverflow(settings: Settings) {
+    return Math.max(
+      -this.restGlyph.bBoxes.bBoxSW[1] * settings.unit + this.verticalShift * settings.unit - settings.midStave,
+      0,
+    )
   }
 }

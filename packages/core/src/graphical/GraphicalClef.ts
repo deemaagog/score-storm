@@ -66,14 +66,14 @@ export class GraphicalClef extends BaseGraphical implements IGraphical {
     )
   }
 
-  getMaxY(settings: Settings) {
+  getTopStaveOverflow(settings: Settings) {
     return Math.max(
       this.clefGlyph.bBoxes.bBoxNE[1] * settings.unit - this.verticalShift * settings.unit - settings.midStave,
       0,
     )
   }
 
-  getMinY(settings: Settings) {
+  getBottomStaveOverflow(settings: Settings) {
     return Math.max(
       -this.clefGlyph.bBoxes.bBoxSW[1] * settings.unit + this.verticalShift * settings.unit - settings.midStave,
       0,
