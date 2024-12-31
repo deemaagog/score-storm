@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.2](https://github.com/deemaagog/score-storm/compare/v0.2.2...v0.3.2) (2024-12-31)
+
+### Features
+
+* handle pitch ([e283991](https://github.com/deemaagog/score-storm/commit/e283991625413de76979cc675966bec60d3ec5eb)) - by @deemaagog
+
 ## [0.2.2](https://github.com/deemaagog/score-storm/compare/v0.2.1...v0.2.2) (2024-11-04)
 
 **Note:** Version bump only for package @score-storm/full-featured-editor
