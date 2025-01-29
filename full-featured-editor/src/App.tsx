@@ -11,6 +11,7 @@ import { File } from "./sidebar/file"
 import styles from "./App.module.css"
 import Container from "./Container"
 import { PitchGroup } from './sidebar/note/PitchGroup'
+import { Player } from './Player'
 
 const actions = [
   {
@@ -106,6 +107,7 @@ export const App = () => {
       </Affix>
       {/* event handlers */}
       <PitchGroup/>
+      <Player/>
     </>
   )
 }

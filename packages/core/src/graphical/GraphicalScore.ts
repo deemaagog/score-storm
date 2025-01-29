@@ -56,8 +56,7 @@ export class GraphicalScore {
       if (graphicalGlobalMeasure.globalMeasure.time) {
         currentTimeSignature = new GraphicalTimeSignature(graphicalGlobalMeasure.globalMeasure.time)
       }
-      // TODO: get time signature from GlobalMeasure  gm.getCurrentTimeSignature()
-      graphicalGlobalMeasure.calculateMinContentWidth(currentTimeSignature!.time)
+      graphicalGlobalMeasure.calculateMinContentWidth()
 
       // calculate measure attributes relative positions TODO: move to GraphicalGlobalMeasure
       let timeSignatureRelativeWidth = 0,
