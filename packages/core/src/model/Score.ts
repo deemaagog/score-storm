@@ -23,14 +23,6 @@ export class Score {
 
     const score = new Score()
 
-    score.globalMeasures = Array.from({ length: mergedOptions.numberOfMeasures! }, (_, i) => {
-      const globalMeasure = new GlobalMeasure()
-      if (i === 0) {
-        globalMeasure.time = mergedOptions.timeSignature
-      }
-      return globalMeasure
-    })
-
     for (let i = 0; i < mergedOptions.instruments.length; i++) {
       const instrument = new Instrument(InstrumentNames[mergedOptions.instruments[i]])
       for (let m = 0; m < mergedOptions.numberOfMeasures!; m++) {
@@ -57,6 +49,17 @@ export class Score {
       score.instruments.push(instrument)
     }
 
+    for (let i = 0; i < mergedOptions.numberOfMeasures!; i++) {
+      const globalMeasure = new GlobalMeasure()
+      globalMeasure.index = i
+      globalMeasure.score = score
+      if (i === 0) {
+        globalMeasure.time = mergedOptions.timeSignature
+      }
+      score.globalMeasures.push(globalMeasure)
+      globalMeasure.createGlobalBeats()
+    }
+
     return score
   }
 
@@ -65,16 +68,6 @@ export class Score {
 
     console.log("mnxScore", mnxScore)
     const score = new Score()
-
-    for (const mnxGlobalMeasure of mnxScore.global.measures) {
-      const globalMeasure = new GlobalMeasure()
-      globalMeasure.key = mnxGlobalMeasure.key
-      if (mnxGlobalMeasure.time) {
-        globalMeasure.time = new TimeSignature(mnxGlobalMeasure.time.count, mnxGlobalMeasure.time.unit)
-      }
-
-      score.globalMeasures.push(globalMeasure)
-    }
 
     for (let i = 0; i < mnxScore.parts.length; i++) {
       const part = mnxScore.parts[i]
@@ -107,6 +100,19 @@ export class Score {
       score.instruments.push(instrument)
     }
 
+    for (let i = 0; i < mnxScore.global.measures.length; i++) {
+      const mnxGlobalMeasure = mnxScore.global.measures[i]
+      const globalMeasure = new GlobalMeasure()
+      globalMeasure.index = i
+      globalMeasure.score = score
+      globalMeasure.key = mnxGlobalMeasure.key
+      if (mnxGlobalMeasure.time) {
+        globalMeasure.time = new TimeSignature(mnxGlobalMeasure.time.count, mnxGlobalMeasure.time.unit)
+      }
+      score.globalMeasures.push(globalMeasure)
+      globalMeasure.createGlobalBeats()
+    }
+
     return score
   }
 
@@ -122,7 +128,7 @@ export class Score {
     if (!currentTimeSignature) {
       throw new Error("Failed to determine time signature")
     }
-    this.globalMeasures.push(new GlobalMeasure())
+
     for (const instrument of this.instruments) {
       // assuming only one stave for now
       const measure = new Measure()
@@ -137,6 +143,13 @@ export class Score {
       measure.instrument = instrument
       instrument.measures.push(measure)
     }
+
+    const globalMeasure = new GlobalMeasure()
+    globalMeasure.index = this.globalMeasures.length
+    globalMeasure.score = this
+    this.globalMeasures.push(globalMeasure)
+    globalMeasure.createGlobalBeats()
+
     return this
   }
 

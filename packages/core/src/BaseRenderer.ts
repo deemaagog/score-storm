@@ -252,7 +252,7 @@ class BaseRenderer {
       const event = graphicalMeasure.events[i]
       const graphicalGlobalBeat = graphicalGlobalMeasure.graphicalGlobalBeatByNote.get(event)!
       event.setPosition(
-        measureX + availableWidth * graphicalGlobalBeat.fraction,
+        measureX + availableWidth * graphicalGlobalBeat.globalBeat.fraction,
         this.y + this.settings.midStave,
         this.settings,
       )

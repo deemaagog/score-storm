@@ -1,10 +1,7 @@
-import { GraphicalNoteEvent } from "./GraphicalNoteEvent"
-import { GraphicalRestEvent } from "./GraphicalRestEvent"
+import { GlobalBeat } from "../model/GlobalBeat"
 
 export type GraphicalGlobalBeat = {
-  duration: number
-  fraction: number
-  beats: Array<GraphicalNoteEvent | GraphicalRestEvent>
+  globalBeat: GlobalBeat
   offsetLeft: number
   offsetRight: number
 }

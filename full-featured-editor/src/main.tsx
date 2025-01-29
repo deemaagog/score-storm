@@ -5,13 +5,16 @@ import { theme } from "./theme"
 import { ScoreStormProvider } from "./ScoreStormProvider.tsx"
 import { App } from "./App.tsx"
 import { SelectionProvider } from "./SelectionProvider.tsx"
+import { PlayerProvider } from "./PlayerProvider.tsx"
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <MantineProvider theme={theme}>
       <ScoreStormProvider>
         <SelectionProvider>
-          <App />
+          <PlayerProvider>
+            <App />
+          </PlayerProvider>
         </SelectionProvider>
       </ScoreStormProvider>
     </MantineProvider>
