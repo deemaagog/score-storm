@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 
-import { Settings } from "../BaseRenderer"
+import { Settings } from "../Settings"
 import { IRenderer } from "../interfaces"
 
 export interface GlyphBBoxes {

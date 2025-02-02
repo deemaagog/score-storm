@@ -1,4 +1,4 @@
-import { Settings } from "../BaseRenderer"
+import { Settings } from "../Settings"
 import { IRenderer } from "../interfaces"
 import { Beat } from "../model/Beat"
 import { BaseGraphical } from "./BaseGraphical"
@@ -10,8 +10,8 @@ type GlyphMap = Record<string, Glyph>
 export class GraphicalRestEvent extends BaseGraphical implements IGraphical {
   height!: number
   width!: number
-  restGlyph: Glyph
-  verticalShift: number // value in stave spaces
+  restGlyph!: Glyph
+  verticalShift!: number // value in stave spaces
   x!: number
   y!: number
   noteEvent: Beat
@@ -29,6 +29,10 @@ export class GraphicalRestEvent extends BaseGraphical implements IGraphical {
   constructor(noteEvent: Beat) {
     super()
     this.noteEvent = noteEvent
+    this.calculateMetrics(noteEvent)
+  }
+
+  calculateMetrics(noteEvent: Beat) {
     const duration = noteEvent.duration?.base
 
     this.verticalShift = duration === "whole" ? -1 : 0 // TODO: respect rest position

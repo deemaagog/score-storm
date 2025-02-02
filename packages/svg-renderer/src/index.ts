@@ -1,9 +1,10 @@
-import { EventType, IRenderer, SelectionProcessedEvent, Settings } from "@score-storm/core"
-import { IGraphical, EventManager } from "@score-storm/core"
+import ScoreStorm, { EventType, IRenderer, SelectionProcessedEvent } from "@score-storm/core"
+import { IGraphical } from "@score-storm/core"
 
 const NS = "http://www.w3.org/2000/svg"
 
 class SvgRenderer implements IRenderer {
+  scoreStorm!: ScoreStorm
   containerElement: HTMLDivElement
   containerWidth: number
   svgElement!: SVGElement
@@ -11,8 +12,6 @@ class SvgRenderer implements IRenderer {
   resizeObserver: ResizeObserver
   isInitialized: boolean = false
   openedGroup: SVGGElement | null = null
-  settings!: Settings
-  eventManager!: EventManager
   elementByObject: Map<IGraphical, SVGElement> = new Map()
 
   constructor(containerElement: HTMLDivElement) {
@@ -39,10 +38,10 @@ class SvgRenderer implements IRenderer {
       let x = event.clientX - rect.left
       let y = event.clientY - rect.top
 
-      this.eventManager.dispatch(EventType.SELECTION_ENDED, { x, y })
+      this.scoreStorm.eventManager.dispatch(EventType.SELECTION_ENDED, { x, y })
     })
 
-    this.eventManager.on(EventType.SELECTION_PROCESSED, this.handleSelectionProcessed)
+    this.scoreStorm.eventManager.on(EventType.SELECTION_PROCESSED, this.handleSelectionProcessed)
   }
 
   handleSelectionProcessed({ object }: SelectionProcessedEvent) {
@@ -81,12 +80,12 @@ class SvgRenderer implements IRenderer {
         user-select: none;
       }
       .clickable:hover {
-        fill: ${this.settings.editor!.styles.hoverColor};
+        fill: ${this.scoreStorm.settings.editor!.styles.hoverColor};
         transition: fill 0.1s;
         cursor: pointer;
       }
       .selected {
-        fill: ${this.settings.editor!.styles.selectColor} !important;
+        fill: ${this.scoreStorm.settings.editor!.styles.selectColor} !important;
         transition: fill 0.1s;
       }
     `)

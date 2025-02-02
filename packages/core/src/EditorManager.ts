@@ -1,6 +1,7 @@
 import RBush from "rbush"
 import { BBox, IGraphical } from "./graphical"
-import { EventManager, EventType, InteractionPosition } from "./EventManager"
+import { EventType, InteractionPosition } from "./EventManager"
+import RenderManager from "./RenderManager"
 
 type SpatialIndexItem = {
   minX: number
@@ -10,15 +11,15 @@ type SpatialIndexItem = {
   object: object
 }
 
-export class BaseEditor {
-  private eventManager!: EventManager
+export class EditorManager {
+  private renderManager!: RenderManager
   private hoveredObject: any | null = null
   private selectedObject: any | null = null // TODO: improve tpyes, create BaeObject class
   private spatialSearchTree!: RBush<SpatialIndexItem>
   private grahicalByObject: Map<object, IGraphical> = new Map()
 
-  constructor(eventManager: EventManager) {
-    this.eventManager = eventManager
+  constructor(renderManager: RenderManager) {
+    this.renderManager = renderManager
 
     this.spatialSearchTree = new RBush()
 
@@ -26,8 +27,8 @@ export class BaseEditor {
     this.handleHover = this.handleHover.bind(this)
     this.handleSelectionEnded = this.handleSelectionEnded.bind(this)
 
-    this.eventManager.on(EventType.HOVER, this.handleHover)
-    this.eventManager.on(EventType.SELECTION_ENDED, this.handleSelectionEnded)
+    this.renderManager.scoreStorm.eventManager.on(EventType.HOVER, this.handleHover)
+    this.renderManager.scoreStorm.eventManager.on(EventType.SELECTION_ENDED, this.handleSelectionEnded)
   }
 
   handleHover({ x, y }: InteractionPosition) {
@@ -53,7 +54,7 @@ export class BaseEditor {
     }
 
     if (shouldUpdate) {
-      this.eventManager.dispatch(EventType.HOVER_PROCESSED, {
+      this.renderManager.scoreStorm.eventManager.dispatch(EventType.HOVER_PROCESSED, {
         object: this.grahicalByObject.get(this.hoveredObject) || null,
       })
     }
@@ -70,7 +71,7 @@ export class BaseEditor {
     const newSelected = result[0] ? result[0].object : null
     if (newSelected !== this.selectedObject) {
       this.selectedObject = newSelected
-      this.eventManager.dispatch(EventType.SELECTION_PROCESSED, {
+      this.renderManager.scoreStorm.eventManager.dispatch(EventType.SELECTION_PROCESSED, {
         object: this.grahicalByObject.get(this.selectedObject) || null,
       })
     }
@@ -98,7 +99,7 @@ export class BaseEditor {
 
   restoreSelection() {
     if (this.selectedObject) {
-      this.eventManager.dispatch(EventType.SELECTION_PROCESSED, {
+      this.renderManager.scoreStorm.eventManager.dispatch(EventType.SELECTION_PROCESSED, {
         object: this.grahicalByObject.get(this.selectedObject) || null,
       })
     }

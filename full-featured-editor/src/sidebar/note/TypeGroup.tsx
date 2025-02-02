@@ -11,7 +11,8 @@ export const TypeGroup: React.FC = () => {
   const { selectedObject } = useContext(SelectionContext)
 
   const handleClick = () => {
-    scoreStorm.getScore().switchNoteType((selectedObject as GraphicalNoteEvent).noteEvent)
+    const selectedBeat = (selectedObject as GraphicalNoteEvent).noteEvent
+    selectedBeat.switchType()
     scoreStorm.render()
   }
 

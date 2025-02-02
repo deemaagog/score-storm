@@ -1,5 +1,11 @@
-import { BBox, EventType, HoverProcessedEvent, IRenderer, SelectionProcessedEvent, Settings } from "@score-storm/core"
-import { IGraphical, EventManager } from "@score-storm/core"
+import ScoreStorm, {
+  BBox,
+  EventType,
+  HoverProcessedEvent,
+  IRenderer,
+  SelectionProcessedEvent,
+  IGraphical,
+} from "@score-storm/core"
 import { Layer } from "./Layer"
 
 class CanvasRenderer implements IRenderer {
@@ -20,8 +26,7 @@ class CanvasRenderer implements IRenderer {
   resizeObserver: ResizeObserver
   isInitialized: boolean = false
 
-  settings!: Settings
-  eventManager!: EventManager
+  scoreStorm!: ScoreStorm
 
   boundingRect!: DOMRect
 
@@ -44,8 +49,8 @@ class CanvasRenderer implements IRenderer {
       this.currentLayer = this.hoverLayer
       this.mainLayer.setCursorType("pointer")
 
-      this.setColor(this.settings.editor!.styles.hoverColor)
-      object.render(this, this.settings)
+      this.setColor(this.scoreStorm.settings.editor!.styles.hoverColor)
+      object.render(this, this.scoreStorm.settings)
     } else {
       this.currentLayer = this.hoverLayer
       this.hoverLayer.clear()
@@ -59,8 +64,8 @@ class CanvasRenderer implements IRenderer {
     this.currentLayer = this.selectionLayer
     if (object) {
       this.currentLayer.clear()
-      this.setColor(this.settings.editor!.styles.selectColor)
-      object.render(this, this.settings)
+      this.setColor(this.scoreStorm.settings.editor!.styles.selectColor)
+      object.render(this, this.scoreStorm.settings)
     } else {
       this.currentLayer.clear()
     }
@@ -84,17 +89,17 @@ class CanvasRenderer implements IRenderer {
       let x = event.clientX - this.boundingRect.left
       let y = event.clientY - this.boundingRect.top
 
-      this.eventManager.dispatch(EventType.HOVER, { x, y })
+      this.scoreStorm.eventManager.dispatch(EventType.HOVER, { x, y })
     })
 
     this.mainLayer.canvasElement.addEventListener("click", (event: MouseEvent) => {
       let x = event.clientX - this.boundingRect.left
       let y = event.clientY - this.boundingRect.top
-      this.eventManager.dispatch(EventType.SELECTION_ENDED, { x, y })
+      this.scoreStorm.eventManager.dispatch(EventType.SELECTION_ENDED, { x, y })
     })
 
-    this.eventManager.on(EventType.HOVER_PROCESSED, this.handleHoverProcessed)
-    this.eventManager.on(EventType.SELECTION_PROCESSED, this.handleSelectionProcessed)
+    this.scoreStorm.eventManager.on(EventType.HOVER_PROCESSED, this.handleHoverProcessed)
+    this.scoreStorm.eventManager.on(EventType.SELECTION_PROCESSED, this.handleSelectionProcessed)
 
     this.currentLayer = this.mainLayer
   }

@@ -1,4 +1,4 @@
-import { IRenderer, Settings, IGraphical, EventManager } from "@score-storm/core"
+import ScoreStorm, { IRenderer, IGraphical } from "@score-storm/core"
 import { Canvas, createCanvas, SKRSContext2D, GlobalFonts, SvgExportFlag, SvgCanvas } from "@napi-rs/canvas"
 
 type Options = {
@@ -9,12 +9,11 @@ type Options = {
 type CanvasOrSvgCanvas<T extends Options> = T["svgExportFlag"] extends SvgExportFlag ? SvgCanvas : Canvas
 
 class NodeSkiaRenderer<T extends Options> implements IRenderer {
+  scoreStorm!: ScoreStorm
   containerWidth: number
   canvas!: CanvasOrSvgCanvas<T>
   context!: SKRSContext2D
   isInitialized: boolean = false
-  settings!: Settings
-  eventManager!: EventManager
   svgExportFlag?: SvgExportFlag
 
   constructor(opts: T) {

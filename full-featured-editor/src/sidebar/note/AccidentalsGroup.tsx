@@ -14,8 +14,8 @@ export const AccidentalsGroup: React.FC = () => {
   const { scoreStorm } = useContext(ScoreStormContext)
 
   const handleSetAccidental = (accidental?: number) => {
-    const note = (selectedObject as GraphicalNoteEvent).noteEvent?.notes![0]
-    scoreStorm.getScore().changeNoteAccidental(note, accidental)
+    const beat = (selectedObject as GraphicalNoteEvent).noteEvent
+    beat.changeAccidental(accidental)
     scoreStorm.render()
   }
 
