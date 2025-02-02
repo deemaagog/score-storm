@@ -5,6 +5,7 @@ import { Measure } from "./Measure"
 import { Beat, Note, Pitch } from "./Beat"
 import { Clef } from "./Clef"
 import { Instrument, InstrumentNames, InstrumentType } from "./Instrument"
+import { GraphicalScore } from "../graphical"
 
 export type QuickScoreOptions = {
   numberOfMeasures?: number
@@ -25,26 +26,26 @@ export class Score {
 
     for (let i = 0; i < mergedOptions.instruments.length; i++) {
       const instrument = new Instrument(InstrumentNames[mergedOptions.instruments[i]])
+      instrument.index = i
       for (let m = 0; m < mergedOptions.numberOfMeasures!; m++) {
         const measure = new Measure()
+        measure.instrument = instrument
+        instrument.measures.push(measure)
 
         if (m === 0) {
           measure.clef = new Clef("G", -2)
         }
 
         measure.events = Array.from({ length: mergedOptions.timeSignature!.count }, () => {
-          const beat = new Beat({
-            duration: { base: mergedOptions.timeSignature.unitToDuration() },
-            rest: {},
-          })
-          beat.measure = measure
+          const beat = new Beat(
+            {
+              duration: { base: mergedOptions.timeSignature.unitToDuration() },
+              rest: {},
+            },
+            measure,
+          )
           return beat
         })
-
-        measure.instrument = instrument
-
-        instrument.measures.push(measure)
-        instrument.index = i
       }
       score.instruments.push(instrument)
     }
@@ -72,8 +73,11 @@ export class Score {
     for (let i = 0; i < mnxScore.parts.length; i++) {
       const part = mnxScore.parts[i]
       const instrument = new Instrument({ name: part.name || "", shortName: part["short-name"] || "" })
+      instrument.index = i
       for (const mnxMeasure of part.measures!) {
         const measure = new Measure()
+        instrument.measures.push(measure)
+        measure.instrument = instrument
         measure.events = []
         // TODO: clef changes
 
@@ -86,16 +90,12 @@ export class Score {
 
         for (const event of firstVoice.content) {
           if (event.type === "event") {
-            const beat = new Beat(event)
-            beat.measure = measure
+            const beat = new Beat(event, measure)
             measure.events.push(beat)
           } else {
             throw new Error(`Event type ${event.type} is not supported`)
           }
         }
-        measure.instrument = instrument
-        instrument.measures.push(measure)
-        instrument.index = i
       }
       score.instruments.push(instrument)
     }
@@ -121,7 +121,11 @@ export class Score {
   // TODO: staves/measures
   instruments: Instrument[] = []
 
-  constructor() {}
+  graphical: GraphicalScore
+
+  constructor() {
+    this.graphical = new GraphicalScore(this)
+  }
 
   addMeasure() {
     const currentTimeSignature = this.getMeasureTimeSignature(this.globalMeasures.length - 1)
@@ -132,15 +136,17 @@ export class Score {
     for (const instrument of this.instruments) {
       // assuming only one stave for now
       const measure = new Measure()
+      measure.instrument = instrument
       measure.events = Array.from({ length: currentTimeSignature.count }, () => {
-        const beat = new Beat({
-          duration: { base: this.globalMeasures[0].time!.unitToDuration() },
-          rest: {},
-        })
-        beat.measure = measure
+        const beat = new Beat(
+          {
+            duration: { base: this.globalMeasures[0].time!.unitToDuration() },
+            rest: {},
+          },
+          measure,
+        )
         return beat
       })
-      measure.instrument = instrument
       instrument.measures.push(measure)
     }
 
@@ -180,42 +186,6 @@ export class Score {
       firstMeasure.clef!.changeType("F", 2)
     } else {
       firstMeasure.clef!.changeType("G", -2)
-    }
-  }
-
-  // if rest, make it note and vice versa
-  switchNoteType(noteEvent: Beat) {
-    if (noteEvent.rest) {
-      noteEvent.rest = undefined
-      noteEvent.notes = [
-        {
-          pitch: noteEvent.getCurrentClef().getMiddleLinePitch(),
-        },
-      ]
-    } else {
-      noteEvent.rest = {}
-      noteEvent.notes = undefined
-    }
-  }
-
-  changeNoteAccidental(note: Note, newAlter?: number) {
-    // taking into account key signature is out of scope for now
-    const { alter, ...rest } = note.pitch
-    const alterChanged = alter !== newAlter
-    if (!alterChanged) {
-      newAlter = undefined
-    }
-    note.accidentalDisplay = {
-      show: typeof newAlter === "number",
-    }
-    note.pitch = { ...rest, ...(newAlter !== 0 && { alter: newAlter }) }
-  }
-
-  changeNotePitch(note: Note, newPitch: Pitch) {
-    // TODO: check equality
-    note.pitch = newPitch
-    note.accidentalDisplay = {
-      show: !!newPitch.alter,
     }
   }
 }

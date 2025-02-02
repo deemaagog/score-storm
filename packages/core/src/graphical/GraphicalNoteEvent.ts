@@ -1,5 +1,5 @@
 import { note } from "@tonaljs/pitch-note"
-import { Settings } from "../BaseRenderer"
+import { Settings } from "../Settings"
 import { IRenderer } from "../interfaces"
 import { Note, Beat } from "../model/Beat"
 import { BaseGraphical } from "./BaseGraphical"
@@ -20,8 +20,8 @@ export class GraphicalNoteEvent extends BaseGraphical implements IGraphical {
   noteEvent: Beat
   height!: number
   width!: number
-  noteheadGlyph: Glyph
-  verticalShift: number // value in stave spaces
+  noteheadGlyph!: Glyph
+  verticalShift!: number // value in stave spaces
   drawStem!: boolean
   x!: number
   y!: number
@@ -57,6 +57,10 @@ export class GraphicalNoteEvent extends BaseGraphical implements IGraphical {
   constructor(noteEvent: Beat) {
     super()
     this.noteEvent = noteEvent
+    this.calculateMetrics(noteEvent)
+  }
+
+  calculateMetrics(noteEvent: Beat) {
     const duration = noteEvent.duration?.base
 
     if (duration !== "whole") {
@@ -164,7 +168,7 @@ export class GraphicalNoteEvent extends BaseGraphical implements IGraphical {
     const pitch = this.noteEvent.notes![0].pitch
 
     // TODO: account for clef changes
-    const clef = this.noteEvent.getCurrentClef()
+    const clef = this.noteEvent.measure.getCurrentClef()
 
     const middlePitch = clef.getMiddleLinePitch()
 

@@ -27,12 +27,13 @@ export const PitchGroup: React.FC = () => {
       direction = "down"
     }
     if (direction) {
-      const note = (selectedObject as GraphicalNoteEvent).noteEvent?.notes![0]
+      const beat = (selectedObject as GraphicalNoteEvent).noteEvent
+      const note = beat.notes![0]
       const newPitch = transposePitch(note.pitch, direction === "up" ? "2m" : "-2m")
 
       play([{ pitch: toTonalPitch(newPitch), duration: 0.05 }])
 
-      scoreStorm.getScore().changeNotePitch(note, newPitch)
+      beat.changePitch(newPitch)
       scoreStorm.render()
     }
   }

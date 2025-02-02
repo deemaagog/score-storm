@@ -1,4 +1,4 @@
-import { Settings } from "../BaseRenderer"
+import { Settings } from "../Settings"
 import { IRenderer } from "../interfaces"
 import { TimeSignature } from "../model/TimeSignature"
 import { BaseGraphical } from "./BaseGraphical"
@@ -20,8 +20,8 @@ type GlyphMap = Record<number, Glyph>
 export class GraphicalTimeSignature extends BaseGraphical implements IGraphical {
   height!: number
   width!: number
-  countGlyph: Glyph
-  unitGlyph: Glyph
+  countGlyph!: Glyph
+  unitGlyph!: Glyph
   x!: number
   y!: number
   time!: TimeSignature
@@ -41,7 +41,11 @@ export class GraphicalTimeSignature extends BaseGraphical implements IGraphical 
   constructor(time: TimeSignature) {
     super()
     this.time = time
-    const { count, unit } = time!
+    this.calculateMetrics()
+  }
+
+  private calculateMetrics() {
+    const { count, unit } = this.time!
 
     this.countGlyph = GraphicalTimeSignature.glyphMap[count as keyof GlyphMap]
 
@@ -52,7 +56,6 @@ export class GraphicalTimeSignature extends BaseGraphical implements IGraphical 
     }
 
     // TODO: two digit time signatures, like 12/8
-
     const countGlyphHeight = this.countGlyph.bBoxes.bBoxNE[1] - this.countGlyph.bBoxes.bBoxSW[1]
     const unitGlyphHeight = this.unitGlyph.bBoxes.bBoxNE[1] - this.unitGlyph.bBoxes.bBoxSW[1]
 

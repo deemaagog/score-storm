@@ -1,4 +1,4 @@
-import { Settings } from "../BaseRenderer"
+import { Settings } from "../Settings"
 import { IRenderer } from "../interfaces"
 import { Clef } from "../model/Clef"
 import { BaseGraphical } from "./BaseGraphical"
@@ -10,8 +10,8 @@ type GlyphMap = Record<"G" | "F", Glyph>
 export class GraphicalClef extends BaseGraphical implements IGraphical {
   height!: number
   width!: number
-  clefGlyph: Glyph
-  verticalShift: number // value in stave spaces
+  clefGlyph!: Glyph
+  verticalShift!: number // value in stave spaces
   x!: number // todo : create Point2d type
   y!: number
   clef: Clef
@@ -24,7 +24,11 @@ export class GraphicalClef extends BaseGraphical implements IGraphical {
   constructor(clef: Clef) {
     super()
     this.clef = clef
-    const { position, sign } = clef
+    this.calculateMetrics()
+  }
+
+  calculateMetrics() {
+    const { position, sign } = this.clef
 
     this.verticalShift = position * -0.5
 

@@ -1,14 +1,15 @@
-import { Settings } from "./BaseRenderer"
-import { EventManager } from "./EventManager"
+import { ScoreStorm } from "./ScoreStorm"
 
 /* eslint-disable no-unused-vars */
 export interface IRenderer {
+  /**
+   * This holds the reference to the ScoreStorm instance. It is set by the RenderManager and should not be set manually.
+   * It is used to access the settings and eventManager.
+   */
+  scoreStorm: ScoreStorm
+
   containerWidth: number
   isInitialized: boolean
-
-  // adding this temporarily. TODO: make settings singlton and eventManager or use dependency injection
-  settings: Settings
-  eventManager: EventManager
 
   init(): void
 

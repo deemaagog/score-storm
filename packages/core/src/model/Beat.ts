@@ -1,4 +1,4 @@
-import { Clef } from "./Clef"
+import { GraphicalNoteEvent, GraphicalRestEvent } from "../graphical"
 import { Measure } from "./Measure"
 
 export type Pitch = {
@@ -32,7 +32,9 @@ export class Beat {
   rest?: Rest
   measure!: Measure
 
-  constructor(params: { duration?: NoteDuration; notes?: Note[]; rest?: Rest }) {
+  graphical: GraphicalNoteEvent | GraphicalRestEvent
+
+  constructor(params: { duration?: NoteDuration; notes?: Note[]; rest?: Rest }, measure: Measure) {
     const { duration, notes, rest } = params
 
     if (!duration) {
@@ -42,11 +44,19 @@ export class Beat {
       throw new Error(`Chords are not supported`)
     }
 
+    this.measure = measure
+
     this.duration = duration
     this.notes = notes
     this.rest = rest
 
     this.durationValue = this.getDurationValue(duration.base)
+
+    if (notes) {
+      this.graphical = new GraphicalNoteEvent(this)
+    } else {
+      this.graphical = new GraphicalRestEvent(this)
+    }
   }
 
   getDurationValue(base: string): number {
@@ -70,8 +80,47 @@ export class Beat {
     }
   }
 
-  getCurrentClef(): Clef {
-    // TODO: account for clef changes
-    return this.measure.instrument.measures[0].clef!
+  // if rest, make it note and vice versa
+  switchType() {
+    if (this.rest) {
+      this.rest = undefined
+      this.notes = [
+        {
+          pitch: this.measure.getCurrentClef().getMiddleLinePitch(),
+        },
+      ]
+      this.graphical = new GraphicalNoteEvent(this)
+    } else {
+      this.rest = {}
+      this.notes = undefined
+      this.graphical = new GraphicalRestEvent(this)
+    }
+  }
+
+  changeAccidental(newAlter?: number) {
+    // taking into account key signature is out of scope for now
+    const note = this.notes![0]
+    const { alter, ...rest } = note.pitch
+    const alterChanged = alter !== newAlter
+    if (!alterChanged) {
+      newAlter = undefined
+    }
+    note.accidentalDisplay = {
+      show: typeof newAlter === "number",
+    }
+    note.pitch = { ...rest, ...(newAlter !== 0 && { alter: newAlter }) }
+
+    this.graphical = new GraphicalNoteEvent(this)
+  }
+
+  changePitch(newPitch: Pitch) {
+    // TODO: check equality
+    const note = this.notes![0]
+    note.pitch = newPitch
+    note.accidentalDisplay = {
+      show: !!newPitch.alter,
+    }
+
+    this.graphical = new GraphicalNoteEvent(this)
   }
 }

@@ -1,36 +1,23 @@
-import BaseRenderer from "./BaseRenderer"
+import RenderManager from "./RenderManager"
 import { EventManager } from "./EventManager"
 import { IRenderer } from "./interfaces"
 import { Score } from "./model/Score"
-
-export interface ScoreStormSettings {
-  scale: number
-  debug?: {
-    bBoxes: boolean
-  }
-  editor?: {
-    enable: boolean
-    styles: {
-      hoverColor: string
-      selectColor: string
-    }
-  }
-}
+import { ScoreStormSettings, Settings } from "./Settings"
 
 /**
  * The main entrypoint
  */
 export class ScoreStorm {
   private score: Score
-  private baseRenderer!: BaseRenderer
-  private settings?: ScoreStormSettings
-  private eventManager!: EventManager
+  private renderManager!: RenderManager
+  eventManager!: EventManager
+  settings!: Settings
 
   constructor(settings?: ScoreStormSettings) {
     this.score = Score.createQuickScore()
-    this.settings = settings
+    this.settings = new Settings(settings)
     this.eventManager = new EventManager()
-    this.baseRenderer = new BaseRenderer(this.eventManager, this.settings)
+    this.renderManager = new RenderManager(this)
   }
 
   public setScore(score: Score) {
@@ -46,24 +33,23 @@ export class ScoreStorm {
   }
 
   public setSettings(settings?: ScoreStormSettings) {
-    this.settings = settings
-    this.baseRenderer.setSettings(settings)
+    this.settings = new Settings(settings)
   }
 
   public setRenderer(renderer: IRenderer) {
-    this.baseRenderer.setRenderer(renderer)
+    this.renderManager.setRenderer(renderer)
   }
 
   public getRenderer() {
-    return this.baseRenderer.getRenderer()
+    return this.renderManager.getRenderer()
   }
 
   public render() {
-    this.baseRenderer.render(this.score)
+    this.renderManager.render(this.score)
   }
 
   public destroy() {
-    this.baseRenderer.destroy()
+    this.renderManager.destroy()
     this.eventManager.clear()
   }
 
