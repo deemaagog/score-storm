@@ -35,3 +35,5 @@ export interface IGraphical {
 
   getBBox(settings: Settings): BBox
 }
+
+export type Point = { x: number; y: number }

@@ -88,6 +88,10 @@ class RenderManager {
           const measure = score.instruments[i].measures[globalMeasure.index]
           this.renderMeasure(measure, latestRow, latestMeasureInRow, globalMeasure)
         }
+        // setting global measure position and height
+        globalMeasure.graphical.height = row.systemHeight
+        globalMeasure.graphical.setPosition({ x: this.x, y: row.instrumentsPosition[0]})
+
         this.x += globalMeasure.graphical.width // TODO: make X position a GraphicalGlobalMeasure property
       }
       this.x = 0
@@ -109,7 +113,7 @@ class RenderManager {
   renderMeasure(measure: Measure, latestRow: boolean, latestMeasureInRow: boolean, globalMeasure: GlobalMeasure) {
     // draw staff lines
 
-    this.renderStaveLines(globalMeasure.graphical.width)
+    measure.graphical.renderStaveLines(this.renderer, this.x, this.y, this.scoreStorm.settings)
 
     this.renderMeasureContent(measure, globalMeasure)
 
@@ -135,23 +139,6 @@ class RenderManager {
         this.scoreStorm.settings.barlineHeight,
       )
     }
-  }
-
-  renderStaveLines(measureWidth: number) {
-    this.renderer.setColor(this.scoreStorm.settings.staveLineColor)
-    const half = Math.floor(this.scoreStorm.settings.numberOfStaffLines / 2)
-    for (let index = -half; index <= half; index++) {
-      this.renderer.drawRect(
-        this.x,
-        this.y +
-          this.scoreStorm.settings.midStave +
-          this.scoreStorm.settings.unit * index -
-          this.scoreStorm.settings.staffLineThickness / 2,
-        measureWidth,
-        this.scoreStorm.settings.staffLineThickness,
-      )
-    }
-    this.renderer.setColor(this.scoreStorm.settings.mainColor)
   }
 
   renderBBox(bBox: BBox) {
@@ -189,6 +176,14 @@ class RenderManager {
     for (let i = 0; i < measure.events.length; i++) {
       const event = measure.events[i]
       const globalBeat = globalMeasure.globalBeatByNote.get(event)!
+
+      if (!globalBeat.graphical.position) {
+        globalBeat.graphical.setPosition({
+          x: measureX + availableWidth * globalBeat.fraction,
+          y: this.y,
+        })
+      }
+
       event.graphical.setPosition(
         measureX + availableWidth * globalBeat.fraction,
         this.y + this.scoreStorm.settings.midStave,

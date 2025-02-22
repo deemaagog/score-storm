@@ -2,7 +2,7 @@ import { getMNXScore, getScoreFromMusicXml } from "mnxconverter"
 import { GlobalMeasure } from "./GlobalMeasure"
 import { TimeSignature } from "./TimeSignature"
 import { Measure } from "./Measure"
-import { Beat, Note, Pitch } from "./Beat"
+import { Beat } from "./Beat"
 import { Clef } from "./Clef"
 import { Instrument, InstrumentNames, InstrumentType } from "./Instrument"
 import { GraphicalScore } from "../graphical"
@@ -26,10 +26,12 @@ export class Score {
 
     for (let i = 0; i < mergedOptions.instruments.length; i++) {
       const instrument = new Instrument(InstrumentNames[mergedOptions.instruments[i]])
+      instrument.score = score
       instrument.index = i
       for (let m = 0; m < mergedOptions.numberOfMeasures!; m++) {
         const measure = new Measure()
         measure.instrument = instrument
+        measure.index = m
         instrument.measures.push(measure)
 
         if (m === 0) {
@@ -73,11 +75,14 @@ export class Score {
     for (let i = 0; i < mnxScore.parts.length; i++) {
       const part = mnxScore.parts[i]
       const instrument = new Instrument({ name: part.name || "", shortName: part["short-name"] || "" })
+      instrument.score = score
       instrument.index = i
-      for (const mnxMeasure of part.measures!) {
+      for (let m = 0; m < part.measures!.length; m++) {
+        const mnxMeasure = part.measures![m]
         const measure = new Measure()
         instrument.measures.push(measure)
         measure.instrument = instrument
+        measure.index = m
         measure.events = []
         // TODO: clef changes
 
@@ -133,10 +138,13 @@ export class Score {
       throw new Error("Failed to determine time signature")
     }
 
+    const newMeasureIndex = this.globalMeasures.length
+
     for (const instrument of this.instruments) {
       // assuming only one stave for now
       const measure = new Measure()
       measure.instrument = instrument
+      measure.index = newMeasureIndex
       measure.events = Array.from({ length: currentTimeSignature.count }, () => {
         const beat = new Beat(
           {
@@ -151,7 +159,7 @@ export class Score {
     }
 
     const globalMeasure = new GlobalMeasure()
-    globalMeasure.index = this.globalMeasures.length
+    globalMeasure.index = newMeasureIndex
     globalMeasure.score = this
     this.globalMeasures.push(globalMeasure)
     globalMeasure.createGlobalBeats()
