@@ -1,9 +1,11 @@
 import { useContext, useEffect, useRef } from "react"
-import { ScoreStormContext } from "./ScoreStormProvider"
+import { ScoreStormContext } from "../ScoreStormProvider"
 // import Renderer from "@score-storm/svg-renderer"
 import Renderer from "@score-storm/canvas-renderer"
+import { Cursor } from "./Cursor"
+import styles from "./Score.module.css"
 
-export default function Container() {
+export const Score = () => {
   const rootElementRef = useRef<HTMLDivElement>(null)
   const { scoreStorm } = useContext(ScoreStormContext)
 
@@ -12,5 +14,11 @@ export default function Container() {
     scoreStorm.render()
   }, [])
 
-  return <div id="ss-container" ref={rootElementRef} />
+  return (
+    <div className={styles.wrapper}>
+      <div className={styles.container} ref={rootElementRef}>
+        <Cursor />
+      </div>
+    </div>
+  )
 }

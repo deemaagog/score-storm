@@ -1,9 +1,11 @@
 import React, { PropsWithChildren, useEffect, useState, createContext, useRef } from "react"
 import { SplendidGrandPiano } from "smplr"
 import { getAudioContext } from "./audio-context"
+import { useSettings } from "./SettingsProvider"
 
 type PlayerContextValue = {
   play: (events: PlayEvent[]) => void
+  playOne: (event: PlayEvent) => void
   stop: () => void
   isReady: boolean
   isPlaying: boolean
@@ -18,18 +20,18 @@ export type PlayEvent = {
 
 export const PlayerContext = createContext<PlayerContextValue>({
   play: () => {},
+  playOne: () => {},
   stop: () => {},
   isReady: false,
   isPlaying: false,
 })
 
-const BPM = 100 // hardcoded for now
-const quarterToBmp = 4 * (60 / BPM)
-
 // only piano for now
 export const PlayerProvider: React.FC<PropsWithChildren> = ({ children }) => {
   const [isReady, setIsReady] = useState<boolean>(false)
   const [isPlaying, setIsPlaying] = useState<boolean>(false)
+  const { bpm } = useSettings()
+  const quarterToBpm = 4 * (60 / bpm)
 
   const instrument = useRef<SplendidGrandPiano>()
 
@@ -40,17 +42,33 @@ export const PlayerProvider: React.FC<PropsWithChildren> = ({ children }) => {
     events.map((event, i) =>
       instrument.current!.start({
         note: event.pitch,
-        duration: event.duration * quarterToBmp,
-        time: instrument.current!.context.currentTime + (event.time ?? 0) * quarterToBmp,
+        duration: event.duration * quarterToBpm,
+        time: instrument.current!.context.currentTime + (event.time ?? 0) * quarterToBpm,
         onEnded:
           i === events.length - 1
             ? () => {
                 setIsPlaying(false)
               }
             : undefined,
+        // onStart: (note) => {console.log("played", note)},
         velocity: event.velocity ?? 100,
       }),
     )
+  }
+
+  // play one note, used for pitch input
+  const playOne = (event: PlayEvent) => {
+    if (isPlaying) {
+      return
+    }
+    getAudioContext().resume()
+
+    instrument.current!.start({
+      note: event.pitch,
+      duration: event.duration * quarterToBpm,
+      time: instrument.current!.context.currentTime + (event.time ?? 0) * quarterToBpm,
+      velocity: event.velocity ?? 100,
+    })
   }
 
   const stop = () => {
@@ -68,5 +86,5 @@ export const PlayerProvider: React.FC<PropsWithChildren> = ({ children }) => {
     })
   }, [])
 
-  return <PlayerContext.Provider value={{ play, stop, isReady, isPlaying }}>{children}</PlayerContext.Provider>
+  return <PlayerContext.Provider value={{ play, playOne, stop, isReady, isPlaying }}>{children}</PlayerContext.Provider>
 }

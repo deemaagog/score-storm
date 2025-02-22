@@ -13,7 +13,7 @@ import Demo from "@site/src/components/Demo"
 import FontLoader from "@site/src/components/FontLoader"
 
 <FontLoader>
-  <iframe  style={{border: "1px solid #e6e6e6"}} width="100%"  height="700px" src={process.env.NODE_ENV === 'development'? "http://localhost:5173":"https://ss-editor.netlify.app"} />
+  <iframe width="100%"  height="700px" src={process.env.NODE_ENV === 'development'? "http://localhost:5173":"https://ss-editor.netlify.app"} />
 </FontLoader>
 
 Usage in code:

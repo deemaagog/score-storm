@@ -1,0 +1,19 @@
+.actionButton {
+  color: rgb(18 42 89 / 80%);
+  background-color: rgb(34 69 137 / 10%);
+  &:hover {
+    background-color: darken(rgb(34 69 137 / 10%), 0.02);
+    color: rgb(18 42 89 / 80%);
+  }
+
+  &[data-active] {
+    border: 1px solid rgb(18 42 89 / 80%);
+    border-width: 1.2px;
+  }
+
+  &[data-disabled] {
+    color: var(--mantine-color-gray-5);
+    background: rgba(34, 69, 137, 0.1);
+  }
+}
+

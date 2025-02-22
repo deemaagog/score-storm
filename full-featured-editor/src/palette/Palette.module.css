@@ -1,0 +1,9 @@
+.palette {
+  background-color: #ffffffe6;
+  flex-basis: rem(240px);
+  flex-grow: 0;
+  flex-shrink: 0;
+  height: 100%;
+}
+
+
