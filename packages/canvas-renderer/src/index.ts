@@ -105,7 +105,10 @@ class CanvasRenderer implements IRenderer {
   }
 
   destroy() {
-    this.containerElement.innerHTML = ""
+    for (const layer of [this.mainLayer, this.hoverLayer, this.selectionLayer]) {
+      this.containerElement.removeChild(layer.canvasElement);
+    }
+
     this.isInitialized = false
     this.resizeObserver.unobserve(this.containerElement)
   }
