@@ -1,4 +1,5 @@
 import { Settings } from "../Settings"
+import { IRenderer } from "../interfaces"
 import { Measure } from "../model/Measure"
 import { GraphicalClef } from "./GraphicalClef"
 import { GraphicalTimeSignature } from "./GraphicalTimeSignature"
@@ -35,5 +36,19 @@ export class GraphicalMeasure {
       (min, event) => Math.max(min, event.graphical.getBottomStaveOverflow(settings)),
       minY,
     )
+  }
+
+  renderStaveLines(renderer: IRenderer, x: number, y: number, settings: Settings) {
+    renderer.setColor(settings.staveLineColor)
+    const half = Math.floor(settings.numberOfStaffLines / 2)
+    for (let index = -half; index <= half; index++) {
+      renderer.drawRect(
+        x,
+        y + settings.midStave + settings.unit * index - settings.staffLineThickness / 2,
+        this.measure.getGlobalMeasure().graphical.width,
+        settings.staffLineThickness,
+      )
+    }
+    renderer.setColor(settings.mainColor)
   }
 }

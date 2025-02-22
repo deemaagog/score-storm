@@ -9,6 +9,7 @@ export type InstrumentPosition = number
 export class Row {
   globalMeasures!: GlobalMeasure[]
   instrumentsPosition!: InstrumentPosition[]
+  systemHeight!: number // TODO: come up with a better name for this
 }
 
 const SPACE_BETWEEN_STAVE_ROWS_COEF = 6 // space unit
@@ -28,7 +29,7 @@ export class GraphicalScore {
 
   calculateLineBreaks(containerWidth: number, settings: Settings) {
     // calculate line breaks
-    const rows: Omit<Row, "instrumentsPosition">[] = []
+    const rows: Pick<Row, "globalMeasures">[] = []
     const instrumentsCurrentClefs: GraphicalClef[] = []
     let currentTimeSignature: GraphicalTimeSignature
 
@@ -98,14 +99,15 @@ export class GraphicalScore {
     this.calculateYPositionsAndScoreHeight(rows, settings)
   }
 
-  calculateYPositionsAndScoreHeight(rows: Omit<Row, "instrumentsPosition">[], settings: Settings) {
+  calculateYPositionsAndScoreHeight(rows: Pick<Row, "globalMeasures">[], settings: Settings) {
     this.height = 0
     this.rows = []
     // calculate instruments Y position and total height
 
     let currentYPosition = 0
-
+    
     for (let ri = 0; ri < rows.length; ri++) {
+      let systemHeight = 0
       const instrumentPositions: InstrumentPosition[] = []
 
       const row = rows[ri]
@@ -135,16 +137,18 @@ export class GraphicalScore {
         currentYPosition += currentYTopShift
         instrumentPositions[i] = currentYPosition
 
+        systemHeight += settings.barlineHeight
         currentYPosition += settings.barlineHeight
         this.height += currentYTopShift + settings.barlineHeight + currentYBottomShift
 
         if (i < this.score.instruments.length - 1) {
+          systemHeight += settings.unit * SPACE_BETWEEN_INSTRUMENTS_ROWS_COEF
           currentYPosition += settings.unit * SPACE_BETWEEN_INSTRUMENTS_ROWS_COEF
           this.height += settings.unit * SPACE_BETWEEN_INSTRUMENTS_ROWS_COEF
         }
       }
 
-      this.rows.push({ ...row, instrumentsPosition: instrumentPositions })
+      this.rows.push({ ...row, instrumentsPosition: instrumentPositions, systemHeight })
 
       if (ri < rows.length - 1) {
         currentYPosition += settings.unit * SPACE_BETWEEN_STAVE_ROWS_COEF

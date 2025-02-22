@@ -1,8 +1,13 @@
 import { GlobalMeasure } from "../model/GlobalMeasure"
+import { Point } from './interfaces'
+
 export class GraphicalGlobalMeasure {
+  globalMeasure!: GlobalMeasure
+  
   minContentWidth!: number // notes/rests only, measure attributes are not taken into account
   width!: number // actual width calculated at the time of line breaking
-  globalMeasure!: GlobalMeasure
+  height!: number
+  position!: Point
 
   // horizontal relative positions
   timeSignatureRelativeWidth = 0
@@ -10,6 +15,10 @@ export class GraphicalGlobalMeasure {
 
   constructor(globalMeasure: GlobalMeasure) {
     this.globalMeasure = globalMeasure
+  }
+
+  setPosition(position: Point): void {
+    this.position = position
   }
 
   calculateMinContentWidth() {

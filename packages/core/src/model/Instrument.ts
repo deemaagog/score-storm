@@ -1,3 +1,4 @@
+import { Score } from "."
 import { Measure } from "./Measure"
 
 export enum InstrumentType {
@@ -11,6 +12,7 @@ export const InstrumentNames: Record<InstrumentType, InstrumentParams> = {
 }
 
 export class Instrument {
+  score!: Score
   // TODO: staves/measures
 
   // Instrument's position in Score. Starts from 0.
