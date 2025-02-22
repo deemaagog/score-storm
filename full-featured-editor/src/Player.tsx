@@ -1,36 +1,50 @@
-import { useContext, useEffect } from "react"
+import { useContext } from "react"
 import { ScoreStormContext } from "./ScoreStormProvider"
 import { GlobalMeasure, toTonalPitch } from "@score-storm/core"
 import { PlayerContext, PlayEvent } from "./PlayerProvider"
+import { IconPlayerPlayFilled, IconPlayerStopFilled } from "@tabler/icons-react"
 
 export const Player: React.FC = () => {
   const { play, stop, isPlaying, isReady } = useContext(PlayerContext)
   const { scoreStorm } = useContext(ScoreStormContext)
 
-  useEffect(() => {
-    window.addEventListener("keyup", handleKey)
-    return () => {
-      window.removeEventListener("keyup", handleKey)
-    }
-  }, [isPlaying, isReady])
-
-  const handleKey = (e: KeyboardEvent) => {
-    if (!isReady) {
-      console.log("player not ready")
-      return
-    }
-    if (e.code === "Space") {
-      if (isPlaying) {
-        stop()
-      } else {
-        const score = scoreStorm.getScore()
-        const playEvents = getPlayEvents(score.globalMeasures)
-        play(playEvents)
-      }
-    }
+  const handlePlay = () => {
+    const score = scoreStorm.getScore()
+    const playEvents = getPlayEvents(score.globalMeasures)
+    play(playEvents)
   }
 
-  return null
+  const handleStop = () => {
+    stop()
+  }
+
+  if (!isReady) {
+    return null
+  }
+
+  if (isPlaying) {
+    return (
+      <IconPlayerStopFilled
+        color="white"
+        style={{ zIndex: 1000 }}
+        role="button"
+        cursor={"pointer"}
+        onClick={handleStop}
+      />
+    )
+  }
+
+  return (
+    <IconPlayerPlayFilled
+      color="white"
+      style={{ zIndex: 1000 }}
+      role="button"
+      cursor={"pointer"}
+      onClick={handlePlay}
+    />
+  )
+
+  /* <Slider w={"100%"} flex={1} size={"xs"} mr={8} step={0.01} /> */
 }
 
 function getPlayEvents(globalMeasures: GlobalMeasure[]): PlayEvent[] {

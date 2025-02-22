@@ -1,14 +1,13 @@
 import { Stack } from "@mantine/core"
 import { CollapsibleGroup } from "../CollapsibleGroup"
 import { ClefGroup } from "./ClefGroup"
-import { ManagementGroup } from './ManagementGroup'
+import { ManagementGroup } from "./ManagementGroup"
 
 export const Measure: React.FC = () => {
-
   return (
-    <Stack align="stretch" justify="center" gap="md">
+    <Stack align="stretch" justify="center" gap="lg">
       <CollapsibleGroup label="Management">
-        <ManagementGroup/>
+        <ManagementGroup />
       </CollapsibleGroup>
       <CollapsibleGroup label="Clef">
         <ClefGroup />

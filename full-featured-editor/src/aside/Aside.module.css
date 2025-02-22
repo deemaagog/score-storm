@@ -1,0 +1,4 @@
+.asideActions {
+  padding: var(--mantine-spacing-sm);
+  z-index: 100;
+}

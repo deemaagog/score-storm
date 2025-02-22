@@ -1,11 +1,11 @@
 import { useContext, useEffect } from "react"
-import { SelectionContext } from "../../SelectionProvider"
+import { SelectionContext } from "./SelectionProvider"
 import { GraphicalNoteEvent, transposePitch, toTonalPitch } from "@score-storm/core"
-import { ScoreStormContext } from "../../ScoreStormProvider"
-import { PlayerContext } from "../../PlayerProvider"
+import { ScoreStormContext } from "./ScoreStormProvider"
+import { PlayerContext } from "./PlayerProvider"
 
-export const PitchGroup: React.FC = () => {
-  const { play } = useContext(PlayerContext)
+export const KeyboardHandler: React.FC = () => {
+  const { playOne } = useContext(PlayerContext)
   const { selectedObject } = useContext(SelectionContext)
   const { scoreStorm } = useContext(ScoreStormContext)
 
@@ -31,7 +31,7 @@ export const PitchGroup: React.FC = () => {
       const note = beat.notes![0]
       const newPitch = transposePitch(note.pitch, direction === "up" ? "2m" : "-2m")
 
-      play([{ pitch: toTonalPitch(newPitch), duration: 0.05 }])
+      playOne({ pitch: toTonalPitch(newPitch), duration: 0.05 })
 
       beat.changePitch(newPitch)
       scoreStorm.render()

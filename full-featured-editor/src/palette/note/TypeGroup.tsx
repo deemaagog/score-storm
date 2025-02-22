@@ -1,10 +1,11 @@
 import { useContext } from "react"
-import { ActionIcon, Group, Tooltip } from "@mantine/core"
+import { Group } from "@mantine/core"
 import { IconLetterN, IconLetterR } from "@tabler/icons-react"
 import { SelectionContext } from "../../SelectionProvider"
 import { ScoreStormContext } from "../../ScoreStormProvider"
 import { GraphicalNoteEvent } from "@score-storm/core"
 import { GraphicalRestEvent } from "@score-storm/core"
+import { ActionButton } from "../ActionButton"
 
 export const TypeGroup: React.FC = () => {
   const { scoreStorm } = useContext(ScoreStormContext)
@@ -19,19 +20,11 @@ export const TypeGroup: React.FC = () => {
   return (
     <Group>
       {selectedObject instanceof GraphicalNoteEvent && (
-        <Tooltip label="Make current note rest">
-          <ActionIcon color="blue.9" bg={"blue.1"} size="xl" variant="white" onClick={handleClick}>
-            <IconLetterR size={32} strokeWidth={1.2} />
-          </ActionIcon>
-        </Tooltip>
+        <ActionButton Icon={IconLetterR} onClick={handleClick} tooltip={"Make current note rest"} />
       )}
 
       {selectedObject instanceof GraphicalRestEvent && (
-        <Tooltip label="Remove current rest note">
-          <ActionIcon color="blue.9" bg={"blue.1"} size="xl" variant="white" onClick={handleClick}>
-            <IconLetterN size={32} strokeWidth={1.2} />
-          </ActionIcon>
-        </Tooltip>
+        <ActionButton Icon={IconLetterN} onClick={handleClick} tooltip={"Make current rest note"} />
       )}
     </Group>
   )

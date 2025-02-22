@@ -1,4 +1,4 @@
-import { Group, Tooltip } from "@mantine/core"
+import { Group } from "@mantine/core"
 import { useContext } from "react"
 import { ScoreStormContext } from "../../ScoreStormProvider"
 import { SelectionContext } from "../../SelectionProvider"
@@ -23,13 +23,20 @@ export const ClefGroup = () => {
 
   return (
     <Group>
-      <Tooltip openDelay={1000} label="G Clef">
-        <ActionButton Icon={GClefIcon} onClick={handleClefClick} disabled={!isClef} active={gClefActive} />
-      </Tooltip>
-
-      <Tooltip openDelay={1000} label="F Clef">
-        <ActionButton Icon={FClefIcon} onClick={handleClefClick} disabled={!isClef} active={fClefActive} />
-      </Tooltip>
+      <ActionButton
+        Icon={GClefIcon}
+        onClick={handleClefClick}
+        disabled={!isClef}
+        active={gClefActive}
+        tooltip={"G Clef"}
+      />
+      <ActionButton
+        Icon={FClefIcon}
+        onClick={handleClefClick}
+        disabled={!isClef}
+        active={fClefActive}
+        tooltip={"F Clef"}
+      />
     </Group>
   )
 }
