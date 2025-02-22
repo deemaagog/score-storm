@@ -58,7 +58,7 @@ class SvgRenderer implements IRenderer {
   }
 
   destroy() {
-    this.containerElement.innerHTML = ""
+    this.containerElement.removeChild(this.svgElement)
     this.isInitialized = false
     this.resizeObserver.unobserve(this.containerElement)
   }
