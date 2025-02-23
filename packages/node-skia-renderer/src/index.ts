@@ -54,6 +54,10 @@ class NodeSkiaRenderer<T extends Options> implements IRenderer {
     this.context.fillStyle = color
   }
 
+  getColor(): string {
+    return this.context.fillStyle as string
+  }
+
   drawRect(x: number, y: number, width: number, height: number) {
     this.context.fillRect(x, y, width, height)
   }

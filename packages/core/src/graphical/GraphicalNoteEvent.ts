@@ -12,6 +12,8 @@ const STEM_THICKNESS = 0.12
 const STEM_HEIGHT = 3.5
 const STEM_HEIGHT_CUT = 0.17
 
+const LEDGER_LINE_LENGTH = 1.8
+
 type GlyphMap = Record<string, Glyph>
 type FlagMap = Record<string, Glyph>
 type GlyphAccidentalMap = Record<number, Glyph>
@@ -124,7 +126,11 @@ export class GraphicalNoteEvent extends BaseGraphical implements IGraphical {
 
   render(renderer: IRenderer, settings: Settings) {
     let xShift = 0
+    const currentColor = renderer.getColor()
+
+    // draw accidental
     if (this.accidentalGlyph) {
+      renderer.setColor(settings.mainColor)
       renderer.drawGlyph(
         this.getTextFromUnicode(this.accidentalGlyph.symbol),
         this.x - this.accidentalGlyph.bBoxes.bBoxSW[0] * settings.unit,
@@ -132,13 +138,34 @@ export class GraphicalNoteEvent extends BaseGraphical implements IGraphical {
       )
       xShift = xShift + this.accidentalWidth! * settings.unit + 0.5 * settings.unit
     }
-    renderer.drawGlyph(
-      this.getTextFromUnicode(this.noteheadGlyph.symbol),
-      this.x - this.noteheadGlyph.bBoxes.bBoxSW[0] * settings.unit + xShift,
-      this.y,
-    )
 
+    // draw ledger lines
+    if (Math.abs(this.verticalShift) >= 3) {
+      renderer.setColor(settings.staveLineColor)
+
+      const ledgerLineX =
+        this.x -
+        this.noteheadGlyph.bBoxes.bBoxSW[0] * settings.unit +
+        xShift -
+        ((LEDGER_LINE_LENGTH - this.width) * settings.unit) / 2
+
+      const ledgerLineLength = LEDGER_LINE_LENGTH * settings.unit
+      const ledgerLineThickness = settings.staffLineThickness
+      const ledgerLineCount = Math.floor(Math.abs(this.verticalShift)) - 2
+
+      // render ledger lines above or below the stave
+      const ledgerLineDirection = this.verticalShift > 0 ? -1 : 1
+      const staveCenterY = this.y - this.verticalShift * settings.unit
+      for (let i = 0; i < ledgerLineCount; i++) {
+        const ledgerLineY =
+          staveCenterY - ledgerLineDirection * (i + 3) * settings.unit - settings.staffLineThickness / 2
+        renderer.drawRect(ledgerLineX, ledgerLineY, ledgerLineLength, ledgerLineThickness)
+      }
+    }
+
+    // draw stem and flag
     if (this.drawStem) {
+      renderer.setColor(settings.mainColor)
       const stemThickness = STEM_THICKNESS * settings.unit
       const stemHeight = STEM_HEIGHT * settings.unit
       const stemHeightCut = STEM_HEIGHT_CUT * settings.unit
@@ -162,6 +189,13 @@ export class GraphicalNoteEvent extends BaseGraphical implements IGraphical {
         )
       }
     }
+
+    renderer.setColor(currentColor)
+    renderer.drawGlyph(
+      this.getTextFromUnicode(this.noteheadGlyph.symbol),
+      this.x - this.noteheadGlyph.bBoxes.bBoxSW[0] * settings.unit + xShift,
+      this.y,
+    )
   }
 
   calculateVerticalShift(): number {

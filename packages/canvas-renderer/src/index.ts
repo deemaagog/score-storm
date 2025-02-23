@@ -106,7 +106,7 @@ class CanvasRenderer implements IRenderer {
 
   destroy() {
     for (const layer of [this.mainLayer, this.hoverLayer, this.selectionLayer]) {
-      this.containerElement.removeChild(layer.canvasElement);
+      this.containerElement.removeChild(layer.canvasElement)
     }
 
     this.isInitialized = false
@@ -127,6 +127,10 @@ class CanvasRenderer implements IRenderer {
 
   setColor(color: string) {
     this.currentLayer.context.fillStyle = color
+  }
+
+  getColor(): string {
+    return this.currentLayer.context.fillStyle as string
   }
 
   drawRect(x: number, y: number, width: number, height: number) {

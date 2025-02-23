@@ -104,6 +104,10 @@ class SvgRenderer implements IRenderer {
     this.currentColor = color
   }
 
+  getColor(): string {
+    return this.currentColor
+  }
+
   drawRect(x: number, y: number, width: number, height: number) {
     const rec = document.createElementNS(NS, "rect")
     rec.setAttribute("x", `${x}`)

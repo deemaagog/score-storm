@@ -23,6 +23,8 @@ export interface IRenderer {
 
   setColor(color: string): void
 
+  getColor(): string
+
   drawRect(x: number, y: number, width: number, height: number): void
 
   drawGlyph(glyph: string | number, x: number, y: number): void
