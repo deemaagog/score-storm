@@ -18,9 +18,10 @@ export const Cursor: React.FC = () => {
     if (isPlaying) {
       const score = scoreStorm.getScore()
       const firstBeatPosition = score.globalMeasures[0].globalBeats[0].graphical.position!
+      const initialY = score.globalMeasures[0].graphical.position!.y
       setCursorParams({
         x: firstBeatPosition.x,
-        y: score.globalMeasures[0].graphical.position!.y,
+        y: initialY,
         height: score.globalMeasures[0].graphical.height,
         width: scoreStorm.getSettings().unit,
       })
@@ -45,7 +46,7 @@ export const Cursor: React.FC = () => {
         for (let gb = 0; gb < globalMeasure.globalBeats.length; gb++) {
           const globalBeat = globalMeasure.globalBeats[gb]
           const translateX = globalBeat.graphical.position!.x - firstBeatPosition.x
-          const translateY = currentY - firstBeatPosition.y
+          const translateY = currentY - initialY
 
           if (isNewRow && gb === 0) {
             const prevGlobalMeasure = score.globalMeasures[gm - 1]
@@ -56,7 +57,7 @@ export const Cursor: React.FC = () => {
               prevGlobalBeat.graphical.position!.x -
               scoreStorm.getSettings().unit // minus barline width
             keyFrames.push({
-              transform: `translate(${prevGlobalBeat.graphical.position!.x - firstBeatPosition.x + prevMeasureEndX}px,${prevGlobalMeasure.graphical.position!.y - firstBeatPosition.y}px)`,
+              transform: `translate(${prevGlobalBeat.graphical.position!.x - firstBeatPosition.x + prevMeasureEndX}px,${prevGlobalMeasure.graphical.position!.y - initialY}px)`,
               offset,
             })
             keyFrames.push({
@@ -85,7 +86,7 @@ export const Cursor: React.FC = () => {
         scoreStorm.getSettings().unit // minus barline width
 
       keyFrames.push({
-        transform: `translate(${lastBeat.graphical.position!.x - firstBeatPosition.x + measureEndX}px,${lastMeasure.graphical.position!.y - firstBeatPosition.y}px)`,
+        transform: `translate(${lastBeat.graphical.position!.x - firstBeatPosition.x + measureEndX}px,${lastMeasure.graphical.position!.y - initialY}px)`,
         offset: 1,
       })
 
@@ -95,7 +96,7 @@ export const Cursor: React.FC = () => {
       ref.current?.animate(keyFrames, {
         duration: durationTotal * 1000 * quarterToBpm,
         easing: "linear",
-        // fill: "forwards",
+        fill: "forwards",
         // delay: 1000,
       })
     } else {
