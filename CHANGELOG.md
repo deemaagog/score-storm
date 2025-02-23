@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.3](https://github.com/deemaagog/score-storm/compare/v0.3.2...v0.3.3) (2025-02-23)
+
+### Bug Fixes
+
+* adjust cursor vertical position ([22c455e](https://github.com/deemaagog/score-storm/commit/22c455e668b105486666455962a3f83c064ac470)) - by @deemaagog
+* **renderer:** fix renderer clean up ([8aa347e](https://github.com/deemaagog/score-storm/commit/8aa347e772978d1fa7761b432dd9d36261899816)) - by @deemaagog
+
+### Features
+
+* add initial web player implementation ([6554851](https://github.com/deemaagog/score-storm/commit/6554851a0c969a07a30dfd6a4546a21a6063cb3b)) - by @deemaagog
+* redesign full-featured-editor and add basic cursor implementation ([0d68406](https://github.com/deemaagog/score-storm/commit/0d6840656f60e631d77e0bae9a6e9f9436ac9f65)) - by @deemaagog
+* render ledger lines ([b373070](https://github.com/deemaagog/score-storm/commit/b373070c4fe7ee5964a7ce73bb6511aa94fb9677)) - by @deemaagog
+* store global measure and global beat position, other rendering improvements ([492de0d](https://github.com/deemaagog/score-storm/commit/492de0d1766d8edd41f3e064ffa74d356f0ff05d)) - by @deemaagog
+
 ## [0.3.2](https://github.com/deemaagog/score-storm/compare/v0.2.2...v0.3.2) (2024-12-31)
 
 ### Features

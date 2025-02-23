@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.3](https://github.com/deemaagog/score-storm/compare/v0.3.2...v0.3.3) (2025-02-23)
+
+### Features
+
+* add initial web player implementation ([6554851](https://github.com/deemaagog/score-storm/commit/6554851a0c969a07a30dfd6a4546a21a6063cb3b)) - by @deemaagog
+* render ledger lines ([b373070](https://github.com/deemaagog/score-storm/commit/b373070c4fe7ee5964a7ce73bb6511aa94fb9677)) - by @deemaagog
+* store global measure and global beat position, other rendering improvements ([492de0d](https://github.com/deemaagog/score-storm/commit/492de0d1766d8edd41f3e064ffa74d356f0ff05d)) - by @deemaagog
+
 ## [0.3.2](https://github.com/deemaagog/score-storm/compare/v0.2.2...v0.3.2) (2024-12-31)
 
 ### Features

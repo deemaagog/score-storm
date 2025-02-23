@@ -1,6 +1,6 @@
 {
   "name": "@score-storm/node-skia-renderer",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "A Score-Storm renderer for Node.js, powered by SKIA",
   "main": "./dist/esm/index.js",
   "types": "./dist/esm/index.d.ts",

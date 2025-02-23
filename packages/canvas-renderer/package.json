@@ -1,6 +1,6 @@
 {
   "name": "@score-storm/canvas-renderer",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "HTML Canvas renderer, meant to be used for Web apps",
   "main": "./dist/esm/index.js",
   "types": "./dist/esm/index.d.ts",

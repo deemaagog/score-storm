@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.3](https://github.com/deemaagog/score-storm/compare/v0.3.2...v0.3.3) (2025-02-23)
+
+### Bug Fixes
+
+* adjust cursor vertical position ([22c455e](https://github.com/deemaagog/score-storm/commit/22c455e668b105486666455962a3f83c064ac470)) - by @deemaagog
+
+### Features
+
+* add initial web player implementation ([6554851](https://github.com/deemaagog/score-storm/commit/6554851a0c969a07a30dfd6a4546a21a6063cb3b)) - by @deemaagog
+* redesign full-featured-editor and add basic cursor implementation ([0d68406](https://github.com/deemaagog/score-storm/commit/0d6840656f60e631d77e0bae9a6e9f9436ac9f65)) - by @deemaagog
+
 ## [0.3.2](https://github.com/deemaagog/score-storm/compare/v0.2.2...v0.3.2) (2024-12-31)
 
 ### Features
