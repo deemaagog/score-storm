@@ -26,7 +26,7 @@
   },
   "homepage": "http://score-storm.netlify.com",
   "scripts": {
-    "build": "tsc --build tsconfig.esm.json tsconfig.cjs.json",
+    "build": "tsc --project tsconfig.esm.json && tsc --project tsconfig.cjs.json",
     "lint": "eslint ."
   },
   "dependencies": {
