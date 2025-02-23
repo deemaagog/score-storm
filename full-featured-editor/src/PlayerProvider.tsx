@@ -58,7 +58,7 @@ export const PlayerProvider: React.FC<PropsWithChildren> = ({ children }) => {
 
   // play one note, used for pitch input
   const playOne = (event: PlayEvent) => {
-    if (isPlaying) {
+    if (isPlaying || !isReady) {
       return
     }
     getAudioContext().resume()
