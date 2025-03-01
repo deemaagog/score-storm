@@ -1,7 +1,7 @@
 import { FileButton, Flex, Stack, Text } from "@mantine/core"
 import { useContext } from "react"
 import { IconActivityHeartbeat, IconArticle, IconMathGreater, IconPlaylist, IconPlus } from "@tabler/icons-react"
-import { Score } from "@score-storm/core"
+import { fromMusicXML } from "@score-storm/musicxml-importer"
 import { Measure } from "../palette/measure"
 import { Note } from "../palette/note"
 import { ScoreStormContext } from "../ScoreStormProvider"
@@ -43,7 +43,7 @@ export const Aside: React.FC<{
     const fileReader = new FileReader()
     fileReader.onload = (event) => {
       const scoreXml = event.target!.result as string
-      scoreStorm.setScore(Score.fromMusicXML(scoreXml))
+      scoreStorm.setScore(fromMusicXML(scoreXml))
       scoreStorm.render()
     }
     fileReader.readAsText(payload)

@@ -20,6 +20,7 @@
     "@mdx-js/react": "^3.0.0",
     "@score-storm/canvas-renderer": "workspace:*",
     "@score-storm/core": "workspace:*",
+    "@score-storm/musicxml-importer": "workspace:*",
     "@score-storm/svg-renderer": "workspace:*",
     "clsx": "^2.0.0",
     "prism-react-renderer": "^2.3.0",
