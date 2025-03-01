@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.4](https://github.com/deemaagog/score-storm/compare/v0.3.3...v0.3.4) (2025-03-01)
+
+### Features
+
+* implement undo-redo ([a6fcdb9](https://github.com/deemaagog/score-storm/commit/a6fcdb947a5dbb7c7590821a4787c1f1f0bf9e78)) - by @deemaagog
+
 ## [0.3.3](https://github.com/deemaagog/score-storm/compare/v0.3.2...v0.3.3) (2025-02-23)
 
 ### Features

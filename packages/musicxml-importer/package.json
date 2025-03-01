@@ -1,6 +1,6 @@
 {
   "name": "@score-storm/musicxml-importer",
-  "version": "0.0.1",
+  "version": "0.3.4",
   "description": "A package to create a score object from a musicxml",
   "main": "./dist/esm/index.js",
   "types": "./dist/esm/index.d.ts",

@@ -1,6 +1,6 @@
 {
   "name": "@score-storm/core",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "A javascript package for rendering and editing music scores",
   "main": "./dist/esm/index.js",
   "types": "./dist/esm/index.d.ts",
