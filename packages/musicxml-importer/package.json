@@ -1,0 +1,36 @@
+{
+  "name": "@score-storm/musicxml-importer",
+  "version": "0.0.1",
+  "description": "A package to create a score object from a musicxml",
+  "main": "./dist/esm/index.js",
+  "types": "./dist/esm/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc --project tsconfig.esm.json && tsc --project tsconfig.cjs.json",
+    "lint": "eslint ."
+  },
+  "keywords": [],
+  "author": "deemaagog",
+  "license": "MIT",
+  "dependencies": {
+    "@score-storm/core": "workspace:*",
+    "mnxconverter": "^1.0.1"
+  },
+  "devDependencies": {
+    "@score-storm/eslint-config": "workspace:*",
+    "@score-storm/typescript-config": "workspace:*",
+    "typescript": "^5.3.3"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/deemaagog/score-storm.git"
+  }
+}

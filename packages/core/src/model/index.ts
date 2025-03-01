@@ -1,4 +1,7 @@
-export { InstrumentType } from "./Instrument"
+export { InstrumentType, Instrument } from "./Instrument"
+export { Beat } from "./Beat"
+export { Measure } from "./Measure"
+export { Clef } from "./Clef"
 export { TimeSignature } from "./TimeSignature"
 export { GlobalMeasure } from "./GlobalMeasure"
 export { Score, type QuickScoreOptions } from "./Score"

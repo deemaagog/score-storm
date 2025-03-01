@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from "react"
 import ScoreStorm, { Score, TimeSignature } from "@score-storm/core"
 import CanvasRenderer from "@score-storm/canvas-renderer"
 import SvgRenderer from "@score-storm/svg-renderer"
+import {fromMusicXML} from "@score-storm/musicxml-importer"
 
 function Demo({ renderer = "canvas", musicXml = undefined, bordered = false, scale = 100 }) {
   const rootElementRef = useRef(null)
@@ -19,7 +20,7 @@ function Demo({ renderer = "canvas", musicXml = undefined, bordered = false, sca
     )
 
     const score = musicXml
-      ? Score.fromMusicXML(musicXml)
+      ? fromMusicXML(musicXml)
       : Score.createQuickScore({ numberOfMeasures: 3, timeSignature: new TimeSignature(4, 4) })
     scoreStorm.current.setScore(score)
     scoreStorm.current.render()

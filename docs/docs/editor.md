@@ -1,12 +1,8 @@
 ---
-sidebar_position: 5
+sidebar_position: 18
 ---
 
-# Editor
-
-TBD
-
-# Full-featured music score app
+# Full-featured app
 
 import React from "react"
 import Demo from "@site/src/components/Demo"

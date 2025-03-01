@@ -53,6 +53,9 @@ importers:
       '@score-storm/core':
         specifier: workspace:*
         version: link:../packages/core
+      '@score-storm/musicxml-importer':
+        specifier: workspace:*
+        version: link:../packages/musicxml-importer
       '@score-storm/svg-renderer':
         specifier: workspace:*
         version: link:../packages/svg-renderer
@@ -93,6 +96,9 @@ importers:
       '@score-storm/core':
         specifier: workspace:*
         version: link:../packages/core
+      '@score-storm/musicxml-importer':
+        specifier: workspace:*
+        version: link:../packages/musicxml-importer
       '@score-storm/svg-renderer':
         specifier: workspace:*
         version: link:../packages/svg-renderer
@@ -121,6 +127,9 @@ importers:
       '@score-storm/core':
         specifier: workspace:*
         version: link:../packages/core
+      '@score-storm/musicxml-importer':
+        specifier: workspace:*
+        version: link:../packages/musicxml-importer
       '@score-storm/svg-renderer':
         specifier: workspace:*
         version: link:../packages/svg-renderer
@@ -213,9 +222,6 @@ importers:
       fraction.js:
         specifier: 4.3.7
         version: 4.3.7
-      mnxconverter:
-        specifier: ^1.0.1
-        version: 1.0.1
       rbush:
         specifier: ^3.0.1
         version: 3.0.1
@@ -232,6 +238,25 @@ importers:
       typescript:
         specifier: ^5.3.3
         version: 5.3.3
+
+  packages/musicxml-importer:
+    dependencies:
+      '@score-storm/core':
+        specifier: workspace:*
+        version: link:../core
+      mnxconverter:
+        specifier: ^1.0.1
+        version: 1.0.1
+    devDependencies:
+      '@score-storm/eslint-config':
+        specifier: workspace:*
+        version: link:../../tooling/eslint-config
+      '@score-storm/typescript-config':
+        specifier: workspace:*
+        version: link:../../tooling/typescript-config
+      typescript:
+        specifier: ^5.3.3
+        version: 5.7.2
 
   packages/node-skia-renderer:
     dependencies:
