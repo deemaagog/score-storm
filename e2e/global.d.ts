@@ -8,5 +8,7 @@ declare global {
     svgRenderer: SvgRenderer
     canvasRenderer: CanvasRenderer
     getScoreFormMusicXml: (xml: string) => Score
+    addMeasure: () => void
+    getDefaultScore: () => void
   }
 }

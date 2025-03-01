@@ -6,6 +6,8 @@ export enum EventType {
   SELECTION_STARTED = "SELECTION_STARTED",
   SELECTION_ENDED = "SELECTION_ENDED",
   SELECTION_PROCESSED = "SELECTION_PROCESSED",
+  UNDO_REDO_STATE_UPDATED = "UNDO_REDO_STATE_UPDATED",
+  NUMBER_OF_MEASURES_UPDATED = "NUMBER_OF_MEASURES_UPDATED",
 }
 
 export interface InteractionPosition {
@@ -25,12 +27,23 @@ export interface HoverProcessedEvent {
 
 export interface SelectionProcessedEvent extends HoverProcessedEvent {}
 
+export interface UndoRedoStateUpdatedEvent {
+  undo: boolean
+  redo: boolean
+}
+
+export interface NumberOfMeasuresUpdatedEvent {
+  numberOfMeasures: number
+}
+
 interface EventMap {
   [EventType.HOVER]: InteractionPosition
   [EventType.HOVER_PROCESSED]: HoverProcessedEvent
   [EventType.SELECTION_STARTED]: InteractionPosition
   [EventType.SELECTION_ENDED]: InteractionPosition
   [EventType.SELECTION_PROCESSED]: SelectionProcessedEvent
+  [EventType.UNDO_REDO_STATE_UPDATED]: UndoRedoStateUpdatedEvent
+  [EventType.NUMBER_OF_MEASURES_UPDATED]: NumberOfMeasuresUpdatedEvent
 }
 
 export type EventListenerCallback<K extends EventType> = (event: EventMap[K]) => void

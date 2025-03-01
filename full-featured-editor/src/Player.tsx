@@ -19,7 +19,7 @@ export const Player: React.FC = () => {
   }
 
   if (!isReady) {
-    return null
+    return <div />
   }
 
   if (isPlaying) {

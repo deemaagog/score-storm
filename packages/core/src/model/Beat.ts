@@ -7,7 +7,7 @@ export type Pitch = {
   step: string
 }
 
-type AccidentalDisplay = {
+export type AccidentalDisplay = {
   show: boolean
 }
 
@@ -78,49 +78,5 @@ export class Beat {
       default:
         throw new Error(`Note duration ${base} is not supported`)
     }
-  }
-
-  // if rest, make it note and vice versa
-  switchType() {
-    if (this.rest) {
-      this.rest = undefined
-      this.notes = [
-        {
-          pitch: this.measure.getCurrentClef().getMiddleLinePitch(),
-        },
-      ]
-      this.graphical = new GraphicalNoteEvent(this)
-    } else {
-      this.rest = {}
-      this.notes = undefined
-      this.graphical = new GraphicalRestEvent(this)
-    }
-  }
-
-  changeAccidental(newAlter?: number) {
-    // taking into account key signature is out of scope for now
-    const note = this.notes![0]
-    const { alter, ...rest } = note.pitch
-    const alterChanged = alter !== newAlter
-    if (!alterChanged) {
-      newAlter = undefined
-    }
-    note.accidentalDisplay = {
-      show: typeof newAlter === "number",
-    }
-    note.pitch = { ...rest, ...(newAlter !== 0 && { alter: newAlter }) }
-
-    this.graphical = new GraphicalNoteEvent(this)
-  }
-
-  changePitch(newPitch: Pitch) {
-    // TODO: check equality
-    const note = this.notes![0]
-    note.pitch = newPitch
-    note.accidentalDisplay = {
-      show: !!newPitch.alter,
-    }
-
-    this.graphical = new GraphicalNoteEvent(this)
   }
 }

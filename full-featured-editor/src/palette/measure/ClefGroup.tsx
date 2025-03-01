@@ -5,14 +5,14 @@ import { SelectionContext } from "../../SelectionProvider"
 import { GClefIcon } from "../icons/GClef"
 import { FClefIcon } from "../icons/FClef"
 import { ActionButton } from "../ActionButton"
-import { GraphicalClef } from "@score-storm/core"
+import { GraphicalClef, ChangeClefCommand } from "@score-storm/core"
 
 export const ClefGroup = () => {
   const { scoreStorm } = useContext(ScoreStormContext)
   const { selectedObject } = useContext(SelectionContext)
 
   const handleClefClick = () => {
-    scoreStorm.getScore().setClef()
+    scoreStorm.executeCommand(new ChangeClefCommand())
     scoreStorm.render()
   }
 

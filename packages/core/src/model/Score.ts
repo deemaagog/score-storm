@@ -132,52 +132,6 @@ export class Score {
     this.graphical = new GraphicalScore(this)
   }
 
-  addMeasure() {
-    const currentTimeSignature = this.getMeasureTimeSignature(this.globalMeasures.length - 1)
-    if (!currentTimeSignature) {
-      throw new Error("Failed to determine time signature")
-    }
-
-    const newMeasureIndex = this.globalMeasures.length
-
-    for (const instrument of this.instruments) {
-      // assuming only one stave for now
-      const measure = new Measure()
-      measure.instrument = instrument
-      measure.index = newMeasureIndex
-      measure.events = Array.from({ length: currentTimeSignature.count }, () => {
-        const beat = new Beat(
-          {
-            duration: { base: this.globalMeasures[0].time!.unitToDuration() },
-            rest: {},
-          },
-          measure,
-        )
-        return beat
-      })
-      instrument.measures.push(measure)
-    }
-
-    const globalMeasure = new GlobalMeasure()
-    globalMeasure.index = newMeasureIndex
-    globalMeasure.score = this
-    this.globalMeasures.push(globalMeasure)
-    globalMeasure.createGlobalBeats()
-
-    return this
-  }
-
-  removeMeasure(index: number) {
-    if (this.globalMeasures.length === 1) {
-      throw new Error("Failed to remove measure. There should be at least one measure in music score")
-    }
-    this.globalMeasures.splice(index)
-    for (const instrument of this.instruments) {
-      instrument.measures.splice(index)
-    }
-    return this
-  }
-
   getMeasureTimeSignature(index: number): TimeSignature | undefined {
     for (let i = index; i >= 0; i--) {
       const globalMeasure = this.globalMeasures[i]
@@ -186,14 +140,5 @@ export class Score {
       }
     }
     return
-  }
-
-  setClef() {
-    const firstMeasure = this.instruments[0].measures[0]
-    if (firstMeasure.clef?.sign === "G") {
-      firstMeasure.clef!.changeType("F", 2)
-    } else {
-      firstMeasure.clef!.changeType("G", -2)
-    }
   }
 }

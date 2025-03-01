@@ -6,7 +6,7 @@ import { UseSSParams, useSS } from "./hooks"
 import { InstrumentType, TimeSignature } from "@score-storm/core"
 import { useSettings } from "./SettingsProvider"
 
-type ScoreStormContextValue = { scoreStorm: ScoreStorm }
+type ScoreStormContextValue = { scoreStorm: ScoreStorm; numberOfMeasures: number }
 export const ScoreStormContext = createContext<ScoreStormContextValue>({} as ScoreStormContextValue)
 
 const getDefaultParams = (theme: MantineTheme, scale: number): UseSSParams => ({
@@ -25,11 +25,13 @@ export const ScoreStormProvider: React.FC<PropsWithChildren> = ({ children }) =>
   const theme = useMantineTheme()
   const settings = useSettings()
 
-  const { ss, initialized } = useSS(getDefaultParams(theme, settings.scale))
+  const { ss, initialized, numberOfMeasures } = useSS(getDefaultParams(theme, settings.scale))
 
   if (!initialized) {
     return null
   }
 
-  return <ScoreStormContext.Provider value={{ scoreStorm: ss }}>{children}</ScoreStormContext.Provider>
+  return (
+    <ScoreStormContext.Provider value={{ scoreStorm: ss, numberOfMeasures }}>{children}</ScoreStormContext.Provider>
+  )
 }

@@ -75,6 +75,8 @@ export class GraphicalScore {
           if (instrumentsCurrentClefs[i].width > clefRelativeWidth) {
             clefRelativeWidth = instrumentsCurrentClefs[i].width
           }
+        } else {
+          measure.graphical.clef = undefined // TODO: assign null instead of undefined???
         }
       }
 
@@ -105,7 +107,7 @@ export class GraphicalScore {
     // calculate instruments Y position and total height
 
     let currentYPosition = 0
-    
+
     for (let ri = 0; ri < rows.length; ri++) {
       let systemHeight = 0
       const instrumentPositions: InstrumentPosition[] = []
