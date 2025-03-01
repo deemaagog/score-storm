@@ -3,7 +3,7 @@ import { Group } from "@mantine/core"
 import { IconLetterN, IconLetterR } from "@tabler/icons-react"
 import { SelectionContext } from "../../SelectionProvider"
 import { ScoreStormContext } from "../../ScoreStormProvider"
-import { GraphicalNoteEvent } from "@score-storm/core"
+import { ChangeBeatTypeCommand, GraphicalNoteEvent } from "@score-storm/core"
 import { GraphicalRestEvent } from "@score-storm/core"
 import { ActionButton } from "../ActionButton"
 
@@ -13,7 +13,7 @@ export const TypeGroup: React.FC = () => {
 
   const handleClick = () => {
     const selectedBeat = (selectedObject as GraphicalNoteEvent).noteEvent
-    selectedBeat.switchType()
+    scoreStorm.executeCommand(new ChangeBeatTypeCommand({ beat: selectedBeat }))
     scoreStorm.render()
   }
 

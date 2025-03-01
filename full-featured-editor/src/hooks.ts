@@ -1,8 +1,4 @@
-import ScoreStorm, {
-  Score,
-  ScoreStormSettings,
-  QuickScoreOptions,
-} from "@score-storm/core"
+import ScoreStorm, { Score, ScoreStormSettings, QuickScoreOptions, EventType } from "@score-storm/core"
 import { useEffect, useRef, useState } from "react"
 
 export type UseSSParams = {
@@ -13,14 +9,20 @@ export type UseSSParams = {
 type UseSSReturn = {
   initialized: boolean
   ss: ScoreStorm
+  numberOfMeasures: number
 }
 
 export const useSS = (params: UseSSParams): UseSSReturn => {
   const scoreStorm = useRef<ScoreStorm>()
   const [initialized, setInitialized] = useState(false)
+  const [numberOfMeasures, setNumberOfMeasures] = useState(0)
 
   useEffect(() => {
     scoreStorm.current = new ScoreStorm(params.ssOptions)
+
+    scoreStorm.current.eventManager.on(EventType.NUMBER_OF_MEASURES_UPDATED, ({ numberOfMeasures }) => {
+      setNumberOfMeasures(numberOfMeasures)
+    })
 
     const score = Score.createQuickScore(params.quickScoreOptions)
     scoreStorm.current.setScore(score)
@@ -33,5 +35,5 @@ export const useSS = (params: UseSSParams): UseSSReturn => {
     }
   }, [])
 
-  return { initialized, ss: scoreStorm.current! }
+  return { initialized, ss: scoreStorm.current!, numberOfMeasures }
 }

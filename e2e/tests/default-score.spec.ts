@@ -20,11 +20,18 @@ test.afterEach(async ({ page }) => {
   await expect(page.locator("#ss-container")).toHaveScreenshot()
 })
 
-test("renders default score", async () => {})
+test("renders default score", async ({ page }) => {
+  await page.evaluate(() => {
+    window.scoreStorm.setScore(window.getDefaultScore())
+  })
+})
 
 test("renders 3 measures", async ({ page }) => {
   await page.evaluate(() => {
-    window.scoreStorm.getScore().addMeasure().addMeasure()
+    window.scoreStorm.setScore(window.getDefaultScore())
+    for (let i = 0; i < 2; i++) {
+      window.addMeasure()
+    }
   })
 })
 

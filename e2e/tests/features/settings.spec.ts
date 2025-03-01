@@ -23,6 +23,9 @@ test.afterEach(async ({ page }) => {
 
 test("renders bounding boxes in debug mode", async ({ page }) => {
   await page.evaluate(() => {
-    window.scoreStorm.getScore().addMeasure().addMeasure()
+    window.scoreStorm.setScore(window.getDefaultScore())
+    for (let i = 0; i < 2; i++) {
+      window.addMeasure()
+    }
   })
 })

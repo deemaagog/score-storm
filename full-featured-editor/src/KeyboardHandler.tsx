@@ -1,6 +1,6 @@
 import { useContext, useEffect } from "react"
 import { SelectionContext } from "./SelectionProvider"
-import { GraphicalNoteEvent, transposePitch, toTonalPitch } from "@score-storm/core"
+import { GraphicalNoteEvent, transposePitch, toTonalPitch, ChangePitchCommand } from "@score-storm/core"
 import { ScoreStormContext } from "./ScoreStormProvider"
 import { PlayerContext } from "./PlayerProvider"
 
@@ -33,7 +33,7 @@ export const KeyboardHandler: React.FC = () => {
 
       playOne({ pitch: toTonalPitch(newPitch), duration: 0.05 })
 
-      beat.changePitch(newPitch)
+      scoreStorm.executeCommand(new ChangePitchCommand({ beat, newPitch }))
       scoreStorm.render()
     }
   }

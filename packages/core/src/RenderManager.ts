@@ -1,4 +1,3 @@
-import { Score } from "./model/Score"
 import { IRenderer } from "./interfaces"
 import { ScoreStorm } from "./ScoreStorm"
 import { BBox, IGraphical } from "./graphical/interfaces"
@@ -30,6 +29,7 @@ class RenderManager {
     }
     this.renderer = renderer
 
+    // inject scoreStorm into renderer. TODO: Investigate if this is the best way to do this
     this.renderer.scoreStorm = this.scoreStorm
   }
 
@@ -43,9 +43,14 @@ class RenderManager {
     }
   }
 
-  render(score: Score) {
+  render() {
     // eslint-disable-next-line no-console
     console.log("rendering...")
+
+    const score = this.scoreStorm.getScore()
+    if (!score) {
+      throw new Error("Score is not set!")
+    }
     if (!this.renderer) {
       throw new Error("Renderer is not set!")
     }
@@ -64,13 +69,14 @@ class RenderManager {
     // set sizes and other stuff
     this.renderer.preRender(score.graphical.height, this.scoreStorm.settings.fontSize)
     // loop through measures and draw
-    this.renderScore(score)
+    this.renderScore()
     // do some stuff when score is rendered
     this.renderer.postRender()
     this.editorManager.restoreSelection()
   }
 
-  renderScore(score: Score) {
+  renderScore() {
+    const score = this.scoreStorm.getScore()
     this.x = 0
     this.y = 0
 
@@ -90,7 +96,7 @@ class RenderManager {
         }
         // setting global measure position and height
         globalMeasure.graphical.height = row.systemHeight
-        globalMeasure.graphical.setPosition({ x: this.x, y: row.instrumentsPosition[0]})
+        globalMeasure.graphical.setPosition({ x: this.x, y: row.instrumentsPosition[0] })
 
         this.x += globalMeasure.graphical.width // TODO: make X position a GraphicalGlobalMeasure property
       }

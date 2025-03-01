@@ -6,7 +6,7 @@ import { FlatIcon } from "../icons/Flat"
 import { DoubleFlatIcon } from "../icons/DoubleFlat"
 import { NaturalIcon } from "../icons/Natural"
 import { ActionButton } from "../ActionButton"
-import { GraphicalNoteEvent } from "@score-storm/core"
+import { ChangeAccidentalCommand, GraphicalNoteEvent } from "@score-storm/core"
 import { ScoreStormContext } from "../../ScoreStormProvider"
 
 export const AccidentalsGroup: React.FC = () => {
@@ -15,7 +15,7 @@ export const AccidentalsGroup: React.FC = () => {
 
   const handleSetAccidental = (accidental?: number) => {
     const beat = (selectedObject as GraphicalNoteEvent).noteEvent
-    beat.changeAccidental(accidental)
+    scoreStorm.executeCommand(new ChangeAccidentalCommand({ beat, accidental }))
     scoreStorm.render()
   }
 

@@ -8,6 +8,7 @@ import { Aside, ASIDE_ACTIONS } from "./aside/Aside"
 import { KeyboardHandler } from "./KeyboardHandler"
 import { Palette } from "./palette/Palette"
 import { useSettings } from "./SettingsProvider"
+import UndoRedo from "./UndoRedo"
 
 export const App = () => {
   const [activeAction, setActiveAction] = useState<string>(ASIDE_ACTIONS[0].label)
@@ -23,8 +24,9 @@ export const App = () => {
       <Flex w={"100%"} h={"100%"} direction={"column"} align={"center"} justify={"center"}>
         <header className={classes.header}>
           <Box className={classes.headerPlaceholder} />
-          <Flex align={"center"} flex={1} gap={8}>
+          <Flex align={"center"} flex={1} gap={8} justify="space-between" mr={8}>
             <Player />
+            <UndoRedo />
           </Flex>
         </header>
         <div className={classes.wrapper}>
