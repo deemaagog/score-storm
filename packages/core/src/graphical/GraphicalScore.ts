@@ -3,6 +3,7 @@ import { Score } from "../model/Score"
 import { GraphicalClef } from "./GraphicalClef"
 import { GraphicalTimeSignature } from "./GraphicalTimeSignature"
 import { GlobalMeasure } from "../model"
+import { ILayout } from "../layouts/ILayout"
 
 export type InstrumentPosition = number
 
@@ -12,6 +13,11 @@ export class Row {
   systemHeight!: number // TODO: come up with a better name for this
 }
 
+export class Page {
+  rows!: Row[]
+  height!: number
+}
+
 const SPACE_BETWEEN_STAVE_ROWS_COEF = 6 // space unit
 const SPACE_BETWEEN_INSTRUMENTS_ROWS_COEF = 5 // space unit
 
@@ -19,15 +25,14 @@ const SPACE_BETWEEN_INSTRUMENTS_ROWS_COEF = 5 // space unit
  * The main class for graphical representation of music score model
  */
 export class GraphicalScore {
-  rows!: Row[]
-  height!: number
+  pages!: Page[]
   score: Score
 
   constructor(score: Score) {
     this.score = score
   }
 
-  calculateLineBreaks(containerWidth: number, settings: Settings) {
+  calculateLineBreaks(containerWidth: number) {
     // calculate line breaks
     const rows: Pick<Row, "globalMeasures">[] = []
     const instrumentsCurrentClefs: GraphicalClef[] = []
@@ -98,17 +103,34 @@ export class GraphicalScore {
       })
     }
 
-    this.calculateYPositionsAndScoreHeight(rows, settings)
+    return rows
   }
 
-  calculateYPositionsAndScoreHeight(rows: Pick<Row, "globalMeasures">[], settings: Settings) {
-    this.height = 0
-    this.rows = []
+  calculatePageBreaks(rows: Pick<Row, "globalMeasures">[], settings: Settings, layout: ILayout) {
+    // distribute rows between pages , + set height of individual rows
+    this.pages = []
+    const numberOfRowsByPage = layout.heightValue
+
+    // this.height = 0
+    // this.rows = []
     // calculate instruments Y position and total height
 
     let currentYPosition = 0
+    let page: Page = {
+      height: 0,
+      rows: [],
+    }
 
     for (let ri = 0; ri < rows.length; ri++) {
+      if (page.rows.length === numberOfRowsByPage) {
+        page.height = Math.ceil(page.height)
+        this.pages.push(page)
+        page = {
+          height: 0,
+          rows: [],
+        }
+      }
+
       let systemHeight = 0
       const instrumentPositions: InstrumentPosition[] = []
 
@@ -141,23 +163,24 @@ export class GraphicalScore {
 
         systemHeight += settings.barlineHeight
         currentYPosition += settings.barlineHeight
-        this.height += currentYTopShift + settings.barlineHeight + currentYBottomShift
+        page.height += currentYTopShift + settings.barlineHeight + currentYBottomShift
 
         if (i < this.score.instruments.length - 1) {
           systemHeight += settings.unit * SPACE_BETWEEN_INSTRUMENTS_ROWS_COEF
           currentYPosition += settings.unit * SPACE_BETWEEN_INSTRUMENTS_ROWS_COEF
-          this.height += settings.unit * SPACE_BETWEEN_INSTRUMENTS_ROWS_COEF
+          page.height += settings.unit * SPACE_BETWEEN_INSTRUMENTS_ROWS_COEF
         }
       }
 
-      this.rows.push({ ...row, instrumentsPosition: instrumentPositions, systemHeight })
+      page.rows.push({ ...row, instrumentsPosition: instrumentPositions, systemHeight })
 
       if (ri < rows.length - 1) {
         currentYPosition += settings.unit * SPACE_BETWEEN_STAVE_ROWS_COEF
-        this.height += settings.unit * SPACE_BETWEEN_STAVE_ROWS_COEF
+        page.height += settings.unit * SPACE_BETWEEN_STAVE_ROWS_COEF
       }
     }
 
-    this.height = Math.ceil(this.height)
+    page.height = Math.ceil(page.height)
+    this.pages.push(page)
   }
 }

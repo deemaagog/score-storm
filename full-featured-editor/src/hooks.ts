@@ -1,4 +1,4 @@
-import ScoreStorm, { Score, ScoreStormSettings, QuickScoreOptions, EventType } from "@score-storm/core"
+import ScoreStorm, { Score, ScoreStormSettings, QuickScoreOptions, EventType, FlowLayout } from "@score-storm/core"
 import { useEffect, useRef, useState } from "react"
 
 export type UseSSParams = {
@@ -26,6 +26,7 @@ export const useSS = (params: UseSSParams): UseSSReturn => {
 
     const score = Score.createQuickScore(params.quickScoreOptions)
     scoreStorm.current.setScore(score)
+    scoreStorm.current.setLayout(new FlowLayout())
 
     setInitialized(true)
 

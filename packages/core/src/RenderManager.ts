@@ -4,6 +4,7 @@ import { BBox, IGraphical } from "./graphical/interfaces"
 import { EditorManager } from "./EditorManager"
 import { Measure } from "./model/Measure"
 import { GlobalMeasure } from "./model"
+import { ILayout } from "./layouts/ILayout"
 
 /**
  * Main class responsible for rendering music score.
@@ -11,6 +12,7 @@ import { GlobalMeasure } from "./model"
 class RenderManager {
   scoreStorm: ScoreStorm
   private renderer!: IRenderer
+  private layout!: ILayout
   private editorManager: EditorManager
   private x: number = 0
   private y: number = 0
@@ -37,6 +39,14 @@ class RenderManager {
     return this.renderer
   }
 
+  setLayout(layout: ILayout) {
+    this.layout = layout
+  }
+
+  getLayout(): ILayout {
+    return this.layout
+  }
+
   destroy() {
     if (this.renderer) {
       this.renderer.destroy()
@@ -54,6 +64,9 @@ class RenderManager {
     if (!this.renderer) {
       throw new Error("Renderer is not set!")
     }
+    if (!this.layout) {
+      throw new Error("Layout is not set!")
+    }
 
     if (!this.renderer.isInitialized) {
       // eslint-disable-next-line no-console
@@ -61,13 +74,14 @@ class RenderManager {
       this.renderer.init()
     }
 
-    score.graphical.calculateLineBreaks(this.renderer.containerWidth, this.scoreStorm.settings)
+    const rows = score.graphical.calculateLineBreaks(this.renderer.containerWidth)
+    score.graphical.calculatePageBreaks(rows, this.scoreStorm.settings, this.scoreStorm.getLayout())
 
     // clear
     this.editorManager.clear()
     this.renderer.clear()
     // set sizes and other stuff
-    this.renderer.preRender(score.graphical.height, this.scoreStorm.settings.fontSize)
+    this.renderer.preRender(score.graphical.pages[0].height, this.scoreStorm.settings.fontSize)
     // loop through measures and draw
     this.renderScore()
     // do some stuff when score is rendered
@@ -80,38 +94,42 @@ class RenderManager {
     this.x = 0
     this.y = 0
 
-    for (let ri = 0; ri < score.graphical.rows.length; ri++) {
-      const latestRow = ri === score.graphical.rows.length - 1
-      const row = score.graphical.rows[ri]
+    for (let pi = 0; pi < score.graphical.pages.length; pi++) {
+      const page = score.graphical.pages[pi]
 
-      for (let gmi = 0; gmi < row.globalMeasures.length; gmi++) {
-        const latestMeasureInRow = gmi === row.globalMeasures.length - 1
-        const globalMeasure = row.globalMeasures[gmi]
+      for (let ri = 0; ri < page.rows.length; ri++) {
+        const latestRow = ri === page.rows.length - 1
+        const row = page.rows[ri]
 
-        for (let i = 0; i < row.instrumentsPosition.length; i++) {
-          this.y = row.instrumentsPosition[i]
+        for (let gmi = 0; gmi < row.globalMeasures.length; gmi++) {
+          const latestMeasureInRow = gmi === row.globalMeasures.length - 1
+          const globalMeasure = row.globalMeasures[gmi]
 
-          const measure = score.instruments[i].measures[globalMeasure.index]
-          this.renderMeasure(measure, latestRow, latestMeasureInRow, globalMeasure)
+          for (let i = 0; i < row.instrumentsPosition.length; i++) {
+            this.y = row.instrumentsPosition[i]
+
+            const measure = score.instruments[i].measures[globalMeasure.index]
+            this.renderMeasure(measure, latestRow, latestMeasureInRow, globalMeasure)
+          }
+          // setting global measure position and height
+          globalMeasure.graphical.height = row.systemHeight
+          globalMeasure.graphical.setPosition({ x: this.x, y: row.instrumentsPosition[0] })
+
+          this.x += globalMeasure.graphical.width // TODO: make X position a GraphicalGlobalMeasure property
         }
-        // setting global measure position and height
-        globalMeasure.graphical.height = row.systemHeight
-        globalMeasure.graphical.setPosition({ x: this.x, y: row.instrumentsPosition[0] })
+        this.x = 0
 
-        this.x += globalMeasure.graphical.width // TODO: make X position a GraphicalGlobalMeasure property
-      }
-      this.x = 0
-
-      // draw start bar line
-      if (row.instrumentsPosition.length > 1) {
-        this.renderer.drawRect(
-          this.x,
-          row.instrumentsPosition[0],
-          this.scoreStorm.settings.barLineThickness,
-          row.instrumentsPosition[row.instrumentsPosition.length - 1] +
-            this.scoreStorm.settings.barlineHeight -
+        // draw start bar line
+        if (row.instrumentsPosition.length > 1) {
+          this.renderer.drawRect(
+            this.x,
             row.instrumentsPosition[0],
-        )
+            this.scoreStorm.settings.barLineThickness,
+            row.instrumentsPosition[row.instrumentsPosition.length - 1] +
+              this.scoreStorm.settings.barlineHeight -
+              row.instrumentsPosition[0],
+          )
+        }
       }
     }
   }

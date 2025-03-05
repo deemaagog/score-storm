@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react"
-import ScoreStorm, { Score, TimeSignature } from "@score-storm/core"
+import ScoreStorm, { FlowLayout, Score, TimeSignature } from "@score-storm/core"
 import CanvasRenderer from "@score-storm/canvas-renderer"
 import SvgRenderer from "@score-storm/svg-renderer"
 import {fromMusicXML} from "@score-storm/musicxml-importer"
@@ -18,6 +18,7 @@ function Demo({ renderer = "canvas", musicXml = undefined, bordered = false, sca
     scoreStorm.current.setRenderer(
       renderer === "canvas" ? new CanvasRenderer(rootElementRef.current) : new SvgRenderer(rootElementRef.current),
     )
+    scoreStorm.current.setLayout(new FlowLayout())
 
     const score = musicXml
       ? fromMusicXML(musicXml)
