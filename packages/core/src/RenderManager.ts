@@ -71,7 +71,7 @@ class RenderManager {
     if (!this.renderer.isInitialized) {
       // eslint-disable-next-line no-console
       console.log("initializing...")
-      this.renderer.init()
+      this.renderer.init() // pass scoreStorm instance here?
     }
 
     const rows = score.graphical.calculateLineBreaks(this.renderer.containerWidth)
