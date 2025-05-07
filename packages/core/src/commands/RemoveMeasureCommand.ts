@@ -21,6 +21,10 @@ export class RemoveMeasureCommand implements ICommand {
     this.index = index
   }
 
+  inject(scoreStorm: ScoreStorm): void {
+    this.scoreStorm = scoreStorm
+  }
+
   execute() {
     const score = this.scoreStorm.getScore()
     this.globalMeasure = score.globalMeasures[this.index]

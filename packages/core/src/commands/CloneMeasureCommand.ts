@@ -20,6 +20,10 @@ export class CloneMeasureCommand implements ICommand {
     this.index = index
   }
 
+  inject(scoreStorm: ScoreStorm): void {
+    this.scoreStorm = scoreStorm
+  }
+
   execute() {
     const score = this.scoreStorm.getScore()
     for (const instrument of score.instruments) {
