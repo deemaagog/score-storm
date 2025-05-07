@@ -26,7 +26,7 @@ export const useSS = (params: UseSSParams): UseSSReturn => {
 
     const score = Score.createQuickScore(params.quickScoreOptions)
     scoreStorm.current.setScore(score)
-    scoreStorm.current.setLayout(new FlowLayout())
+    scoreStorm.current.setLayout(new FlowLayout({heightValue: 2}))
 
     setInitialized(true)
 

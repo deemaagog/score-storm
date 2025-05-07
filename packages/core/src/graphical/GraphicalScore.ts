@@ -129,6 +129,7 @@ export class GraphicalScore {
           height: 0,
           rows: [],
         }
+        currentYPosition = 0
       }
 
       let systemHeight = 0

@@ -21,5 +21,5 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         </ScoreStormProvider>
       </MantineProvider>
     </SettingsProvider>
-  </React.StrictMode>,
+     </React.StrictMode>,
 )

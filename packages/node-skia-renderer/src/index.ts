@@ -1,20 +1,20 @@
 import ScoreStorm, { IRenderer, IGraphical } from "@score-storm/core"
-import { Canvas, createCanvas, SKRSContext2D, GlobalFonts, SvgExportFlag, SvgCanvas } from "@napi-rs/canvas"
+import { GlobalFonts, SvgExportFlag } from "@napi-rs/canvas"
+import { Page } from "./Page"
 
 type Options = {
   width: number
   svgExportFlag?: SvgExportFlag
 }
 
-type CanvasOrSvgCanvas<T extends Options> = T["svgExportFlag"] extends SvgExportFlag ? SvgCanvas : Canvas
-
 class NodeSkiaRenderer<T extends Options> implements IRenderer {
   scoreStorm!: ScoreStorm
   containerWidth: number
-  canvas!: CanvasOrSvgCanvas<T>
-  context!: SKRSContext2D
+  pages: Page[] = []
+  // context!: SKRSContext2D
   isInitialized: boolean = false
   svgExportFlag?: SvgExportFlag
+  currentPage: Page | null = null
 
   constructor(opts: T) {
     this.containerWidth = opts.width
@@ -29,17 +29,11 @@ class NodeSkiaRenderer<T extends Options> implements IRenderer {
     this.isInitialized = false
   }
 
-  preRender(height: number, fontSize: number) {
-    if (this.svgExportFlag) {
-      this.canvas = createCanvas(this.containerWidth, height, this.svgExportFlag) as CanvasOrSvgCanvas<T>
-    } else {
-      this.canvas = createCanvas(this.containerWidth, height) as CanvasOrSvgCanvas<T>
-    }
-    this.context = this.canvas.getContext("2d")
-
-    this.context.font = `${fontSize}px Bravura`
-    this.context.textBaseline = "alphabetic" // middle
-    this.context.textAlign = "start"
+  createPage(height: number, fontSize: number) {
+    const page = new Page(this.containerWidth, height, this.svgExportFlag)
+    page.setup(fontSize)
+    this.pages.push(page)
+    this.currentPage = page
 
     // create white background
     this.setColor("white")
@@ -51,19 +45,19 @@ class NodeSkiaRenderer<T extends Options> implements IRenderer {
   postRender(): void {}
 
   setColor(color: string) {
-    this.context.fillStyle = color
+    this.currentPage!.context.fillStyle = color
   }
 
   getColor(): string {
-    return this.context.fillStyle as string
+    return this.currentPage!.context.fillStyle as string
   }
 
   drawRect(x: number, y: number, width: number, height: number) {
-    this.context.fillRect(x, y, width, height)
+    this.currentPage!.context.fillRect(x, y, width, height)
   }
 
   drawGlyph(glyph: string, x: number, y: number) {
-    this.context.fillText(glyph, x, y)
+    this.currentPage!.context.fillText(glyph, x, y)
   }
 
   renderInGroup(_: IGraphical, renderCallback: () => void) {

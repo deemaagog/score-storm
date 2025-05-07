@@ -31,7 +31,7 @@ class SvgRenderer implements IRenderer {
       let x = event.clientX - rect.left
       let y = event.clientY - rect.top
 
-      this.scoreStorm.eventManager.dispatch(EventType.SELECTION_ENDED, { x, y })
+      this.scoreStorm.eventManager.dispatch(EventType.SELECTION_ENDED, { x, y, pageIndex: 0 })
     })
 
     this.scoreStorm.eventManager.on(EventType.SELECTION_PROCESSED, this.handleSelectionProcessed)
@@ -55,7 +55,7 @@ class SvgRenderer implements IRenderer {
     this.isInitialized = false
   }
 
-  preRender(height: number, fontSize: number) {
+  createPage(height: number, fontSize: number) {
     this.svgElement.setAttribute("viewBox", `0 0 ${this.containerWidth} ${height}`)
     this.svgElement.setAttribute("width", `${this.containerWidth}`)
     this.svgElement.setAttribute("height", `${height}`)

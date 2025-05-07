@@ -13,6 +13,7 @@ export enum EventType {
 export interface InteractionPosition {
   x: number
   y: number
+  pageIndex: number
 }
 
 export interface InteractionEvent {
@@ -23,6 +24,7 @@ export interface InteractionEvent {
 
 export interface HoverProcessedEvent {
   object: IGraphical | null
+  pageIndex: number
 }
 
 export interface SelectionProcessedEvent extends HoverProcessedEvent {}
@@ -69,6 +71,18 @@ export class EventManager {
       listeners = []
     }
     listeners.forEach((l) => l(event))
+  }
+
+  public off<K extends EventType>(eventType: K, listener: EventListenerCallback<K>) {
+    const listenerMap: ListenerMap<K> = this.listenerMap
+    let listeners = listenerMap[eventType]
+    if (!listeners) {
+      return
+    }
+    const index = listeners.indexOf(listener)
+    if (index !== -1) {
+      listeners.splice(index, 1)
+    }
   }
 
   public clear() {

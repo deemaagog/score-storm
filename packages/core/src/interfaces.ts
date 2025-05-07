@@ -13,7 +13,7 @@ export interface IRenderer {
 
   init(): void
 
-  preRender(height: number, fontSize: number): void
+  createPage(height: number, fontSize: number, pageIndex: number): void
 
   postRender(): void
 

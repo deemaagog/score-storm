@@ -5,6 +5,7 @@ import { EditorManager } from "./EditorManager"
 import { Measure } from "./model/Measure"
 import { GlobalMeasure } from "./model"
 import { ILayout } from "./layouts/ILayout"
+import { Page } from "./graphical/GraphicalScore"
 
 /**
  * Main class responsible for rendering music score.
@@ -16,6 +17,7 @@ class RenderManager {
   private editorManager: EditorManager
   private x: number = 0
   private y: number = 0
+  private currentPageIndex: number = 0
 
   constructor(scoreStorm: ScoreStorm) {
     this.scoreStorm = scoreStorm
@@ -25,7 +27,6 @@ class RenderManager {
   setRenderer(renderer: IRenderer) {
     if (this.renderer) {
       // eslint-disable-next-line no-console
-      console.log("destroying...")
       this.renderer.destroy()
       // this.eventManager.clear()
     }
@@ -48,7 +49,9 @@ class RenderManager {
   }
 
   destroy() {
+    console.log("destroy intention...")
     if (this.renderer) {
+      console.log("destroying...")
       this.renderer.destroy()
     }
   }
@@ -80,56 +83,56 @@ class RenderManager {
     // clear
     this.editorManager.clear()
     this.renderer.clear()
-    // set sizes and other stuff
-    this.renderer.preRender(score.graphical.pages[0].height, this.scoreStorm.settings.fontSize)
+
+    for (let i = 0; i < score.graphical.pages.length; i++) {
+      const page = score.graphical.pages[i]
+      const isLastPage = i === score.graphical.pages.length - 1
+      this.x = 0
+      this.y = 0
+      this.currentPageIndex = i
+      // set sizes and other stuff
+      this.renderer.createPage(page.height, this.scoreStorm.settings.fontSize, this.currentPageIndex)
+      this.renderPage(page, isLastPage)
+    }
     // loop through measures and draw
-    this.renderScore()
     // do some stuff when score is rendered
     this.renderer.postRender()
     this.editorManager.restoreSelection()
   }
 
-  renderScore() {
-    const score = this.scoreStorm.getScore()
-    this.x = 0
-    this.y = 0
+  renderPage(page: Page, isLastPage: boolean) {
+    for (let ri = 0; ri < page.rows.length; ri++) {
+      const latestRow = ri === page.rows.length - 1 && isLastPage
+      const row = page.rows[ri]
 
-    for (let pi = 0; pi < score.graphical.pages.length; pi++) {
-      const page = score.graphical.pages[pi]
+      for (let gmi = 0; gmi < row.globalMeasures.length; gmi++) {
+        const latestMeasureInRow = gmi === row.globalMeasures.length - 1
+        const globalMeasure = row.globalMeasures[gmi]
 
-      for (let ri = 0; ri < page.rows.length; ri++) {
-        const latestRow = ri === page.rows.length - 1
-        const row = page.rows[ri]
+        for (let i = 0; i < row.instrumentsPosition.length; i++) {
+          this.y = row.instrumentsPosition[i]
 
-        for (let gmi = 0; gmi < row.globalMeasures.length; gmi++) {
-          const latestMeasureInRow = gmi === row.globalMeasures.length - 1
-          const globalMeasure = row.globalMeasures[gmi]
-
-          for (let i = 0; i < row.instrumentsPosition.length; i++) {
-            this.y = row.instrumentsPosition[i]
-
-            const measure = score.instruments[i].measures[globalMeasure.index]
-            this.renderMeasure(measure, latestRow, latestMeasureInRow, globalMeasure)
-          }
-          // setting global measure position and height
-          globalMeasure.graphical.height = row.systemHeight
-          globalMeasure.graphical.setPosition({ x: this.x, y: row.instrumentsPosition[0] })
-
-          this.x += globalMeasure.graphical.width // TODO: make X position a GraphicalGlobalMeasure property
+          const measure = this.scoreStorm.getScore().instruments[i].measures[globalMeasure.index]
+          this.renderMeasure(measure, latestRow, latestMeasureInRow, globalMeasure)
         }
-        this.x = 0
+        // setting global measure position and height
+        globalMeasure.graphical.height = row.systemHeight
+        globalMeasure.graphical.setPosition({ x: this.x, y: row.instrumentsPosition[0] })
 
-        // draw start bar line
-        if (row.instrumentsPosition.length > 1) {
-          this.renderer.drawRect(
-            this.x,
+        this.x += globalMeasure.graphical.width // TODO: make X position a GraphicalGlobalMeasure property
+      }
+      this.x = 0
+
+      // draw start bar line
+      if (row.instrumentsPosition.length > 1) {
+        this.renderer.drawRect(
+          this.x,
+          row.instrumentsPosition[0],
+          this.scoreStorm.settings.barLineThickness,
+          row.instrumentsPosition[row.instrumentsPosition.length - 1] +
+            this.scoreStorm.settings.barlineHeight -
             row.instrumentsPosition[0],
-            this.scoreStorm.settings.barLineThickness,
-            row.instrumentsPosition[row.instrumentsPosition.length - 1] +
-              this.scoreStorm.settings.barlineHeight -
-              row.instrumentsPosition[0],
-          )
-        }
+        )
       }
     }
   }
@@ -225,7 +228,7 @@ class RenderManager {
   }
 
   renderInteractiveObject(object: object, graphicalObject: IGraphical, bBox: BBox) {
-    this.editorManager.registerInteractionArea(object, graphicalObject, bBox)
+    this.editorManager.registerInteractionArea(object, graphicalObject, bBox, this.currentPageIndex)
     this.renderer.renderInGroup(graphicalObject, () => graphicalObject.render(this.renderer, this.scoreStorm.settings))
   }
 }

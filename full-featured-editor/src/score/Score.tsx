@@ -25,7 +25,7 @@ export const Score = () => {
   useEffect(() => {
     const resizeObserver = new ResizeObserver(
       debounce((entries) => {
-        const newWidth = Math.floor(entries[0].contentRect.width)
+        const newWidth = Math.round(entries[0].contentRect.width)
         if (newWidth === rootElementRefWidth.current) {
           return
         }

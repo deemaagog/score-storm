@@ -14,14 +14,14 @@ type SpatialIndexItem = {
 export class EditorManager {
   private renderManager!: RenderManager
   private hoveredObject: any | null = null
-  private selectedObject: any | null = null // TODO: improve tpyes, create BaeObject class
-  private spatialSearchTree!: RBush<SpatialIndexItem>
-  private grahicalByObject: Map<object, IGraphical> = new Map()
+  private selectedObject: any | null = null // TODO: improve types, create BaseObject class
+  private spatialSearchTreeByPage: Map<number, RBush<SpatialIndexItem>>
+  private graphicalByObject: Map<object, IGraphical> = new Map()
 
   constructor(renderManager: RenderManager) {
     this.renderManager = renderManager
 
-    this.spatialSearchTree = new RBush()
+    this.spatialSearchTreeByPage = new Map()
 
     // bind handlers
     this.handleHover = this.handleHover.bind(this)
@@ -31,8 +31,13 @@ export class EditorManager {
     this.renderManager.scoreStorm.eventManager.on(EventType.SELECTION_ENDED, this.handleSelectionEnded)
   }
 
-  handleHover({ x, y }: InteractionPosition) {
-    const result = this.spatialSearchTree.search({
+  handleHover({ x, y, pageIndex }: InteractionPosition) {
+    const spatialSearchTree = this.spatialSearchTreeByPage.get(pageIndex)
+    if (!spatialSearchTree) {
+      return
+    }
+
+    const result = spatialSearchTree.search({
       minX: x,
       minY: y,
       maxX: x,
@@ -55,13 +60,19 @@ export class EditorManager {
 
     if (shouldUpdate) {
       this.renderManager.scoreStorm.eventManager.dispatch(EventType.HOVER_PROCESSED, {
-        object: this.grahicalByObject.get(this.hoveredObject) || null,
+        object: this.graphicalByObject.get(this.hoveredObject) || null,
+        pageIndex,
       })
     }
   }
 
-  handleSelectionEnded({ x, y }: InteractionPosition) {
-    const result = this.spatialSearchTree.search({
+  handleSelectionEnded({ x, y, pageIndex }: InteractionPosition) {
+    const spatialSearchTree = this.spatialSearchTreeByPage.get(pageIndex)
+    if (!spatialSearchTree) {
+      return
+    }
+
+    const result = spatialSearchTree.search({
       minX: x,
       minY: y,
       maxX: x,
@@ -72,18 +83,26 @@ export class EditorManager {
     if (newSelected !== this.selectedObject) {
       this.selectedObject = newSelected
       this.renderManager.scoreStorm.eventManager.dispatch(EventType.SELECTION_PROCESSED, {
-        object: this.grahicalByObject.get(this.selectedObject) || null,
+        object: this.graphicalByObject.get(this.selectedObject) || null,
+        pageIndex,
       })
     }
   }
 
-  registerInteractionArea(object: object, grahicalObject: IGraphical, bBox: BBox) {
-    if (!this.grahicalByObject.get(object)) {
-      // TODO: this doesnt work for graphical objects that does not have their counterpart in score model (clef on non first row e.t.c)
-      this.grahicalByObject.set(object, grahicalObject)
+  registerInteractionArea(object: object, graphicalObject: IGraphical, bBox: BBox, pageIndex: number) {
+    if (!this.graphicalByObject.get(object)) {
+      // TODO: this doesn't work for graphical objects that does not have their counterpart in score model (clef on non first row e.t.c)
+      this.graphicalByObject.set(object, graphicalObject)
+    }
+    let spatialSearchTree: RBush<SpatialIndexItem>
+    if (!this.spatialSearchTreeByPage.has(pageIndex)) {
+      spatialSearchTree = new RBush()
+      this.spatialSearchTreeByPage.set(pageIndex, spatialSearchTree)
+    } else {
+      spatialSearchTree = this.spatialSearchTreeByPage.get(pageIndex)!
     }
 
-    this.spatialSearchTree.insert({
+    spatialSearchTree.insert({
       minX: bBox.x,
       minY: bBox.y,
       maxX: bBox.x + bBox.width,
@@ -93,15 +112,15 @@ export class EditorManager {
   }
 
   clear() {
-    this.spatialSearchTree.clear()
-    this.grahicalByObject.clear()
+    this.spatialSearchTreeByPage.clear()
+    this.graphicalByObject.clear()
   }
 
   restoreSelection() {
-    if (this.selectedObject) {
-      this.renderManager.scoreStorm.eventManager.dispatch(EventType.SELECTION_PROCESSED, {
-        object: this.grahicalByObject.get(this.selectedObject) || null,
-      })
-    }
+    // if (this.selectedObject) {
+    //   this.renderManager.scoreStorm.eventManager.dispatch(EventType.SELECTION_PROCESSED, {
+    //     object: this.graphicalByObject.get(this.selectedObject) || null,
+    //   })
+    // }
   }
 }
