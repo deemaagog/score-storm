@@ -23,7 +23,6 @@ class CanvasRenderer implements IRenderer {
   // current layer
   currentLayer!: Layer
 
-  resizeObserver: ResizeObserver
   isInitialized: boolean = false
 
   scoreStorm!: ScoreStorm
@@ -33,12 +32,6 @@ class CanvasRenderer implements IRenderer {
   constructor(containerElement: HTMLDivElement) {
     this.containerElement = containerElement
     this.containerWidth = this.containerElement.clientWidth
-
-    // make this and destroy method part of BrowserRenderer?
-    this.resizeObserver = new ResizeObserver((entries) => {
-      this.containerWidth = entries[0].contentRect.width
-    })
-    this.resizeObserver.observe(this.containerElement)
 
     this.handleHoverProcessed = this.handleHoverProcessed.bind(this)
     this.handleSelectionProcessed = this.handleSelectionProcessed.bind(this)
@@ -110,7 +103,6 @@ class CanvasRenderer implements IRenderer {
     }
 
     this.isInitialized = false
-    this.resizeObserver.unobserve(this.containerElement)
   }
 
   preRender(height: number, fontSize: number) {

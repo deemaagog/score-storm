@@ -9,7 +9,6 @@ class SvgRenderer implements IRenderer {
   containerWidth: number
   svgElement!: SVGElement
   currentColor: string
-  resizeObserver: ResizeObserver
   isInitialized: boolean = false
   openedGroup: SVGGElement | null = null
   elementByObject: Map<IGraphical, SVGElement> = new Map()
@@ -18,12 +17,6 @@ class SvgRenderer implements IRenderer {
     this.containerElement = containerElement
     this.containerWidth = this.containerElement.clientWidth
     this.currentColor = "black"
-
-    // make this and destroy method part of BrowserRenderer?
-    this.resizeObserver = new ResizeObserver((entries) => {
-      this.containerWidth = entries[0].contentRect.width
-    })
-    this.resizeObserver.observe(this.containerElement)
 
     this.handleSelectionProcessed = this.handleSelectionProcessed.bind(this)
   }
@@ -60,7 +53,6 @@ class SvgRenderer implements IRenderer {
   destroy() {
     this.containerElement.removeChild(this.svgElement)
     this.isInitialized = false
-    this.resizeObserver.unobserve(this.containerElement)
   }
 
   preRender(height: number, fontSize: number) {
