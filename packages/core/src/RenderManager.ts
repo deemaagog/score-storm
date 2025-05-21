@@ -4,6 +4,7 @@ import { BBox, IGraphical } from "./graphical/interfaces"
 import { EditorManager } from "./EditorManager"
 import { Measure } from "./model/Measure"
 import { GlobalMeasure } from "./model"
+import { FlowLayout, ILayout } from "./layouts"
 
 /**
  * Main class responsible for rendering music score.
@@ -12,12 +13,14 @@ class RenderManager {
   scoreStorm: ScoreStorm
   private renderer!: IRenderer
   private editorManager: EditorManager
+  private layout!: ILayout
   private x: number = 0
   private y: number = 0
 
   constructor(scoreStorm: ScoreStorm) {
     this.scoreStorm = scoreStorm
     this.editorManager = new EditorManager(this)
+    this.layout = new FlowLayout()
   }
 
   setRenderer(renderer: IRenderer) {
@@ -43,16 +46,30 @@ class RenderManager {
     }
   }
 
+  setLayout(layout: ILayout) {
+    this.layout = layout
+  }
+
+  getLayout(): ILayout {
+    return this.layout
+  }
+
   render() {
     // eslint-disable-next-line no-console
     console.log("rendering...")
 
     const score = this.scoreStorm.getScore()
+
     if (!score) {
       throw new Error("Score is not set!")
     }
+
     if (!this.renderer) {
       throw new Error("Renderer is not set!")
+    }
+
+    if (!this.layout) {
+      throw new Error("Layout is not set!")
     }
 
     if (!this.renderer.isInitialized) {

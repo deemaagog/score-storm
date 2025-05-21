@@ -5,6 +5,7 @@ import { Score } from "./model/Score"
 import { ScoreStormSettings, Settings } from "./Settings"
 import { ICommand } from "./commands/ICommand"
 import { CommandManager } from "./CommandManager"
+import { ILayout } from "./layouts"
 
 /**
  * The main entrypoint
@@ -74,5 +75,13 @@ export class ScoreStorm {
 
   public redoCommand() {
     this.commandManager.redo()
+  }
+
+  public setLayout(layout: ILayout) {
+    this.renderManager.setLayout(layout)
+  }
+
+  public getLayout(): ILayout {
+    return this.renderManager.getLayout()
   }
 }
