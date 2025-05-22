@@ -1,5 +1,5 @@
 import { ICommand } from "./commands/ICommand"
-import { EventType } from "./EventManager"
+import { EventType } from "./events"
 import { ScoreStorm } from "./ScoreStorm"
 
 export class CommandManager {

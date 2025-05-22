@@ -1,10 +1,10 @@
 import ScoreStorm, {
   BBox,
-  EventType,
   HoverProcessedEvent,
   IRenderer,
   SelectionProcessedEvent,
   IGraphical,
+  InteractionEventType,
 } from "@score-storm/core"
 import { Layer } from "./Layer"
 
@@ -82,17 +82,17 @@ class CanvasRenderer implements IRenderer {
       let x = event.clientX - this.boundingRect.left
       let y = event.clientY - this.boundingRect.top
 
-      this.scoreStorm.eventManager.dispatch(EventType.HOVER, { x, y })
+      this.scoreStorm.dispatchInteractionEvent(InteractionEventType.HOVER, { x, y })
     })
 
     this.mainLayer.canvasElement.addEventListener("click", (event: MouseEvent) => {
       let x = event.clientX - this.boundingRect.left
       let y = event.clientY - this.boundingRect.top
-      this.scoreStorm.eventManager.dispatch(EventType.SELECTION_ENDED, { x, y })
+      this.scoreStorm.dispatchInteractionEvent(InteractionEventType.SELECTION_ENDED, { x, y })
     })
 
-    this.scoreStorm.eventManager.on(EventType.HOVER_PROCESSED, this.handleHoverProcessed)
-    this.scoreStorm.eventManager.on(EventType.SELECTION_PROCESSED, this.handleSelectionProcessed)
+    this.scoreStorm.setInteractionEventListener(InteractionEventType.HOVER_PROCESSED, this.handleHoverProcessed)
+    this.scoreStorm.setInteractionEventListener(InteractionEventType.SELECTION_PROCESSED, this.handleSelectionProcessed)
 
     this.currentLayer = this.mainLayer
   }

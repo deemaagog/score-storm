@@ -1,7 +1,7 @@
 import RBush from "rbush"
 import { BBox, IGraphical } from "./graphical"
-import { EventType, InteractionPosition } from "./EventManager"
-import RenderManager from "./RenderManager"
+import { EventManager } from "./EventManager"
+import { InteractionEventMap, InteractionEventType, InteractionPosition } from "./events"
 
 type SpatialIndexItem = {
   minX: number
@@ -12,14 +12,14 @@ type SpatialIndexItem = {
 }
 
 export class EditorManager {
-  private renderManager!: RenderManager
+  interactionEventManager: EventManager<InteractionEventMap>
   private hoveredObject: any | null = null
-  private selectedObject: any | null = null // TODO: improve tpyes, create BaeObject class
+  private selectedObject: any | null = null // TODO: improve types, create BaseObject class
   private spatialSearchTree!: RBush<SpatialIndexItem>
-  private grahicalByObject: Map<object, IGraphical> = new Map()
+  private graphicalByObject: Map<object, IGraphical> = new Map()
 
-  constructor(renderManager: RenderManager) {
-    this.renderManager = renderManager
+  constructor() {
+    this.interactionEventManager = new EventManager<InteractionEventMap>()
 
     this.spatialSearchTree = new RBush()
 
@@ -27,8 +27,8 @@ export class EditorManager {
     this.handleHover = this.handleHover.bind(this)
     this.handleSelectionEnded = this.handleSelectionEnded.bind(this)
 
-    this.renderManager.scoreStorm.eventManager.on(EventType.HOVER, this.handleHover)
-    this.renderManager.scoreStorm.eventManager.on(EventType.SELECTION_ENDED, this.handleSelectionEnded)
+    this.interactionEventManager.on(InteractionEventType.HOVER, this.handleHover)
+    this.interactionEventManager.on(InteractionEventType.SELECTION_ENDED, this.handleSelectionEnded)
   }
 
   handleHover({ x, y }: InteractionPosition) {
@@ -54,8 +54,8 @@ export class EditorManager {
     }
 
     if (shouldUpdate) {
-      this.renderManager.scoreStorm.eventManager.dispatch(EventType.HOVER_PROCESSED, {
-        object: this.grahicalByObject.get(this.hoveredObject) || null,
+      this.interactionEventManager.dispatch(InteractionEventType.HOVER_PROCESSED, {
+        object: this.graphicalByObject.get(this.hoveredObject) || null,
       })
     }
   }
@@ -71,16 +71,16 @@ export class EditorManager {
     const newSelected = result[0] ? result[0].object : null
     if (newSelected !== this.selectedObject) {
       this.selectedObject = newSelected
-      this.renderManager.scoreStorm.eventManager.dispatch(EventType.SELECTION_PROCESSED, {
-        object: this.grahicalByObject.get(this.selectedObject) || null,
+      this.interactionEventManager.dispatch(InteractionEventType.SELECTION_PROCESSED, {
+        object: this.graphicalByObject.get(this.selectedObject) || null,
       })
     }
   }
 
-  registerInteractionArea(object: object, grahicalObject: IGraphical, bBox: BBox) {
-    if (!this.grahicalByObject.get(object)) {
-      // TODO: this doesnt work for graphical objects that does not have their counterpart in score model (clef on non first row e.t.c)
-      this.grahicalByObject.set(object, grahicalObject)
+  registerInteractionArea(object: object, graphicalObject: IGraphical, bBox: BBox) {
+    if (!this.graphicalByObject.get(object)) {
+      // TODO: this doesn't work for graphical objects that does not have their counterpart in score model (clef on non first row e.t.c)
+      this.graphicalByObject.set(object, graphicalObject)
     }
 
     this.spatialSearchTree.insert({
@@ -94,13 +94,14 @@ export class EditorManager {
 
   clear() {
     this.spatialSearchTree.clear()
-    this.grahicalByObject.clear()
+    this.graphicalByObject.clear()
+    // this.interactionEventManager.clear()
   }
 
   restoreSelection() {
     if (this.selectedObject) {
-      this.renderManager.scoreStorm.eventManager.dispatch(EventType.SELECTION_PROCESSED, {
-        object: this.grahicalByObject.get(this.selectedObject) || null,
+      this.interactionEventManager.dispatch(InteractionEventType.SELECTION_PROCESSED, {
+        object: this.graphicalByObject.get(this.selectedObject) || null,
       })
     }
   }

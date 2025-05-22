@@ -1,4 +1,4 @@
-import { EventType } from "../EventManager"
+import { EventType } from "../events"
 import { GlobalMeasure } from "../model"
 import { Beat } from "../model/Beat"
 import { Measure } from "../model/Measure"

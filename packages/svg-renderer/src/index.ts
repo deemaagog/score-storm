@@ -1,4 +1,4 @@
-import ScoreStorm, { EventType, IRenderer, SelectionProcessedEvent } from "@score-storm/core"
+import ScoreStorm, { InteractionEventType, IRenderer, SelectionProcessedEvent } from "@score-storm/core"
 import { IGraphical } from "@score-storm/core"
 
 const NS = "http://www.w3.org/2000/svg"
@@ -31,10 +31,10 @@ class SvgRenderer implements IRenderer {
       let x = event.clientX - rect.left
       let y = event.clientY - rect.top
 
-      this.scoreStorm.eventManager.dispatch(EventType.SELECTION_ENDED, { x, y })
+      this.scoreStorm.dispatchInteractionEvent(InteractionEventType.SELECTION_ENDED, { x, y })
     })
 
-    this.scoreStorm.eventManager.on(EventType.SELECTION_PROCESSED, this.handleSelectionProcessed)
+    this.scoreStorm.setInteractionEventListener(InteractionEventType.SELECTION_PROCESSED, this.handleSelectionProcessed)
   }
 
   handleSelectionProcessed({ object }: SelectionProcessedEvent) {

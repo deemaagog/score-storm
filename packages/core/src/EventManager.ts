@@ -1,59 +1,12 @@
-import { IGraphical } from "./graphical/interfaces"
+export type EventListenerCallback<K extends keyof M, M> = (event: M[K]) => void
 
-export enum EventType {
-  HOVER = "HOVER",
-  HOVER_PROCESSED = "HOVER_PROCESSED",
-  SELECTION_STARTED = "SELECTION_STARTED",
-  SELECTION_ENDED = "SELECTION_ENDED",
-  SELECTION_PROCESSED = "SELECTION_PROCESSED",
-  UNDO_REDO_STATE_UPDATED = "UNDO_REDO_STATE_UPDATED",
-  NUMBER_OF_MEASURES_UPDATED = "NUMBER_OF_MEASURES_UPDATED",
-}
+type ListenerMap<K extends keyof M, M> = { [P in K]?: EventListenerCallback<P, M>[] }
 
-export interface InteractionPosition {
-  x: number
-  y: number
-}
+export class EventManager<M> {
+  private listenerMap: ListenerMap<keyof M, M> = {}
 
-export interface InteractionEvent {
-  x: number
-  y: number
-  object: IGraphical | null
-}
-
-export interface HoverProcessedEvent {
-  object: IGraphical | null
-}
-
-export interface SelectionProcessedEvent extends HoverProcessedEvent {}
-
-export interface UndoRedoStateUpdatedEvent {
-  undo: boolean
-  redo: boolean
-}
-
-export interface NumberOfMeasuresUpdatedEvent {
-  numberOfMeasures: number
-}
-
-interface EventMap {
-  [EventType.HOVER]: InteractionPosition
-  [EventType.HOVER_PROCESSED]: HoverProcessedEvent
-  [EventType.SELECTION_STARTED]: InteractionPosition
-  [EventType.SELECTION_ENDED]: InteractionPosition
-  [EventType.SELECTION_PROCESSED]: SelectionProcessedEvent
-  [EventType.UNDO_REDO_STATE_UPDATED]: UndoRedoStateUpdatedEvent
-  [EventType.NUMBER_OF_MEASURES_UPDATED]: NumberOfMeasuresUpdatedEvent
-}
-
-export type EventListenerCallback<K extends EventType> = (event: EventMap[K]) => void
-type ListenerMap<K extends EventType> = { [P in K]?: EventListenerCallback<K>[] }
-
-export class EventManager {
-  private listenerMap: ListenerMap<EventType> = {}
-
-  public on<K extends EventType>(eventType: K, listener: EventListenerCallback<K>) {
-    const listenerMap: ListenerMap<K> = this.listenerMap
+  public on<K extends keyof M>(eventType: K, listener: EventListenerCallback<K, M>) {
+    const listenerMap: ListenerMap<keyof M, M> = this.listenerMap
     let listeners = listenerMap[eventType]
     if (!listeners) {
       listeners = []
@@ -62,8 +15,8 @@ export class EventManager {
     listeners.push(listener)
   }
 
-  public dispatch<K extends EventType>(eventType: K, event: EventMap[K]) {
-    const listenerMap: ListenerMap<K> = this.listenerMap
+  public dispatch<K extends keyof M>(eventType: K, event: M[K]) {
+    const listenerMap: ListenerMap<keyof M, M> = this.listenerMap
     let listeners = listenerMap[eventType]
     if (!listeners) {
       listeners = []
