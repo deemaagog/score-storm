@@ -19,7 +19,7 @@ class RenderManager {
 
   constructor(scoreStorm: ScoreStorm) {
     this.scoreStorm = scoreStorm
-    this.editorManager = new EditorManager(this)
+    this.editorManager = new EditorManager()
     this.layout = new FlowLayout()
   }
 
@@ -52,6 +52,14 @@ class RenderManager {
 
   getLayout(): ILayout {
     return this.layout
+  }
+
+  setInteractionEventListener(...args: Parameters<typeof this.editorManager.interactionEventManager.on>) {
+    this.editorManager.interactionEventManager.on(...args)
+  }
+
+  dispatchInteractionEvent(...args: Parameters<typeof this.editorManager.interactionEventManager.dispatch>) {
+    this.editorManager.interactionEventManager.dispatch(...args)
   }
 
   render() {

@@ -1,5 +1,5 @@
-import { EventType } from "../EventManager"
-import { GlobalMeasure, Score } from "../model"
+import { EventType } from "../events"
+import { GlobalMeasure } from "../model"
 import { Measure } from "../model/Measure"
 import { ScoreStorm } from "../ScoreStorm"
 import { ICommand } from "./ICommand"

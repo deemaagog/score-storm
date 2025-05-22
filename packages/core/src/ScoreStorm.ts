@@ -1,11 +1,12 @@
 import RenderManager from "./RenderManager"
-import { EventManager, EventType } from "./EventManager"
+import { EventManager } from "./EventManager"
 import { IRenderer } from "./interfaces"
 import { Score } from "./model/Score"
 import { ScoreStormSettings, Settings } from "./Settings"
 import { ICommand } from "./commands/ICommand"
 import { CommandManager } from "./CommandManager"
 import { ILayout } from "./layouts"
+import { EventMap, EventType } from "./events"
 
 /**
  * The main entrypoint
@@ -14,7 +15,7 @@ export class ScoreStorm {
   private score!: Score
   private renderManager: RenderManager
   private commandManager: CommandManager
-  eventManager: EventManager
+  eventManager: EventManager<EventMap>
   settings: Settings
 
   constructor(settings?: ScoreStormSettings) {
@@ -61,8 +62,16 @@ export class ScoreStorm {
     this.eventManager.clear()
   }
 
-  public setEventListener(...args: Parameters<typeof EventManager.prototype.on>) {
+  public setEventListener(...args: Parameters<typeof this.eventManager.on>) {
     this.eventManager.on(...args)
+  }
+
+  public setInteractionEventListener(...args: Parameters<typeof this.renderManager.setInteractionEventListener>) {
+    this.renderManager.setInteractionEventListener(...args)
+  }
+
+  public dispatchInteractionEvent(...args: Parameters<typeof this.renderManager.dispatchInteractionEvent>) {
+    this.renderManager.dispatchInteractionEvent(...args)
   }
 
   public executeCommand(command: ICommand) {
