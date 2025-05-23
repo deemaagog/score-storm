@@ -1,6 +1,6 @@
 import React, { PropsWithChildren, useContext, useEffect, useState, createContext } from "react"
 import { ScoreStormContext } from "./ScoreStormProvider"
-import { EventType, IGraphical, InteractionEvent } from "@score-storm/core"
+import { IGraphical, InteractionEvent, InteractionEventType } from "@score-storm/core"
 
 type SelectionContextValue = {
   selectedObject: IGraphical | null
@@ -18,8 +18,7 @@ export const SelectionProvider: React.FC<PropsWithChildren> = ({ children }) => 
   }
 
   useEffect(() => {
-    // @ts-expect-error
-    scoreStorm.setEventListener(EventType.SELECTION_PROCESSED, handleSelect)
+    scoreStorm.setInteractionEventListener(InteractionEventType.SELECTION_PROCESSED, handleSelect)
   }, [])
 
   return <SelectionContext.Provider value={{ selectedObject: selectedObject }}>{children}</SelectionContext.Provider>
