@@ -12,6 +12,11 @@ export class Row {
   systemHeight!: number // TODO: come up with a better name for this
 }
 
+export class Page {
+  rows!: Row[]
+  height!: number
+}
+
 const SPACE_BETWEEN_STAVE_ROWS_COEF = 6 // space unit
 const SPACE_BETWEEN_INSTRUMENTS_ROWS_COEF = 5 // space unit
 
@@ -19,15 +24,14 @@ const SPACE_BETWEEN_INSTRUMENTS_ROWS_COEF = 5 // space unit
  * The main class for graphical representation of music score model
  */
 export class GraphicalScore {
-  rows!: Row[]
-  height!: number
+  pages!: Page[]
   score: Score
 
   constructor(score: Score) {
     this.score = score
   }
 
-  calculateLineBreaks(containerWidth: number, settings: Settings) {
+  calculateLineBreaks(containerWidth: number) {
     // calculate line breaks
     const rows: Pick<Row, "globalMeasures">[] = []
     const instrumentsCurrentClefs: GraphicalClef[] = []
@@ -98,15 +102,17 @@ export class GraphicalScore {
       })
     }
 
-    this.calculateYPositionsAndScoreHeight(rows, settings)
+    return rows
   }
 
-  calculateYPositionsAndScoreHeight(rows: Pick<Row, "globalMeasures">[], settings: Settings) {
-    this.height = 0
-    this.rows = []
+  calculatePageBreaks(rows: Pick<Row, "globalMeasures">[], settings: Settings, pageHeight: number) {
     // calculate instruments Y position and total height
-
+    this.pages = []
     let currentYPosition = 0
+    let currentPage: Page = {
+      height: 0,
+      rows: [],
+    }
 
     for (let ri = 0; ri < rows.length; ri++) {
       let systemHeight = 0
@@ -141,23 +147,24 @@ export class GraphicalScore {
 
         systemHeight += settings.barlineHeight
         currentYPosition += settings.barlineHeight
-        this.height += currentYTopShift + settings.barlineHeight + currentYBottomShift
+        currentPage.height += currentYTopShift + settings.barlineHeight + currentYBottomShift
 
         if (i < this.score.instruments.length - 1) {
           systemHeight += settings.unit * SPACE_BETWEEN_INSTRUMENTS_ROWS_COEF
           currentYPosition += settings.unit * SPACE_BETWEEN_INSTRUMENTS_ROWS_COEF
-          this.height += settings.unit * SPACE_BETWEEN_INSTRUMENTS_ROWS_COEF
+          currentPage.height += settings.unit * SPACE_BETWEEN_INSTRUMENTS_ROWS_COEF
         }
       }
 
-      this.rows.push({ ...row, instrumentsPosition: instrumentPositions, systemHeight })
+      currentPage.rows.push({ ...row, instrumentsPosition: instrumentPositions, systemHeight })
 
       if (ri < rows.length - 1) {
         currentYPosition += settings.unit * SPACE_BETWEEN_STAVE_ROWS_COEF
-        this.height += settings.unit * SPACE_BETWEEN_STAVE_ROWS_COEF
+        currentPage.height += settings.unit * SPACE_BETWEEN_STAVE_ROWS_COEF
       }
     }
 
-    this.height = Math.ceil(this.height)
+    currentPage.height = Math.ceil(currentPage.height)
+    this.pages.push(currentPage)
   }
 }

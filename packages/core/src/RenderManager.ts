@@ -5,6 +5,7 @@ import { EditorManager } from "./EditorManager"
 import { Measure } from "./model/Measure"
 import { GlobalMeasure } from "./model"
 import { FlowLayout, ILayout } from "./layouts"
+import { Page } from "./graphical/GraphicalScore"
 
 /**
  * Main class responsible for rendering music score.
@@ -16,6 +17,7 @@ class RenderManager {
   private layout!: ILayout
   private x: number = 0
   private y: number = 0
+  private currentPageIndex: number = 0
 
   constructor(scoreStorm: ScoreStorm) {
     this.scoreStorm = scoreStorm
@@ -86,28 +88,39 @@ class RenderManager {
       this.renderer.init()
     }
 
-    score.graphical.calculateLineBreaks(this.renderer.containerWidth, this.scoreStorm.settings)
+    const pageDimensions = this.scoreStorm.getLayout().getPageDimensions(this.renderer.containerWidth)
+    const rows = score.graphical.calculateLineBreaks(pageDimensions.width)
+    score.graphical.calculatePageBreaks(rows, this.scoreStorm.settings, pageDimensions.height)
 
     // clear
     this.editorManager.clear()
     this.renderer.clear()
-    // set sizes and other stuff
-    this.renderer.preRender(score.graphical.height, this.scoreStorm.settings.fontSize)
-    // loop through measures and draw
-    this.renderScore()
+
+    for (let i = 0; i < score.graphical.pages.length; i++) {
+      const page = score.graphical.pages[i]
+      const isLastPage = i === score.graphical.pages.length - 1
+      this.x = 0
+      this.y = 0
+      this.currentPageIndex = i
+      // set sizes and other stuff
+      this.renderer.preRender(page.height, this.scoreStorm.settings.fontSize /* , this.currentPageIndex */)
+      // loop through measures and draw
+      this.renderPage(page, isLastPage)
+    }
+
     // do some stuff when score is rendered
     this.renderer.postRender()
     this.editorManager.restoreSelection()
   }
 
-  renderScore() {
+  renderPage(page: Page, isLastPage: boolean) {
     const score = this.scoreStorm.getScore()
     this.x = 0
     this.y = 0
 
-    for (let ri = 0; ri < score.graphical.rows.length; ri++) {
-      const latestRow = ri === score.graphical.rows.length - 1
-      const row = score.graphical.rows[ri]
+    for (let ri = 0; ri < page.rows.length; ri++) {
+      const latestRow = ri === page.rows.length - 1 && isLastPage
+      const row = page.rows[ri]
 
       for (let gmi = 0; gmi < row.globalMeasures.length; gmi++) {
         const latestMeasureInRow = gmi === row.globalMeasures.length - 1
