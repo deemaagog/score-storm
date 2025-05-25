@@ -17,9 +17,6 @@ export class Page {
   height!: number
 }
 
-const SPACE_BETWEEN_STAVE_ROWS_COEF = 6 // space unit
-const SPACE_BETWEEN_INSTRUMENTS_ROWS_COEF = 5 // space unit
-
 /**
  * The main class for graphical representation of music score model
  */
@@ -150,17 +147,17 @@ export class GraphicalScore {
         currentPage.height += currentYTopShift + settings.barlineHeight + currentYBottomShift
 
         if (i < this.score.instruments.length - 1) {
-          systemHeight += settings.unit * SPACE_BETWEEN_INSTRUMENTS_ROWS_COEF
-          currentYPosition += settings.unit * SPACE_BETWEEN_INSTRUMENTS_ROWS_COEF
-          currentPage.height += settings.unit * SPACE_BETWEEN_INSTRUMENTS_ROWS_COEF
+          systemHeight += settings.unit * settings.spaceBetweenInstrumentsRows
+          currentYPosition += settings.unit * settings.spaceBetweenInstrumentsRows
+          currentPage.height += settings.unit * settings.spaceBetweenInstrumentsRows
         }
       }
 
       currentPage.rows.push({ ...row, instrumentsPosition: instrumentPositions, systemHeight })
 
       if (ri < rows.length - 1) {
-        currentYPosition += settings.unit * SPACE_BETWEEN_STAVE_ROWS_COEF
-        currentPage.height += settings.unit * SPACE_BETWEEN_STAVE_ROWS_COEF
+        currentYPosition += settings.unit * settings.spaceBetweenStaveRows
+        currentPage.height += settings.unit * settings.spaceBetweenStaveRows
       }
     }
 

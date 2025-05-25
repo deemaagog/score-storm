@@ -28,6 +28,10 @@ export class Settings {
   midStave!: number
   mainColor!: string
   staveLineColor!: string
+
+  spaceBetweenStaveRows!: number
+  spaceBetweenInstrumentsRows!: number
+
   debug?: {
     bBoxes: boolean
   }
@@ -52,6 +56,9 @@ export class Settings {
     this.barLineThickness = this.staffLineThickness * 1.2
     this.mainColor = "black"
     this.staveLineColor = "#666666"
+
+    this.spaceBetweenStaveRows = 6
+    this.spaceBetweenInstrumentsRows = 5
 
     this.midStave = this.barlineHeight / 2
     // default editor settings
