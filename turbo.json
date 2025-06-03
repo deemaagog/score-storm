@@ -17,6 +17,7 @@
     "e2e": {
       "dependsOn": ["^build"]
     },
-    "e2e:install": {}
+    "e2e:install": {},
+    "test": {}
   }
 }
