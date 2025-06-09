@@ -90,6 +90,7 @@ class RenderManager {
 
     const pageDimensions = this.scoreStorm.getLayout().getPageDimensions(this.renderer.containerWidth)
     const rows = score.graphical.calculateLineBreaks(pageDimensions.width)
+    // TODO: handle errors
     score.graphical.calculatePageBreaks(rows, this.scoreStorm.settings, pageDimensions.height)
 
     // clear
@@ -126,29 +127,30 @@ class RenderManager {
         const latestMeasureInRow = gmi === row.globalMeasures.length - 1
         const globalMeasure = row.globalMeasures[gmi]
 
-        for (let i = 0; i < row.instrumentsPosition.length; i++) {
-          this.y = row.instrumentsPosition[i]
+        for (let i = 0; i < row.relativeInstrumentsPosition.length; i++) {
+          this.y = row.systemYPosition + row.relativeInstrumentsPosition[i]
 
           const measure = score.instruments[i].measures[globalMeasure.index]
           this.renderMeasure(measure, latestRow, latestMeasureInRow, globalMeasure)
         }
         // setting global measure position and height
         globalMeasure.graphical.height = row.systemHeight
-        globalMeasure.graphical.setPosition({ x: this.x, y: row.instrumentsPosition[0] })
+        globalMeasure.graphical.setPosition({ x: this.x, y: row.systemYPosition + row.relativeInstrumentsPosition[0] })
 
         this.x += globalMeasure.graphical.width // TODO: make X position a GraphicalGlobalMeasure property
       }
       this.x = 0
 
       // draw start bar line
-      if (row.instrumentsPosition.length > 1) {
+      if (row.relativeInstrumentsPosition.length > 1) {
         this.renderer.drawRect(
           this.x,
-          row.instrumentsPosition[0],
+          row.systemYPosition + row.relativeInstrumentsPosition[0],
           this.scoreStorm.settings.barLineThickness,
-          row.instrumentsPosition[row.instrumentsPosition.length - 1] +
+          row.systemYPosition +
+            row.relativeInstrumentsPosition[row.relativeInstrumentsPosition.length - 1] +
             this.scoreStorm.settings.barlineHeight -
-            row.instrumentsPosition[0],
+            (row.systemYPosition + row.relativeInstrumentsPosition[0]),
         )
       }
     }

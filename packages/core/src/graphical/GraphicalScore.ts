@@ -8,7 +8,8 @@ export type InstrumentPosition = number
 
 export class Row {
   globalMeasures!: GlobalMeasure[]
-  instrumentsPosition!: InstrumentPosition[]
+  relativeInstrumentsPosition!: InstrumentPosition[]
+  systemYPosition!: number
   systemHeight!: number // TODO: come up with a better name for this
 }
 
@@ -105,33 +106,34 @@ export class GraphicalScore {
   calculatePageBreaks(rows: Pick<Row, "globalMeasures">[], settings: Settings, pageHeight: number) {
     // calculate instruments Y position and total height
     this.pages = []
-    let currentYPosition = 0
     let currentPage: Page = {
       height: 0,
       rows: [],
     }
+    let currentYPosition = 0
+    let previousBottomShift = 0
 
     for (let ri = 0; ri < rows.length; ri++) {
       let systemHeight = 0
-      const instrumentPositions: InstrumentPosition[] = []
+      let currentRelativeInstrumentsPosition = 0
+      const relativeInstrumentsPosition: InstrumentPosition[] = []
+      let currentYTopShift = 0
+      let currentYBottomShift = 0
 
       const row = rows[ri]
       for (let i = 0; i < this.score.instruments.length; i++) {
-        let currentYTopShift = 0
-        let currentYBottomShift = 0
         for (let gmi = 0; gmi < row.globalMeasures.length; gmi++) {
           const globalMeasure = row.globalMeasures[gmi]
-
           const graphicalMeasure = this.score.instruments[i].measures[globalMeasure.index].graphical
 
-          if (ri === 0 && i === 0) {
+          if (i === 0) {
             const topStaveOverflow = graphicalMeasure.getTopStaveOverflow(settings)
             if (topStaveOverflow > currentYTopShift) {
               currentYTopShift = topStaveOverflow
             }
           }
 
-          if (ri === rows.length - 1 && i === this.score.instruments.length - 1) {
+          if (i === this.score.instruments.length - 1) {
             const bottomStaveOverflow = graphicalMeasure.getBottomStaveOverflow(settings)
             if (bottomStaveOverflow > currentYBottomShift) {
               currentYBottomShift = bottomStaveOverflow
@@ -139,29 +141,50 @@ export class GraphicalScore {
           }
         }
 
-        currentYPosition += currentYTopShift
-        instrumentPositions[i] = currentYPosition
+        // currentYPosition += currentYTopShift
+        relativeInstrumentsPosition[i] = currentRelativeInstrumentsPosition
+        systemHeight += settings.barlineHeight + (i > 0 ? settings.unit * settings.spaceBetweenInstrumentsRows : 0)
 
-        systemHeight += settings.barlineHeight
-        currentYPosition += settings.barlineHeight
-        currentPage.height += currentYTopShift + settings.barlineHeight + currentYBottomShift
+        currentRelativeInstrumentsPosition +=
+          settings.barlineHeight + settings.unit * settings.spaceBetweenInstrumentsRows
+      }
 
-        if (i < this.score.instruments.length - 1) {
-          systemHeight += settings.unit * settings.spaceBetweenInstrumentsRows
-          currentYPosition += settings.unit * settings.spaceBetweenInstrumentsRows
-          currentPage.height += settings.unit * settings.spaceBetweenInstrumentsRows
+      let newPageHeight =
+        currentPage.height +
+        (currentPage.rows.length > 0 ? settings.unit * settings.spaceBetweenStaveRows : 0) +
+        systemHeight +
+        (currentPage.rows.length > 0 ? 0 : currentYTopShift) +
+        currentYBottomShift
+
+      if (pageHeight !== Infinity) {
+        if (newPageHeight > pageHeight) {
+          newPageHeight = newPageHeight - currentPage.height - settings.unit * settings.spaceBetweenStaveRows
+          currentPage.height = pageHeight
+          this.pages.push(currentPage)
+          currentPage = {
+            height: 0,
+            rows: [],
+          }
+          currentYPosition = 0
+          previousBottomShift = 0
         }
       }
 
-      currentPage.rows.push({ ...row, instrumentsPosition: instrumentPositions, systemHeight })
-
-      if (ri < rows.length - 1) {
-        currentYPosition += settings.unit * settings.spaceBetweenStaveRows
-        currentPage.height += settings.unit * settings.spaceBetweenStaveRows
+      if (currentPage.rows.length === 0) {
+        currentYPosition += currentYTopShift
       }
+      currentPage.height = newPageHeight - previousBottomShift
+      currentPage.rows.push({ ...row, relativeInstrumentsPosition, systemHeight, systemYPosition: currentYPosition })
+      currentYPosition = currentPage.height + settings.unit * settings.spaceBetweenStaveRows - currentYBottomShift
+
+      previousBottomShift = currentYBottomShift
     }
 
-    currentPage.height = Math.ceil(currentPage.height)
+    if (pageHeight === Infinity) {
+      currentPage.height = Math.ceil(currentPage.height)
+    } else {
+      currentPage.height = pageHeight
+    }
     this.pages.push(currentPage)
   }
 }
