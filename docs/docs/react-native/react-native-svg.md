@@ -30,6 +30,10 @@ class ReactNativeSVGRenderer implements IRenderer {
     this.containerWidth = width
   }
 
+  getContainerWidth() {
+    return this.containerWidth
+  }
+
   init() {
     this.isInitialized = true
   }
@@ -38,13 +42,13 @@ class ReactNativeSVGRenderer implements IRenderer {
     this.isInitialized = false
   }
 
-  preRender(height: number, fontSize: number) {
+  preRender(height: number, fontSize: number, width: number) {
     this.fontSize = fontSize
 
     this.svgElement = React.createElement(
       Svg,
       {
-        width: this.containerWidth,
+        width,
         height,
       },
       this.childElements,

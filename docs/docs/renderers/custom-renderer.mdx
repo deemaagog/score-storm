@@ -13,10 +13,11 @@ import CodeBlock from "@theme/CodeBlock"
 {`
 export interface IRenderer {
 
-containerWidth: number
 isInitialized: boolean
 
 scoreStorm: ScoreStorm
+
+getContainerWidth(): number
 
 init(): void
 

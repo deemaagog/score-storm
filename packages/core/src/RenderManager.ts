@@ -88,7 +88,7 @@ class RenderManager {
       this.renderer.init()
     }
 
-    const pageDimensions = this.scoreStorm.getLayout().getPageDimensions(this.renderer.containerWidth)
+    const pageDimensions = this.scoreStorm.getLayout().getPageDimensions(this.renderer.getContainerWidth())
     const rows = score.graphical.calculateLineBreaks(pageDimensions.width)
     // TODO: handle errors
     score.graphical.calculatePageBreaks(rows, this.scoreStorm.settings, pageDimensions.height)
@@ -104,7 +104,11 @@ class RenderManager {
       this.y = 0
       this.currentPageIndex = i
       // set sizes and other stuff
-      this.renderer.preRender(page.height, this.scoreStorm.settings.fontSize /* , this.currentPageIndex */)
+      this.renderer.preRender(
+        page.height,
+        this.scoreStorm.settings.fontSize,
+        pageDimensions.width /* , this.currentPageIndex */,
+      )
       // loop through measures and draw
       this.renderPage(page, isLastPage)
     }

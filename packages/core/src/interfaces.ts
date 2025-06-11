@@ -8,12 +8,13 @@ export interface IRenderer {
    */
   scoreStorm: ScoreStorm
 
-  containerWidth: number
   isInitialized: boolean
+
+  getContainerWidth(): number
 
   init(): void
 
-  preRender(height: number, fontSize: number): void
+  preRender(height: number, fontSize: number, width: number): void
 
   postRender(): void
 

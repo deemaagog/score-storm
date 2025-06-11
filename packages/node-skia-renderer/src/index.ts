@@ -21,6 +21,10 @@ class NodeSkiaRenderer<T extends Options> implements IRenderer {
     this.svgExportFlag = opts.svgExportFlag
   }
 
+  getContainerWidth() {
+    return this.containerWidth
+  }
+
   init() {
     this.isInitialized = true
   }
@@ -29,11 +33,11 @@ class NodeSkiaRenderer<T extends Options> implements IRenderer {
     this.isInitialized = false
   }
 
-  preRender(height: number, fontSize: number) {
+  preRender(height: number, fontSize: number, width: number) {
     if (this.svgExportFlag) {
-      this.canvas = createCanvas(this.containerWidth, height, this.svgExportFlag) as CanvasOrSvgCanvas<T>
+      this.canvas = createCanvas(width, height, this.svgExportFlag) as CanvasOrSvgCanvas<T>
     } else {
-      this.canvas = createCanvas(this.containerWidth, height) as CanvasOrSvgCanvas<T>
+      this.canvas = createCanvas(width, height) as CanvasOrSvgCanvas<T>
     }
     this.context = this.canvas.getContext("2d")
 
@@ -43,7 +47,7 @@ class NodeSkiaRenderer<T extends Options> implements IRenderer {
 
     // create white background
     this.setColor("white")
-    this.drawRect(0, 0, this.containerWidth, height)
+    this.drawRect(0, 0, width, height)
   }
 
   clear() {}
