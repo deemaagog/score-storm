@@ -10,7 +10,6 @@ import { Layer } from "./Layer"
 
 class CanvasRenderer implements IRenderer {
   containerElement: HTMLDivElement
-  containerWidth: number
 
   // *** LAYERS ***
   // main layer meant for rendering music scores
@@ -31,10 +30,13 @@ class CanvasRenderer implements IRenderer {
 
   constructor(containerElement: HTMLDivElement) {
     this.containerElement = containerElement
-    this.containerWidth = this.containerElement.clientWidth
 
     this.handleHoverProcessed = this.handleHoverProcessed.bind(this)
     this.handleSelectionProcessed = this.handleSelectionProcessed.bind(this)
+  }
+
+  getContainerWidth() {
+    return this.containerElement.clientWidth
   }
 
   handleHoverProcessed({ object }: HoverProcessedEvent) {
@@ -105,9 +107,9 @@ class CanvasRenderer implements IRenderer {
     this.isInitialized = false
   }
 
-  preRender(height: number, fontSize: number) {
+  preRender(height: number, fontSize: number, width: number) {
     for (const layer of [this.mainLayer, this.hoverLayer, this.selectionLayer]) {
-      layer.preRender(this.containerWidth, height, fontSize)
+      layer.preRender(width, height, fontSize)
     }
 
     this.boundingRect = this.mainLayer.canvasElement.getBoundingClientRect()

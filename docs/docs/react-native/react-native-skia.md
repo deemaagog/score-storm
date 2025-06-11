@@ -29,6 +29,10 @@ class ReactNativeSkiaRenderer implements IRenderer {
     this.paint.setColor(Skia.Color("black"))
   }
 
+  getContainerWidth() {
+    return this.containerWidth
+  }
+
   init() {
     this.isInitialized = true
   }
@@ -37,7 +41,7 @@ class ReactNativeSkiaRenderer implements IRenderer {
     this.isInitialized = false
   }
 
-  preRender(height: number, fontSize: number) {
+  preRender(height: number, fontSize: number, width: number) {
     const fontStyle = {
       fontFamily: "Bravura",
       fontWeight: "normal",
@@ -47,7 +51,7 @@ class ReactNativeSkiaRenderer implements IRenderer {
     this.font = matchFont(fontStyle, this.fontManager)
 
     const pd = PixelRatio.get()
-    this.surface = Skia.Surface.MakeOffscreen(this.containerWidth * pd, height * pd)
+    this.surface = Skia.Surface.MakeOffscreen(width * pd, height * pd)
     const canvas = this.surface.getCanvas()
     canvas.scale(pd, pd)
     canvas.drawColor(Skia.Color("white")) //background color

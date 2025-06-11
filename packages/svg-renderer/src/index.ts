@@ -6,7 +6,6 @@ const NS = "http://www.w3.org/2000/svg"
 class SvgRenderer implements IRenderer {
   scoreStorm!: ScoreStorm
   containerElement: HTMLDivElement
-  containerWidth: number
   svgElement!: SVGElement
   currentColor: string
   isInitialized: boolean = false
@@ -15,10 +14,13 @@ class SvgRenderer implements IRenderer {
 
   constructor(containerElement: HTMLDivElement) {
     this.containerElement = containerElement
-    this.containerWidth = this.containerElement.clientWidth
     this.currentColor = "black"
 
     this.handleSelectionProcessed = this.handleSelectionProcessed.bind(this)
+  }
+
+  getContainerWidth() {
+    return this.containerElement.clientWidth
   }
 
   init() {
@@ -55,9 +57,9 @@ class SvgRenderer implements IRenderer {
     this.isInitialized = false
   }
 
-  preRender(height: number, fontSize: number) {
-    this.svgElement.setAttribute("viewBox", `0 0 ${this.containerWidth} ${height}`)
-    this.svgElement.setAttribute("width", `${this.containerWidth}`)
+  preRender(height: number, fontSize: number, width: number) {
+    this.svgElement.setAttribute("viewBox", `0 0 ${width} ${height}`)
+    this.svgElement.setAttribute("width", `${width}`)
     this.svgElement.setAttribute("height", `${height}`)
 
     // https://developer.mozilla.org/en-US/docs/Web/API/SVGStyleElement
