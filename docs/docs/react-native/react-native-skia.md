@@ -10,7 +10,7 @@ A possible Renderer implementation could use OffScreen API and look like this:
 
 ```ts
 import { matchFont, SkFont, Skia, SkPaint, SkSurface, SkTypefaceFontProvider } from "@shopify/react-native-skia"
-import { EventManager, IGraphical, IRenderer, Settings } from "@score-storm/core"
+import { EventManager, IGraphical, IRenderer, Settings, PageParameters } from "@score-storm/core"
 
 class ReactNativeSkiaRenderer implements IRenderer {
   containerWidth: number
@@ -41,7 +41,8 @@ class ReactNativeSkiaRenderer implements IRenderer {
     this.isInitialized = false
   }
 
-  preRender(height: number, fontSize: number, width: number) {
+  createPage(parameters: PageParameters) {
+    const { height, fontSize, width } = parameters
     const fontStyle = {
       fontFamily: "Bravura",
       fontWeight: "normal",

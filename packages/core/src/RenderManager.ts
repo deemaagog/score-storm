@@ -104,11 +104,11 @@ class RenderManager {
       this.y = 0
       this.currentPageIndex = i
       // set sizes and other stuff
-      this.renderer.preRender(
-        page.height,
-        this.scoreStorm.settings.fontSize,
-        pageDimensions.width /* , this.currentPageIndex */,
-      )
+      this.renderer.createPage({
+        height: page.height,
+        fontSize: this.scoreStorm.settings.fontSize,
+        width: pageDimensions.width,
+      })
       // loop through measures and draw
       this.renderPage(page, isLastPage)
     }

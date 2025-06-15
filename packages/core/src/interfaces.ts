@@ -1,5 +1,11 @@
 import { ScoreStorm } from "./ScoreStorm"
 
+export type PageParameters = {
+  height: number
+  fontSize: number
+  width: number
+}
+
 /* eslint-disable no-unused-vars */
 export interface IRenderer {
   /**
@@ -14,7 +20,7 @@ export interface IRenderer {
 
   init(): void
 
-  preRender(height: number, fontSize: number, width: number): void
+  createPage(parameters: PageParameters): void
 
   postRender(): void
 

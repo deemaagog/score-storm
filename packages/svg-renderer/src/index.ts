@@ -1,4 +1,4 @@
-import ScoreStorm, { InteractionEventType, IRenderer, SelectionProcessedEvent } from "@score-storm/core"
+import ScoreStorm, { InteractionEventType, IRenderer, SelectionProcessedEvent, PageParameters } from "@score-storm/core"
 import { IGraphical } from "@score-storm/core"
 
 const NS = "http://www.w3.org/2000/svg"
@@ -57,7 +57,8 @@ class SvgRenderer implements IRenderer {
     this.isInitialized = false
   }
 
-  preRender(height: number, fontSize: number, width: number) {
+  createPage(parameters: PageParameters) {
+    const { height, fontSize, width } = parameters
     this.svgElement.setAttribute("viewBox", `0 0 ${width} ${height}`)
     this.svgElement.setAttribute("width", `${width}`)
     this.svgElement.setAttribute("height", `${height}`)

@@ -5,6 +5,7 @@ import ScoreStorm, {
   SelectionProcessedEvent,
   IGraphical,
   InteractionEventType,
+  PageParameters,
 } from "@score-storm/core"
 import { Layer } from "./Layer"
 
@@ -107,9 +108,10 @@ class CanvasRenderer implements IRenderer {
     this.isInitialized = false
   }
 
-  preRender(height: number, fontSize: number, width: number) {
+  createPage(parameters: PageParameters) {
+    const { height, fontSize, width } = parameters
     for (const layer of [this.mainLayer, this.hoverLayer, this.selectionLayer]) {
-      layer.preRender(width, height, fontSize)
+      layer.createPage(width, height, fontSize)
     }
 
     this.boundingRect = this.mainLayer.canvasElement.getBoundingClientRect()
