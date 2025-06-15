@@ -42,7 +42,8 @@ class ReactNativeSVGRenderer implements IRenderer {
     this.isInitialized = false
   }
 
-  preRender(height: number, fontSize: number, width: number) {
+  createPage(parameters: PageParameters) {
+    const { height, fontSize, width } = parameters
     this.fontSize = fontSize
 
     this.svgElement = React.createElement(

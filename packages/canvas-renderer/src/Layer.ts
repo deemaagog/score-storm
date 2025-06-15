@@ -14,7 +14,7 @@ export class Layer {
     }
   }
 
-  preRender(containerWidth: number, height: number, fontSize: number) {
+  createPage(containerWidth: number, height: number, fontSize: number) {
     const scale = window.devicePixelRatio // Change to 1 on retina screens to see blurry canvas.
 
     this.canvasElement.style.width = containerWidth + "px"

@@ -1,4 +1,4 @@
-export { type IRenderer } from "./interfaces"
+export { type IRenderer, type PageParameters } from "./interfaces"
 export { ScoreStorm as default } from "./ScoreStorm"
 export { type ScoreStormSettings } from "./Settings"
 export * from "./EventManager"

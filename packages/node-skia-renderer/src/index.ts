@@ -1,4 +1,4 @@
-import ScoreStorm, { IRenderer, IGraphical } from "@score-storm/core"
+import ScoreStorm, { IRenderer, IGraphical, PageParameters } from "@score-storm/core"
 import { Canvas, createCanvas, SKRSContext2D, GlobalFonts, SvgExportFlag, SvgCanvas } from "@napi-rs/canvas"
 
 type Options = {
@@ -33,7 +33,8 @@ class NodeSkiaRenderer<T extends Options> implements IRenderer {
     this.isInitialized = false
   }
 
-  preRender(height: number, fontSize: number, width: number) {
+  createPage(parameters: PageParameters) {
+    const { height, fontSize, width } = parameters
     if (this.svgExportFlag) {
       this.canvas = createCanvas(width, height, this.svgExportFlag) as CanvasOrSvgCanvas<T>
     } else {
