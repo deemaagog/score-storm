@@ -6,7 +6,7 @@ import { ScoreStormSettings, Settings } from "./Settings"
 import { ICommand } from "./commands/ICommand"
 import { CommandManager } from "./CommandManager"
 import { ILayout } from "./layouts"
-import { EventMap, EventType } from "./events"
+import { EventMap, EventType, InteractionEventMap } from "./events"
 
 /**
  * The main entrypoint
@@ -66,12 +66,15 @@ export class ScoreStorm {
     this.eventManager.on(...args)
   }
 
-  public setInteractionEventListener(...args: Parameters<typeof this.renderManager.setInteractionEventListener>) {
-    this.renderManager.setInteractionEventListener(...args)
+  public setInteractionEventListener<K extends keyof InteractionEventMap>(
+    eventType: K,
+    listener: (event: InteractionEventMap[K]) => void,
+  ) {
+    this.renderManager.setInteractionEventListener(eventType, listener)
   }
 
-  public dispatchInteractionEvent(...args: Parameters<typeof this.renderManager.dispatchInteractionEvent>) {
-    this.renderManager.dispatchInteractionEvent(...args)
+  public dispatchInteractionEvent<K extends keyof InteractionEventMap>(eventType: K, event: InteractionEventMap[K]) {
+    this.renderManager.dispatchInteractionEvent(eventType, event)
   }
 
   public executeCommand(command: ICommand) {

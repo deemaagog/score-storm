@@ -12,6 +12,9 @@ class SvgRenderer implements IRenderer {
   openedGroup: SVGGElement | null = null
   elementByObject: Map<IGraphical, SVGElement> = new Map()
 
+  // temporary
+  pageIndex: number = 0
+
   constructor(containerElement: HTMLDivElement) {
     this.containerElement = containerElement
     this.currentColor = "black"
@@ -33,7 +36,11 @@ class SvgRenderer implements IRenderer {
       let x = event.clientX - rect.left
       let y = event.clientY - rect.top
 
-      this.scoreStorm.dispatchInteractionEvent(InteractionEventType.SELECTION_ENDED, { x, y })
+      this.scoreStorm.dispatchInteractionEvent(InteractionEventType.SELECTION_ENDED, {
+        x,
+        y,
+        pageIndex: this.pageIndex,
+      })
     })
 
     this.scoreStorm.setInteractionEventListener(InteractionEventType.SELECTION_PROCESSED, this.handleSelectionProcessed)

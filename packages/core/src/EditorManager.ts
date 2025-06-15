@@ -15,13 +15,14 @@ export class EditorManager {
   interactionEventManager: EventManager<InteractionEventMap>
   private hoveredObject: any | null = null
   private selectedObject: any | null = null // TODO: improve types, create BaseObject class
-  private spatialSearchTree!: RBush<SpatialIndexItem>
+  private spatialSearchTreeByPage: Map<number, RBush<SpatialIndexItem>>
   private graphicalByObject: Map<object, IGraphical> = new Map()
+  private pageIndexByObject: Map<object, number> = new Map()
 
   constructor() {
     this.interactionEventManager = new EventManager<InteractionEventMap>()
 
-    this.spatialSearchTree = new RBush()
+    this.spatialSearchTreeByPage = new Map()
 
     // bind handlers
     this.handleHover = this.handleHover.bind(this)
@@ -31,8 +32,12 @@ export class EditorManager {
     this.interactionEventManager.on(InteractionEventType.SELECTION_ENDED, this.handleSelectionEnded)
   }
 
-  handleHover({ x, y }: InteractionPosition) {
-    const result = this.spatialSearchTree.search({
+  handleHover({ x, y, pageIndex }: InteractionPosition) {
+    const spatialSearchTree = this.spatialSearchTreeByPage.get(pageIndex)
+    if (!spatialSearchTree) {
+      return
+    }
+    const result = spatialSearchTree.search({
       minX: x,
       minY: y,
       maxX: x,
@@ -55,13 +60,18 @@ export class EditorManager {
 
     if (shouldUpdate) {
       this.interactionEventManager.dispatch(InteractionEventType.HOVER_PROCESSED, {
+        pageIndex,
         object: this.graphicalByObject.get(this.hoveredObject) || null,
       })
     }
   }
 
-  handleSelectionEnded({ x, y }: InteractionPosition) {
-    const result = this.spatialSearchTree.search({
+  handleSelectionEnded({ x, y, pageIndex }: InteractionPosition) {
+    const spatialSearchTree = this.spatialSearchTreeByPage.get(pageIndex)
+    if (!spatialSearchTree) {
+      return
+    }
+    const result = spatialSearchTree.search({
       minX: x,
       minY: y,
       maxX: x,
@@ -72,18 +82,28 @@ export class EditorManager {
     if (newSelected !== this.selectedObject) {
       this.selectedObject = newSelected
       this.interactionEventManager.dispatch(InteractionEventType.SELECTION_PROCESSED, {
+        pageIndex,
         object: this.graphicalByObject.get(this.selectedObject) || null,
       })
     }
   }
 
-  registerInteractionArea(object: object, graphicalObject: IGraphical, bBox: BBox) {
+  registerInteractionArea(object: object, graphicalObject: IGraphical, bBox: BBox, pageIndex: number) {
+    this.pageIndexByObject.set(object, pageIndex)
     if (!this.graphicalByObject.get(object)) {
       // TODO: this doesn't work for graphical objects that does not have their counterpart in score model (clef on non first row e.t.c)
       this.graphicalByObject.set(object, graphicalObject)
     }
 
-    this.spatialSearchTree.insert({
+    let spatialSearchTree: RBush<SpatialIndexItem>
+    if (!this.spatialSearchTreeByPage.has(pageIndex)) {
+      spatialSearchTree = new RBush()
+      this.spatialSearchTreeByPage.set(pageIndex, spatialSearchTree)
+    } else {
+      spatialSearchTree = this.spatialSearchTreeByPage.get(pageIndex)!
+    }
+
+    spatialSearchTree.insert({
       minX: bBox.x,
       minY: bBox.y,
       maxX: bBox.x + bBox.width,
@@ -93,16 +113,21 @@ export class EditorManager {
   }
 
   clear() {
-    this.spatialSearchTree.clear()
+    this.spatialSearchTreeByPage.clear()
     this.graphicalByObject.clear()
+    this.pageIndexByObject.clear()
     // this.interactionEventManager.clear()
   }
 
   restoreSelection() {
     if (this.selectedObject) {
-      this.interactionEventManager.dispatch(InteractionEventType.SELECTION_PROCESSED, {
-        object: this.graphicalByObject.get(this.selectedObject) || null,
-      })
+      const pageIndex = this.pageIndexByObject.get(this.selectedObject)
+      if (pageIndex !== undefined) {
+        this.interactionEventManager.dispatch(InteractionEventType.SELECTION_PROCESSED, {
+          pageIndex,
+          object: this.graphicalByObject.get(this.selectedObject) || null,
+        })
+      }
     }
   }
 }

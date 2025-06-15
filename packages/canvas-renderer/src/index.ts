@@ -29,6 +29,9 @@ class CanvasRenderer implements IRenderer {
 
   boundingRect!: DOMRect
 
+  // temporary
+  pageIndex: number = 0
+
   constructor(containerElement: HTMLDivElement) {
     this.containerElement = containerElement
 
@@ -85,13 +88,17 @@ class CanvasRenderer implements IRenderer {
       let x = event.clientX - this.boundingRect.left
       let y = event.clientY - this.boundingRect.top
 
-      this.scoreStorm.dispatchInteractionEvent(InteractionEventType.HOVER, { x, y })
+      this.scoreStorm.dispatchInteractionEvent(InteractionEventType.HOVER, { x, y, pageIndex: this.pageIndex })
     })
 
     this.mainLayer.canvasElement.addEventListener("click", (event: MouseEvent) => {
       let x = event.clientX - this.boundingRect.left
       let y = event.clientY - this.boundingRect.top
-      this.scoreStorm.dispatchInteractionEvent(InteractionEventType.SELECTION_ENDED, { x, y })
+      this.scoreStorm.dispatchInteractionEvent(InteractionEventType.SELECTION_ENDED, {
+        x,
+        y,
+        pageIndex: this.pageIndex,
+      })
     })
 
     this.scoreStorm.setInteractionEventListener(InteractionEventType.HOVER_PROCESSED, this.handleHoverProcessed)
