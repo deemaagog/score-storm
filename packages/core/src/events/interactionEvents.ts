@@ -9,6 +9,7 @@ export enum InteractionEventType {
 }
 
 export interface InteractionPosition {
+  pageIndex: number
   x: number
   y: number
 }
@@ -20,6 +21,7 @@ export interface InteractionEvent {
 }
 
 export interface HoverProcessedEvent {
+  pageIndex: number
   object: IGraphical | null
 }
 

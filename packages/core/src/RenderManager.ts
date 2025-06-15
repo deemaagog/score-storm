@@ -6,6 +6,7 @@ import { Measure } from "./model/Measure"
 import { GlobalMeasure } from "./model"
 import { FlowLayout, ILayout } from "./layouts"
 import { Page } from "./graphical/GraphicalScore"
+import { InteractionEventMap } from "./events"
 
 /**
  * Main class responsible for rendering music score.
@@ -56,12 +57,15 @@ class RenderManager {
     return this.layout
   }
 
-  setInteractionEventListener(...args: Parameters<typeof this.editorManager.interactionEventManager.on>) {
-    this.editorManager.interactionEventManager.on(...args)
+  setInteractionEventListener<K extends keyof InteractionEventMap>(
+    eventType: K,
+    listener: (event: InteractionEventMap[K]) => void,
+  ) {
+    this.editorManager.interactionEventManager.on(eventType, listener)
   }
 
-  dispatchInteractionEvent(...args: Parameters<typeof this.editorManager.interactionEventManager.dispatch>) {
-    this.editorManager.interactionEventManager.dispatch(...args)
+  dispatchInteractionEvent<K extends keyof InteractionEventMap>(eventType: K, event: InteractionEventMap[K]) {
+    this.editorManager.interactionEventManager.dispatch(eventType, event)
   }
 
   render() {
@@ -251,7 +255,7 @@ class RenderManager {
   }
 
   renderInteractiveObject(object: object, graphicalObject: IGraphical, bBox: BBox) {
-    this.editorManager.registerInteractionArea(object, graphicalObject, bBox)
+    this.editorManager.registerInteractionArea(object, graphicalObject, bBox, this.currentPageIndex)
     this.renderer.renderInGroup(graphicalObject, () => graphicalObject.render(this.renderer, this.scoreStorm.settings))
   }
 }

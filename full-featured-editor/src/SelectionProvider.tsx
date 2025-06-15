@@ -1,6 +1,6 @@
 import React, { PropsWithChildren, useContext, useEffect, useState, createContext } from "react"
 import { ScoreStormContext } from "./ScoreStormProvider"
-import { IGraphical, InteractionEvent, InteractionEventType } from "@score-storm/core"
+import { IGraphical, InteractionEventType, SelectionProcessedEvent } from "@score-storm/core"
 
 type SelectionContextValue = {
   selectedObject: IGraphical | null
@@ -13,7 +13,7 @@ export const SelectionProvider: React.FC<PropsWithChildren> = ({ children }) => 
   const { scoreStorm } = useContext(ScoreStormContext)
   const [selectedObject, setSelectedObject] = useState<IGraphical | null>(null)
 
-  const handleSelect = (event: InteractionEvent) => {
+  const handleSelect = (event: SelectionProcessedEvent) => {
     setSelectedObject(event.object)
   }
 
