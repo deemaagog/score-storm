@@ -401,5 +401,43 @@ describe("GraphicalScore.calculatePageBreaks", () => {
       expect(gs.pages[2].rows[0].relativeInstrumentsPosition).toEqual([0, 10])
       expect(gs.pages[2].height).toEqual(40)
     })
+
+    it(`should calculate instruments position and system height for
+      12 measures,
+      2 instruments,
+      top overflow = 2,
+      bottom overflow = 1`, () => {
+      const mockScore = generateMockScore(12, 2, 2, 1)
+      const rows = mockScoreToRows(mockScore)
+      const gs = new GraphicalScore(mockScore as any)
+
+      gs.calculatePageBreaks(rows, mockSettings, 70)
+      expect(gs.pages).toBeDefined()
+      expect(gs.pages.length).toBe(2)
+
+      expect(gs.pages[0].rows.length).toBe(3)
+      expect(gs.pages[0].rows[0].systemYPosition).toEqual(2)
+      expect(gs.pages[0].rows[0].systemHeight).toEqual(15)
+      expect(gs.pages[0].rows[0].relativeInstrumentsPosition).toEqual([0, 10])
+      expect(gs.pages[0].rows[1].systemYPosition).toEqual(27)
+      expect(gs.pages[0].rows[1].systemHeight).toEqual(15)
+      expect(gs.pages[0].rows[1].relativeInstrumentsPosition).toEqual([0, 10])
+      expect(gs.pages[0].rows[2].systemYPosition).toEqual(52)
+      expect(gs.pages[0].rows[2].systemHeight).toEqual(15)
+      expect(gs.pages[0].rows[2].relativeInstrumentsPosition).toEqual([0, 10])
+      expect(gs.pages[0].height).toEqual(70)
+
+      expect(gs.pages[1].rows.length).toBe(3)
+      expect(gs.pages[1].rows[0].systemYPosition).toEqual(2)
+      expect(gs.pages[1].rows[0].systemHeight).toEqual(15)
+      expect(gs.pages[1].rows[0].relativeInstrumentsPosition).toEqual([0, 10])
+      expect(gs.pages[1].rows[1].systemYPosition).toEqual(27)
+      expect(gs.pages[1].rows[1].systemHeight).toEqual(15)
+      expect(gs.pages[1].rows[1].relativeInstrumentsPosition).toEqual([0, 10])
+      expect(gs.pages[1].rows[2].systemYPosition).toEqual(52)
+      expect(gs.pages[1].rows[2].systemHeight).toEqual(15)
+      expect(gs.pages[1].rows[2].relativeInstrumentsPosition).toEqual([0, 10])
+      expect(gs.pages[1].height).toEqual(70)
+    })
   })
 })
