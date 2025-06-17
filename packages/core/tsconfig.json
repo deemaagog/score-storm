@@ -3,6 +3,7 @@
   "include": ["src/**/*.ts"],
   "compilerOptions": {
     "outDir": "dist/esm",
-    "module": "ESNext"
+    "module": "ESNext",
+    "types": ["vitest/globals"]
   }
 }

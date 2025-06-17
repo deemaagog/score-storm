@@ -19,8 +19,8 @@ const generateMockScore = (
     instruments: Array.from({ length: numberOfInstruments }, (_, i) => ({
       measures: Array.from({ length: numberOfMeasures }, (_, j) => ({
         graphical: {
-          getTopStaveOverflow: jest.fn(() => topOverflow),
-          getBottomStaveOverflow: jest.fn(() => bottomOverflow),
+          getTopStaveOverflow: vi.fn(() => topOverflow),
+          getBottomStaveOverflow: vi.fn(() => bottomOverflow),
         },
       })),
     })),
