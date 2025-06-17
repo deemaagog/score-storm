@@ -28,7 +28,7 @@
   "scripts": {
     "build": "tsc --project tsconfig.esm.json && tsc --project tsconfig.cjs.json",
     "lint": "eslint .",
-    "test": "jest"
+    "test": "vitest --run"
   },
   "dependencies": {
     "@tonaljs/note": "^4.11.0",
@@ -40,11 +40,9 @@
   "devDependencies": {
     "@score-storm/eslint-config": "workspace:*",
     "@score-storm/typescript-config": "workspace:*",
-    "@types/jest": "^29.5.14",
     "@types/rbush": "^3.0.3",
-    "jest": "^29.7.0",
-    "ts-jest": "^29.3.4",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "vitest": "^2.1.9"
   },
   "publishConfig": {
     "access": "public"
