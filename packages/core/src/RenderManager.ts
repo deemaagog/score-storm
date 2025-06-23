@@ -68,6 +68,13 @@ class RenderManager {
     this.editorManager.interactionEventManager.dispatch(eventType, event)
   }
 
+  removeInteractionEventListener<K extends keyof InteractionEventMap>(
+    eventType: K,
+    listener: (event: InteractionEventMap[K]) => void,
+  ) {
+    this.editorManager.interactionEventManager.off(eventType, listener)
+  }
+
   render() {
     // eslint-disable-next-line no-console
     console.log("rendering...")

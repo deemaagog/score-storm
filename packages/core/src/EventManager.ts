@@ -24,6 +24,21 @@ export class EventManager<M> {
     listeners.forEach((l) => l(event))
   }
 
+  public off<K extends keyof M>(eventType: K, listener: EventListenerCallback<K, M>) {
+    const listenerMap: ListenerMap<keyof M, M> = this.listenerMap
+    let listeners = listenerMap[eventType]
+    if (!listeners) {
+      return
+    }
+    if (!listeners) {
+      return
+    }
+    const index = listeners.indexOf(listener)
+    if (index !== -1) {
+      listeners.splice(index, 1)
+    }
+  }
+
   public clear() {
     this.listenerMap = {}
   }

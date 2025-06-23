@@ -1,3 +1,5 @@
+import { PageParameters } from "@score-storm/core"
+
 export class Layer {
   canvasElement!: HTMLCanvasElement
   context!: CanvasRenderingContext2D
@@ -14,13 +16,13 @@ export class Layer {
     }
   }
 
-  createPage(containerWidth: number, height: number, fontSize: number) {
+  setup({ width, height, fontSize }: PageParameters) {
     const scale = window.devicePixelRatio // Change to 1 on retina screens to see blurry canvas.
 
-    this.canvasElement.style.width = containerWidth + "px"
+    this.canvasElement.style.width = width + "px"
     this.canvasElement.style.height = height + "px"
     // Set actual size in memory (scaled to account for extra pixel density).
-    this.canvasElement.width = containerWidth * scale
+    this.canvasElement.width = width * scale
     this.canvasElement.height = height * scale
     // Normalize coordinate system to use css pixels.
     this.context.scale(scale, scale)

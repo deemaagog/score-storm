@@ -1,5 +1,4 @@
 import ScoreStorm, {
-  BBox,
   HoverProcessedEvent,
   IRenderer,
   SelectionProcessedEvent,
@@ -7,21 +6,10 @@ import ScoreStorm, {
   InteractionEventType,
   PageParameters,
 } from "@score-storm/core"
-import { Layer } from "./Layer"
+import { Page } from "./Page"
 
 class CanvasRenderer implements IRenderer {
   containerElement: HTMLDivElement
-
-  // *** LAYERS ***
-  // main layer meant for rendering music scores
-  mainLayer!: Layer
-  // layer meant for rendering current hovered object
-  hoverLayer!: Layer
-  // layer meant for rendering selected object
-  selectionLayer!: Layer
-
-  // current layer
-  currentLayer!: Layer
 
   isInitialized: boolean = false
 
@@ -29,8 +17,8 @@ class CanvasRenderer implements IRenderer {
 
   boundingRect!: DOMRect
 
-  // temporary
-  pageIndex: number = 0
+  pages: Page[] = []
+  currentPage: Page | null = null
 
   constructor(containerElement: HTMLDivElement) {
     this.containerElement = containerElement
@@ -43,114 +31,81 @@ class CanvasRenderer implements IRenderer {
     return this.containerElement.clientWidth
   }
 
-  handleHoverProcessed({ object }: HoverProcessedEvent) {
-    if (object) {
-      this.currentLayer = this.hoverLayer
-      this.mainLayer.setCursorType("pointer")
-
-      this.setColor(this.scoreStorm.settings.editor!.styles.hoverColor)
-      object.render(this, this.scoreStorm.settings)
-    } else {
-      this.currentLayer = this.hoverLayer
-      this.hoverLayer.clear()
-      this.mainLayer.setCursorType("default")
-    }
-
-    this.currentLayer = this.mainLayer
+  handleHoverProcessed({ object, pageIndex }: HoverProcessedEvent) {
+    console.log("handleHoverProcessed", pageIndex)
+    this.currentPage = this.pages[pageIndex]
+    this.currentPage.handleHoverProcessed(object)
   }
 
-  handleSelectionProcessed({ object }: SelectionProcessedEvent) {
-    this.currentLayer = this.selectionLayer
-    if (object) {
-      this.currentLayer.clear()
-      this.setColor(this.scoreStorm.settings.editor!.styles.selectColor)
-      object.render(this, this.scoreStorm.settings)
-    } else {
-      this.currentLayer.clear()
-    }
-
-    this.currentLayer = this.mainLayer
+  handleSelectionProcessed({ object, pageIndex }: SelectionProcessedEvent) {
+    this.currentPage = this.pages[pageIndex]
+    this.currentPage.handleSelectionProcessed(object)
   }
 
   init() {
-    const containerPosition = getComputedStyle(this.containerElement).position
-    if (containerPosition !== "relative") {
-      this.containerElement.style.setProperty("position", "relative")
-    }
-    // layers initialization
-    this.mainLayer = new Layer(this.containerElement)
-    this.hoverLayer = new Layer(this.containerElement, true)
-    this.selectionLayer = new Layer(this.containerElement, true)
-
     this.isInitialized = true
-
-    this.mainLayer.canvasElement.addEventListener("mousemove", (event: MouseEvent) => {
-      let x = event.clientX - this.boundingRect.left
-      let y = event.clientY - this.boundingRect.top
-
-      this.scoreStorm.dispatchInteractionEvent(InteractionEventType.HOVER, { x, y, pageIndex: this.pageIndex })
-    })
-
-    this.mainLayer.canvasElement.addEventListener("click", (event: MouseEvent) => {
-      let x = event.clientX - this.boundingRect.left
-      let y = event.clientY - this.boundingRect.top
-      this.scoreStorm.dispatchInteractionEvent(InteractionEventType.SELECTION_ENDED, {
-        x,
-        y,
-        pageIndex: this.pageIndex,
-      })
-    })
 
     this.scoreStorm.setInteractionEventListener(InteractionEventType.HOVER_PROCESSED, this.handleHoverProcessed)
     this.scoreStorm.setInteractionEventListener(InteractionEventType.SELECTION_PROCESSED, this.handleSelectionProcessed)
-
-    this.currentLayer = this.mainLayer
   }
 
   destroy() {
-    for (const layer of [this.mainLayer, this.hoverLayer, this.selectionLayer]) {
-      this.containerElement.removeChild(layer.canvasElement)
-    }
+    this.clear()
+    this.scoreStorm.removeInteractionEventListener(
+      InteractionEventType.SELECTION_PROCESSED,
+      this.handleSelectionProcessed,
+    )
+    this.scoreStorm.removeInteractionEventListener(InteractionEventType.HOVER_PROCESSED, this.handleHoverProcessed)
 
     this.isInitialized = false
   }
 
   createPage(parameters: PageParameters) {
-    const { height, fontSize, width } = parameters
-    for (const layer of [this.mainLayer, this.hoverLayer, this.selectionLayer]) {
-      layer.createPage(width, height, fontSize)
-    }
-
-    this.boundingRect = this.mainLayer.canvasElement.getBoundingClientRect()
+    const page = new Page(this, this.pages.length)
+    this.containerElement.appendChild(page.pageElement)
+    page.setup(parameters)
+    this.pages.push(page)
+    this.currentPage = page
   }
 
-  clear() {}
+  clear() {
+    for (const page of this.pages) {
+      this.containerElement.removeChild(page.pageElement)
+    }
+    this.currentPage = null
+    this.pages = []
+  }
 
   postRender(): void {}
 
+  getCurrentLayer() {
+    return this.currentPage!.currentLayer
+  }
+
   setColor(color: string) {
-    this.currentLayer.context.fillStyle = color
+    this.getCurrentLayer().context.fillStyle = color
   }
 
   getColor(): string {
-    return this.currentLayer.context.fillStyle as string
+    return this.getCurrentLayer().context.fillStyle as string
   }
 
   drawRect(x: number, y: number, width: number, height: number) {
-    // this.currentContext.fillRect(x, y, width, height)
+    const currentLayer = this.getCurrentLayer()
 
-    this.currentLayer.context.beginPath()
+    currentLayer.context.beginPath()
+    currentLayer.context.moveTo(x, y)
+    currentLayer.context.lineTo(x + width, y)
+    currentLayer.context.lineTo(x + width, y + height)
+    currentLayer.context.lineTo(x, y + height)
+    currentLayer.context.lineTo(x, y)
+    currentLayer.context.fill()
+    // this.currentContext.fillRect(x, y, width, height)
     // this.currentContext.rect(x, y, width, height)
-    this.currentLayer.context.moveTo(x, y)
-    this.currentLayer.context.lineTo(x + width, y)
-    this.currentLayer.context.lineTo(x + width, y + height)
-    this.currentLayer.context.lineTo(x, y + height)
-    this.currentLayer.context.lineTo(x, y)
-    this.currentLayer.context.fill()
   }
 
   drawGlyph(glyph: string, x: number, y: number) {
-    this.currentLayer.context.fillText(glyph, x, y)
+    this.getCurrentLayer().context.fillText(glyph, x, y)
   }
 
   renderInGroup(_: IGraphical, renderCallback: () => void) {

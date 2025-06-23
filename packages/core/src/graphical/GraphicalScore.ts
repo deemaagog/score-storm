@@ -109,23 +109,11 @@ export class GraphicalScore {
     let currentYPosition = 0
     let previousBottomOverflow = 0
 
-    console.log("pageHeight", pageHeight)
-
     for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
       const row = rows[rowIndex]
 
       // Calculate system layout for this row
       const { systemHeight, instrumentPositions, topOverflow, bottomOverflow } = this.calculateRowLayout(row, settings)
-      console.log(
-        "row #",
-        rowIndex,
-        "systemHeight",
-        systemHeight,
-        "topOverflow",
-        topOverflow,
-        "bottomOverflow",
-        bottomOverflow,
-      )
 
       // Calculate total page height if we add this row
       let potentialPageHeight = this.calculatePotentialPageHeight(
