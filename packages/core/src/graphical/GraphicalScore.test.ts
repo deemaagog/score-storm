@@ -191,7 +191,7 @@ describe("GraphicalScore.calculatePageBreaks", () => {
     })
   })
 
-  describe("Fixed Page Height (aka Paged Layout)", () => {
+  describe("Fixed Page Height (aka Page Layout)", () => {
     it(`should calculate instruments position and system height for
      2 measures, 
      one instrument, 
