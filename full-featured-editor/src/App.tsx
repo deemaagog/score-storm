@@ -1,5 +1,5 @@
 import "@mantine/core/styles.css"
-import { Box, Flex } from "@mantine/core"
+import { Box, Flex, Group } from "@mantine/core"
 import { useState } from "react"
 import classes from "./App.module.css"
 import { Score } from "./score/Score"
@@ -9,6 +9,7 @@ import { KeyboardHandler } from "./KeyboardHandler"
 import { Palette } from "./palette/Palette"
 import { useSettings } from "./SettingsProvider"
 import UndoRedo from "./UndoRedo"
+import LayoutSwitcher from "./LayoutSwitcher"
 
 export const App = () => {
   const [activeAction, setActiveAction] = useState<string>(ASIDE_ACTIONS[0].label)
@@ -26,7 +27,10 @@ export const App = () => {
           <Box className={classes.headerPlaceholder} />
           <Flex align={"center"} flex={1} gap={8} justify="space-between" mr={8}>
             <Player />
-            <UndoRedo />
+            <Group gap="xl">
+              <UndoRedo />
+              <LayoutSwitcher />
+            </Group>
           </Flex>
         </header>
         <div className={classes.wrapper}>
