@@ -77,6 +77,13 @@ export class ScoreStorm {
     this.renderManager.dispatchInteractionEvent(eventType, event)
   }
 
+  public removeInteractionEventListener<K extends keyof InteractionEventMap>(
+    eventType: K,
+    listener: (event: InteractionEventMap[K]) => void,
+  ) {
+    this.renderManager.removeInteractionEventListener(eventType, listener)
+  }
+
   public executeCommand(command: ICommand) {
     this.commandManager.execute(command)
   }

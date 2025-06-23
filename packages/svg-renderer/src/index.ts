@@ -1,19 +1,18 @@
 import ScoreStorm, { InteractionEventType, IRenderer, SelectionProcessedEvent, PageParameters } from "@score-storm/core"
 import { IGraphical } from "@score-storm/core"
-
-const NS = "http://www.w3.org/2000/svg"
+import { NS, Page } from "./Page"
 
 class SvgRenderer implements IRenderer {
   scoreStorm!: ScoreStorm
   containerElement: HTMLDivElement
-  svgElement!: SVGElement
+
   currentColor: string
   isInitialized: boolean = false
   openedGroup: SVGGElement | null = null
   elementByObject: Map<IGraphical, SVGElement> = new Map()
 
-  // temporary
-  pageIndex: number = 0
+  pages: Page[] = []
+  currentPage: Page | null = null
 
   constructor(containerElement: HTMLDivElement) {
     this.containerElement = containerElement
@@ -27,22 +26,9 @@ class SvgRenderer implements IRenderer {
   }
 
   init() {
-    this.svgElement = document.createElementNS(NS, "svg")
-    this.containerElement.appendChild(this.svgElement)
     this.isInitialized = true
 
-    this.svgElement.addEventListener("click", (event: MouseEvent) => {
-      let rect = this.svgElement.getBoundingClientRect() // TODO: make it a class member and update on resize
-      let x = event.clientX - rect.left
-      let y = event.clientY - rect.top
-
-      this.scoreStorm.dispatchInteractionEvent(InteractionEventType.SELECTION_ENDED, {
-        x,
-        y,
-        pageIndex: this.pageIndex,
-      })
-    })
-
+    // TODO: unsubscribe
     this.scoreStorm.setInteractionEventListener(InteractionEventType.SELECTION_PROCESSED, this.handleSelectionProcessed)
   }
 
@@ -60,43 +46,30 @@ class SvgRenderer implements IRenderer {
   }
 
   destroy() {
-    this.containerElement.removeChild(this.svgElement)
+    for (const page of this.pages) {
+      this.containerElement.removeChild(page.svgElement)
+    }
+    this.scoreStorm.removeInteractionEventListener(
+      InteractionEventType.SELECTION_PROCESSED,
+      this.handleSelectionProcessed,
+    )
     this.isInitialized = false
   }
 
   createPage(parameters: PageParameters) {
-    const { height, fontSize, width } = parameters
-    this.svgElement.setAttribute("viewBox", `0 0 ${width} ${height}`)
-    this.svgElement.setAttribute("width", `${width}`)
-    this.svgElement.setAttribute("height", `${height}`)
-
-    // https://developer.mozilla.org/en-US/docs/Web/API/SVGStyleElement
-    // TODO: override styles instead of recreating
-    const style = document.createElementNS(NS, "style")
-    const node = document.createTextNode(`
-      .glyph { 
-        font-size: ${fontSize}px;
-        font-family: Bravura;
-        dominant-baseline: alphabetic;
-        text-anchor: start;
-        user-select: none;
-      }
-      .clickable:hover {
-        fill: ${this.scoreStorm.settings.editor!.styles.hoverColor};
-        transition: fill 0.1s;
-        cursor: pointer;
-      }
-      .selected {
-        fill: ${this.scoreStorm.settings.editor!.styles.selectColor} !important;
-        transition: fill 0.1s;
-      }
-    `)
-    style.appendChild(node)
-    this.svgElement.appendChild(style)
+    const page = new Page(this, this.pages.length)
+    page.setup(parameters)
+    this.containerElement.appendChild(page.svgElement)
+    this.pages.push(page)
+    this.currentPage = page
   }
 
   clear() {
-    this.svgElement.innerHTML = ""
+    for (const page of this.pages) {
+      this.containerElement.removeChild(page.svgElement)
+    }
+    this.currentPage = null
+    this.pages = []
     this.elementByObject.clear()
   }
 
@@ -117,7 +90,7 @@ class SvgRenderer implements IRenderer {
     rec.setAttribute("width", `${width}`)
     rec.setAttribute("height", `${height}`)
     rec.setAttribute("fill", this.currentColor)
-    this.svgElement.appendChild(rec)
+    this.currentPage!.svgElement.appendChild(rec)
   }
 
   drawGlyph(glyph: string, x: number, y: number) {
@@ -126,7 +99,7 @@ class SvgRenderer implements IRenderer {
     text.setAttributeNS(null, "y", `${y}`)
     text.setAttributeNS(null, "class", "glyph")
     text.textContent = glyph
-    const parent = this.openedGroup || this.svgElement
+    const parent = this.openedGroup || this.currentPage!.svgElement
     parent.appendChild(text)
   }
 
@@ -134,7 +107,7 @@ class SvgRenderer implements IRenderer {
     const group = document.createElementNS(NS, "g")
     // group.setAttributeNS(null, "id", graphicalObject.id)
     group.setAttributeNS(null, "class", "clickable")
-    this.svgElement.appendChild(group)
+    this.currentPage!.svgElement.appendChild(group)
     this.openedGroup = group
     renderCallback()
     this.openedGroup = null
