@@ -18,7 +18,7 @@
   "author": "deemaagog",
   "license": "MIT",
   "dependencies": {
-    "@napi-rs/canvas": "^0.1.59",
+    "@napi-rs/canvas": "^0.1.71",
     "@score-storm/core": "workspace:*"
   },
   "devDependencies": {

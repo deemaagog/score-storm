@@ -1,22 +1,21 @@
 import ScoreStorm, { IRenderer, IGraphical, PageParameters } from "@score-storm/core"
-import { Canvas, createCanvas, SKRSContext2D, GlobalFonts, SvgExportFlag, SvgCanvas } from "@napi-rs/canvas"
+import { GlobalFonts, SvgExportFlag } from "@napi-rs/canvas"
+import { Page, SvgFlagOrUndefined } from "./Page"
 
-type Options = {
+type NodeSkiaRendererOptions<TSvgFlag extends SvgFlagOrUndefined = undefined> = {
   width: number
-  svgExportFlag?: SvgExportFlag
+  svgExportFlag?: TSvgFlag
 }
 
-type CanvasOrSvgCanvas<T extends Options> = T["svgExportFlag"] extends SvgExportFlag ? SvgCanvas : Canvas
-
-class NodeSkiaRenderer<T extends Options> implements IRenderer {
+export class NodeSkiaRenderer<TSvgFlag extends SvgFlagOrUndefined = undefined> implements IRenderer {
   scoreStorm!: ScoreStorm
   containerWidth: number
-  canvas!: CanvasOrSvgCanvas<T>
-  context!: SKRSContext2D
   isInitialized: boolean = false
-  svgExportFlag?: SvgExportFlag
+  svgExportFlag?: TSvgFlag
+  pages: Page<TSvgFlag>[] = []
+  currentPage: Page<TSvgFlag> | null = null
 
-  constructor(opts: T) {
+  constructor(opts: NodeSkiaRendererOptions<TSvgFlag>) {
     this.containerWidth = opts.width
     this.svgExportFlag = opts.svgExportFlag
   }
@@ -34,21 +33,14 @@ class NodeSkiaRenderer<T extends Options> implements IRenderer {
   }
 
   createPage(parameters: PageParameters) {
-    const { height, fontSize, width } = parameters
-    if (this.svgExportFlag) {
-      this.canvas = createCanvas(width, height, this.svgExportFlag) as CanvasOrSvgCanvas<T>
-    } else {
-      this.canvas = createCanvas(width, height) as CanvasOrSvgCanvas<T>
-    }
-    this.context = this.canvas.getContext("2d")
+    const page = new Page<TSvgFlag>(this.svgExportFlag)
+    page.setup(parameters)
+    this.pages.push(page)
+    this.currentPage = page
 
-    this.context.font = `${fontSize}px Bravura`
-    this.context.textBaseline = "alphabetic" // middle
-    this.context.textAlign = "start"
-
-    // create white background
+    // // create white background
     this.setColor("white")
-    this.drawRect(0, 0, width, height)
+    this.drawRect(0, 0, parameters.width, parameters.height)
   }
 
   clear() {}
@@ -56,19 +48,19 @@ class NodeSkiaRenderer<T extends Options> implements IRenderer {
   postRender(): void {}
 
   setColor(color: string) {
-    this.context.fillStyle = color
+    this.currentPage!.context.fillStyle = color
   }
 
   getColor(): string {
-    return this.context.fillStyle as string
+    return this.currentPage!.context.fillStyle as string
   }
 
   drawRect(x: number, y: number, width: number, height: number) {
-    this.context.fillRect(x, y, width, height)
+    this.currentPage!.context.fillRect(x, y, width, height)
   }
 
   drawGlyph(glyph: string, x: number, y: number) {
-    this.context.fillText(glyph, x, y)
+    this.currentPage!.context.fillText(glyph, x, y)
   }
 
   renderInGroup(_: IGraphical, renderCallback: () => void) {
