@@ -32,7 +32,6 @@ class CanvasRenderer implements IRenderer {
   }
 
   handleHoverProcessed({ object, pageIndex }: HoverProcessedEvent) {
-    console.log("handleHoverProcessed", pageIndex)
     this.currentPage = this.pages[pageIndex]
     this.currentPage.handleHoverProcessed(object)
   }
