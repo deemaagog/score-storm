@@ -84,7 +84,7 @@ class ReactNativeSkiaRenderer implements IRenderer {
 
 :::info
 
-This is not production ready code, there is a room for improvement. Also, this is not a complete implementation, it's just a starting point. You may need to implement editor part of the renderer, handle events, etc.
+This is not production ready code, there is a room for improvement. Also, this is not a complete implementation, it's just a starting point. You may need to implement editor part of the renderer, multi-page support, handle events, etc.
 
 :::
 
