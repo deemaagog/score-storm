@@ -2,6 +2,8 @@ import { CSSProperties, useContext, useEffect, useMemo, useRef, useState } from 
 import { ScoreStormContext } from "../ScoreStormProvider"
 import { PlayerContext } from "../PlayerProvider"
 import { useSettings } from "../SettingsProvider"
+import CanvasRenderer from "@score-storm/canvas-renderer"
+import { GlobalMeasure } from "@score-storm/core"
 
 // Very basic cursor implementation.
 // TODO: sync with audio timer
@@ -14,8 +16,10 @@ export const Cursor: React.FC = () => {
   const ref = useRef<HTMLDivElement>(null)
   // const animationRef = useRef<Animation | null>(null)
 
+  // TODO: this obviously needs to be revisited
   useEffect(() => {
     if (isPlaying) {
+      const pageElements = (scoreStorm.getRenderer() as CanvasRenderer).pages.map((page) => page.pageElement)
       const score = scoreStorm.getScore()
       const firstBeatPosition = score.globalMeasures[0].globalBeats[0].graphical.position!
       const initialY = score.globalMeasures[0].graphical.position!.y
@@ -38,41 +42,56 @@ export const Cursor: React.FC = () => {
 
       let offset = 0
       let previousY = 0
-      for (let gm = 0; gm < score.globalMeasures.length; gm++) {
-        const globalMeasure = score.globalMeasures[gm]
-        const currentY = globalMeasure.graphical.position!.y
-        const isNewRow = previousY != 0 && previousY !== currentY
+      let prevGlobalMeasure: GlobalMeasure
+      let pageOffset = 0
+      let previousPageOffset = 0
 
-        for (let gb = 0; gb < globalMeasure.globalBeats.length; gb++) {
-          const globalBeat = globalMeasure.globalBeats[gb]
-          const translateX = globalBeat.graphical.position!.x - firstBeatPosition.x
-          const translateY = currentY - initialY
+      const pages = score.graphical.pages
 
-          if (isNewRow && gb === 0) {
-            const prevGlobalMeasure = score.globalMeasures[gm - 1]
-            const prevGlobalBeat = prevGlobalMeasure.globalBeats[prevGlobalMeasure.globalBeats.length - 1]
-            const prevMeasureEndX =
-              prevGlobalMeasure.graphical.position!.x +
-              prevGlobalMeasure.graphical.width -
-              prevGlobalBeat.graphical.position!.x -
-              scoreStorm.getSettings().unit // minus barline width
-            keyFrames.push({
-              transform: `translate(${prevGlobalBeat.graphical.position!.x - firstBeatPosition.x + prevMeasureEndX}px,${prevGlobalMeasure.graphical.position!.y - initialY}px)`,
-              offset,
-            })
-            keyFrames.push({
-              transform: `translate(${translateX}px,${translateY}px) scaleY(${globalMeasure.graphical.height / score.globalMeasures[0].graphical.height})`,
-              offset,
-            })
-          } else {
-            keyFrames.push({
-              transform: `translate(${translateX}px,${translateY}px) scaleY(${globalMeasure.graphical.height / score.globalMeasures[0].graphical.height})`,
-              offset,
-            })
+      for (let pi = 0; pi < pages.length; pi++) {
+        pageOffset = pageElements[pi].offsetTop
+        const page = pages[pi]
+        for (let ri = 0; ri < page.rows.length; ri++) {
+          const row = page.rows[ri]
+          for (let gm = 0; gm < row.globalMeasures.length; gm++) {
+            const globalMeasure = row.globalMeasures[gm]
+            const currentY = globalMeasure.graphical.position!.y + pageOffset
+            const isNewRow = previousY != 0 && previousY !== currentY
+
+            for (let gb = 0; gb < globalMeasure.globalBeats.length; gb++) {
+              const globalBeat = globalMeasure.globalBeats[gb]
+              const translateX = globalBeat.graphical.position!.x - firstBeatPosition.x
+              const translateY = currentY - initialY
+
+              if (isNewRow && gb === 0) {
+                const prevGlobalBeat = prevGlobalMeasure!.globalBeats[prevGlobalMeasure!.globalBeats.length - 1]
+                const prevMeasureEndX =
+                  prevGlobalMeasure!.graphical.position!.x +
+                  prevGlobalMeasure!.graphical.width -
+                  prevGlobalBeat.graphical.position!.x -
+                  scoreStorm.getSettings().unit // minus barline width
+
+                keyFrames.push({
+                  transform: `translate(${prevGlobalBeat.graphical.position!.x - firstBeatPosition.x + prevMeasureEndX}px,${prevGlobalMeasure!.graphical.position!.y + (ri === 0 ? previousPageOffset : pageOffset) - initialY}px)`,
+                  offset,
+                })
+                keyFrames.push({
+                  transform: `translate(${translateX}px,${translateY}px) scaleY(${globalMeasure.graphical.height / score.globalMeasures[0].graphical.height})`,
+                  offset,
+                })
+              } else {
+                keyFrames.push({
+                  transform: `translate(${translateX}px,${translateY}px) scaleY(${globalMeasure.graphical.height / score.globalMeasures[0].graphical.height})`,
+                  offset,
+                })
+              }
+              offset = offset + globalBeat.duration / durationTotal
+            }
+            prevGlobalMeasure = globalMeasure
+            previousY = currentY
           }
-          offset = offset + globalBeat.duration / durationTotal
         }
-        previousY = currentY
+        previousPageOffset = pageOffset
       }
 
       // last beat
@@ -86,7 +105,7 @@ export const Cursor: React.FC = () => {
         scoreStorm.getSettings().unit // minus barline width
 
       keyFrames.push({
-        transform: `translate(${lastBeat.graphical.position!.x - firstBeatPosition.x + measureEndX}px,${lastMeasure.graphical.position!.y - initialY}px)`,
+        transform: `translate(${lastBeat.graphical.position!.x - firstBeatPosition.x + measureEndX}px,${lastMeasure.graphical.position!.y + pageOffset - initialY}px)`,
         offset: 1,
       })
 
