@@ -18,8 +18,6 @@ export class Page {
   // current layer
   currentLayer!: Layer
 
-  boundingRect!: DOMRect
-
   constructor(renderer: CanvasRenderer, index: number) {
     this.renderer = renderer
     this.index = index
@@ -39,23 +37,21 @@ export class Page {
     this.selectionLayer = new Layer(this.pageElement, true)
 
     this.mainLayer.canvasElement.addEventListener("mousemove", (event: MouseEvent) => {
-      let x = event.clientX - this.boundingRect.left
-      let y = event.clientY - this.boundingRect.top
+      let x = event.offsetX
+      let y = event.offsetY
 
       this.renderer.scoreStorm.dispatchInteractionEvent(InteractionEventType.HOVER, { x, y, pageIndex: this.index })
     })
 
     this.mainLayer.canvasElement.addEventListener("click", (event: MouseEvent) => {
-      let x = event.clientX - this.boundingRect.left
-      let y = event.clientY - this.boundingRect.top
+      let x = event.offsetX
+      let y = event.offsetY
       this.renderer.scoreStorm.dispatchInteractionEvent(InteractionEventType.SELECTION_ENDED, {
         x,
         y,
         pageIndex: this.index,
       })
     })
-
-    this.boundingRect = this.mainLayer.canvasElement.getBoundingClientRect()
 
     this.currentLayer = this.mainLayer
 
