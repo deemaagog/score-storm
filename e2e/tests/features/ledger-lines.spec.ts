@@ -18,7 +18,7 @@ test.afterEach(async ({ page }) => {
     window.scoreStorm.render()
   })
 
-  await expect(page.locator("#ss-container")).toHaveScreenshot()
+  await expect(page.locator(".ss-page")).toHaveScreenshot()
 })
 
 test("correctly renders ledger lines", async ({ page }) => {

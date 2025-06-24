@@ -10,5 +10,6 @@ declare global {
     getScoreFormMusicXml: (xml: string) => Score
     addMeasure: () => void
     getDefaultScore: () => void
+    setPageLayout: () => void
   }
 }
