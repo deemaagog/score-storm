@@ -1,7 +1,6 @@
 import { expect } from "@playwright/test"
-import fs from "fs"
-import path from "path"
 import { test } from "../parametrized-test"
+import { Score, TimeSignature } from "@score-storm/core"
 
 // todo: move to global setup
 test.beforeEach(async ({ page, renderer }) => {
@@ -18,12 +17,16 @@ test.afterEach(async ({ page }) => {
     window.scoreStorm.render()
   })
 
-  await expect(page.locator(".ss-page")).toHaveScreenshot()
+  // Take individual screenshots for each page element
+  const pageElements = await page.locator(".ss-page").all()
+  for (let i = 0; i < pageElements.length; i++) {
+    await expect(pageElements[i]).toHaveScreenshot(`page-${i}.png`)
+  }
 })
 
-test("correctly renders long score", async ({ page }) => {
-  const inputXmlString = fs.readFileSync(path.join(__dirname, "long.musicxml"), "utf8")
-  await page.evaluate((xml) => {
-    window.scoreStorm.setScore(window.getScoreFormMusicXml(xml))
-  }, inputXmlString)
+test("correctly renders multi page score", async ({ page }) => {
+  await page.evaluate(() => {
+    window.setPageLayout()
+    window.scoreStorm.setScore(window.getDefaultScore(20))
+  })
 })

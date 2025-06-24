@@ -17,7 +17,7 @@ test.afterEach(async ({ page }) => {
     window.scoreStorm.render()
   })
 
-  await expect(page.locator("#ss-container")).toHaveScreenshot()
+  await expect(page.locator(".ss-page")).toHaveScreenshot()
 })
 
 test("renders 8th, 16th, 32nd and 64th rests", async ({ page }) => {
