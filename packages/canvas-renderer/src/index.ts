@@ -34,11 +34,23 @@ class CanvasRenderer implements IRenderer {
   handleHoverProcessed({ object, pageIndex }: HoverProcessedEvent) {
     this.currentPage = this.pages[pageIndex]
     this.currentPage.handleHoverProcessed(object)
+    // clear hover for other pages
+    for (const page of this.pages) {
+      if (page !== this.currentPage) {
+        page.clearHover()
+      }
+    }
   }
 
   handleSelectionProcessed({ object, pageIndex }: SelectionProcessedEvent) {
     this.currentPage = this.pages[pageIndex]
     this.currentPage.handleSelectionProcessed(object)
+    // clear selection for other pages
+    for (const page of this.pages) {
+      if (page !== this.currentPage) {
+        page.clearSelection()
+      }
+    }
   }
 
   init() {

@@ -19,6 +19,9 @@ export const SelectionProvider: React.FC<PropsWithChildren> = ({ children }) => 
 
   useEffect(() => {
     scoreStorm.setInteractionEventListener(InteractionEventType.SELECTION_PROCESSED, handleSelect)
+    return () => {
+      scoreStorm.removeInteractionEventListener(InteractionEventType.SELECTION_PROCESSED, handleSelect)
+    }
   }, [])
 
   return <SelectionContext.Provider value={{ selectedObject: selectedObject }}>{children}</SelectionContext.Provider>

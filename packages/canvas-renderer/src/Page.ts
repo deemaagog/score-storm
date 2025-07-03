@@ -78,14 +78,20 @@ export class Page {
 
   handleSelectionProcessed(object: SelectionProcessedEvent["object"]) {
     this.currentLayer = this.selectionLayer
+    this.currentLayer.clear()
     if (object) {
-      this.currentLayer.clear()
       this.renderer.setColor(this.renderer.scoreStorm.settings.editor!.styles.selectColor)
       object.render(this.renderer, this.renderer.scoreStorm.settings)
-    } else {
-      this.currentLayer.clear()
     }
 
     this.currentLayer = this.mainLayer
+  }
+
+  clearHover() {
+    this.hoverLayer.clear()
+  }
+
+  clearSelection() {
+    this.selectionLayer.clear()
   }
 }
