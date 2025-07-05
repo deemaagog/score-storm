@@ -1,4 +1,5 @@
 import "@mantine/core/styles.css"
+import "@mantine/notifications/styles.css"
 import { Box, Flex, Group } from "@mantine/core"
 import { useState } from "react"
 import classes from "./App.module.css"
