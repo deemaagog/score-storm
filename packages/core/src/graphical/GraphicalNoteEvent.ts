@@ -30,6 +30,7 @@ export class GraphicalNoteEvent extends BaseGraphical implements IGraphical {
   accidentalGlyph?: Glyph
   accidentalWidth?: number
   flagGlyph?: Glyph
+  flagWidth?: number
 
   static glyphMap: GlyphMap = {
     whole: NoteheadWhole,
@@ -86,6 +87,9 @@ export class GraphicalNoteEvent extends BaseGraphical implements IGraphical {
     this.noteheadGlyph = GraphicalNoteEvent.glyphMap[duration as keyof GlyphMap]
 
     this.flagGlyph = GraphicalNoteEvent.flagMap[duration as keyof FlagMap]
+    if (this.flagGlyph) {
+      this.flagWidth = this.flagGlyph.bBoxes.bBoxNE[0] - this.flagGlyph.bBoxes.bBoxSW[0]
+    }
 
     // TODO: this validation has to be done at score model level
     if (!this.noteheadGlyph) {
@@ -186,6 +190,23 @@ export class GraphicalNoteEvent extends BaseGraphical implements IGraphical {
             this.noteheadGlyph.bBoxes.bBoxSW[0] * settings.unit +
             xShift,
           this.y - 3.5 * settings.unit,
+        )
+      }
+    }
+
+    if (this.noteEvent.duration?.dots && this.noteEvent.duration.dots > 0) {
+      const dotVerticalShift = Number.isInteger(this.verticalShift) ? -0.5 : 0
+      let x = this.x + this.width * settings.unit + xShift
+      if (this.flagGlyph) {
+        x += (this.flagWidth! + settings.dotMargin / 4) * settings.unit
+      } else {
+        x += settings.dotMargin * settings.unit
+      }
+      for (let i = 0; i < this.noteEvent.duration.dots; i++) {
+        renderer.drawCircle(
+          x + i * settings.spaceBetweenDots * settings.unit,
+          this.y + dotVerticalShift * settings.unit,
+          settings.unit * settings.dotRadius,
         )
       }
     }

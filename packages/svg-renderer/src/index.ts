@@ -93,6 +93,15 @@ class SvgRenderer implements IRenderer {
     this.currentPage!.svgElement.appendChild(rec)
   }
 
+  drawCircle(x: number, y: number, radius: number) {
+    const circle = document.createElementNS(NS, "circle")
+    circle.setAttribute("cx", `${x}`)
+    circle.setAttribute("cy", `${y}`)
+    circle.setAttribute("r", `${radius}`)
+    circle.setAttribute("fill", this.currentColor)
+    this.currentPage!.svgElement.appendChild(circle)
+  }
+
   drawGlyph(glyph: string, x: number, y: number) {
     const text = document.createElementNS(NS, "text")
     text.setAttributeNS(null, "x", `${x}`)

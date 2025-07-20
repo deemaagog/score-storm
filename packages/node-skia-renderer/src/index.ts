@@ -59,6 +59,12 @@ export class NodeSkiaRenderer<TSvgFlag extends SvgFlagOrUndefined = undefined> i
     this.currentPage!.context.fillRect(x, y, width, height)
   }
 
+  drawCircle(x: number, y: number, radius: number) {
+    this.currentPage!.context.beginPath()
+    this.currentPage!.context.arc(x, y, radius, 0, 2 * Math.PI)
+    this.currentPage!.context.fill()
+  }
+
   drawGlyph(glyph: string, x: number, y: number) {
     this.currentPage!.context.fillText(glyph, x, y)
   }

@@ -41,12 +41,16 @@ export class GlobalMeasure {
 
       for (let b = measure.events.length - 1; b >= 0; b--) {
         const beat = measure.events[b]
-        // const dots = duration.dots || 0
+        const dots = beat.duration.dots || 0
         let fraction = new Fraction(timeSignature.unit, timeSignature.count).mul(beat.durationValue)
 
-        // for (let i = 0; i < dots; i++) {
-        //   fraction.add(fraction.clone().div(2))
-        // }
+        if (dots > 0) {
+          let dotFraction = fraction.clone()
+          for (let i = 0; i < dots; i++) {
+            dotFraction = dotFraction.div(2)
+            fraction = fraction.add(dotFraction)
+          }
+        }
 
         currentBeat = currentBeat.sub(fraction)
         const currentBeatString = currentBeat.toFraction()

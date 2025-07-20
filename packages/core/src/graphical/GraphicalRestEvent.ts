@@ -14,7 +14,7 @@ export class GraphicalRestEvent extends BaseGraphical implements IGraphical {
   verticalShift!: number // value in stave spaces
   x!: number
   y!: number
-  noteEvent: Beat
+  noteEvent!: Beat
 
   static glyphMap: GlyphMap = {
     whole: RestWhole,
@@ -73,6 +73,15 @@ export class GraphicalRestEvent extends BaseGraphical implements IGraphical {
       this.x - this.restGlyph.bBoxes.bBoxSW[0] * settings.unit,
       this.y,
     )
+
+    if (this.noteEvent.duration?.dots && this.noteEvent.duration.dots > 0) {
+      const dotVerticalShift = -0.5 // always the same?
+      renderer.drawCircle(
+        this.x + this.width * settings.unit + settings.dotMargin * settings.unit,
+        this.y + dotVerticalShift * settings.unit,
+        settings.unit * settings.dotRadius,
+      )
+    }
   }
 
   getBeatOffsetLeft(): number {

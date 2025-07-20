@@ -34,6 +34,8 @@ export interface IRenderer {
 
   drawRect(x: number, y: number, width: number, height: number): void
 
+  drawCircle(x: number, y: number, radius: number): void
+
   drawGlyph(glyph: string | number, x: number, y: number): void
 
   renderInGroup(object: object, renderCallback: () => void): void
