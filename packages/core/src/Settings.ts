@@ -22,6 +22,9 @@ export class Settings {
   staffLineThickness!: number
   clefMargin!: number
   timeSignatureMargin!: number
+  dotMargin!: number
+  dotRadius!: number
+  spaceBetweenDots!: number
   contentMargin!: number
   barLineThickness!: number
   barlineHeight!: number
@@ -56,6 +59,10 @@ export class Settings {
     this.barLineThickness = this.staffLineThickness * 1.2
     this.mainColor = "black"
     this.staveLineColor = "#666666"
+
+    this.dotMargin = 0.75
+    this.spaceBetweenDots = 0.75
+    this.dotRadius = 0.2
 
     this.spaceBetweenStaveRows = 6
     this.spaceBetweenInstrumentsRows = 5

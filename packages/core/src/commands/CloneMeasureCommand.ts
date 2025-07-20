@@ -35,7 +35,7 @@ export class CloneMeasureCommand implements ICommand {
       measure.events = originalMeasure.events.map((event) => {
         const beat = new Beat(
           {
-            duration: { base: event.duration.base },
+            duration: { ...event.duration },
             rest: event.rest,
             notes: event.notes?.map((note) => {
               return {

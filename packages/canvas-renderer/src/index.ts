@@ -115,6 +115,13 @@ class CanvasRenderer implements IRenderer {
     // this.currentContext.rect(x, y, width, height)
   }
 
+  drawCircle(x: number, y: number, radius: number) {
+    const currentLayer = this.getCurrentLayer()
+    currentLayer.context.beginPath()
+    currentLayer.context.arc(x, y, radius, 0, 2 * Math.PI)
+    currentLayer.context.fill()
+  }
+
   drawGlyph(glyph: string, x: number, y: number) {
     this.getCurrentLayer().context.fillText(glyph, x, y)
   }

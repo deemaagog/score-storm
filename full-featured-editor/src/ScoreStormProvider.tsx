@@ -13,6 +13,9 @@ const getDefaultParams = (theme: MantineTheme, scale: number): UseSSParams => ({
   ssOptions: {
     scale,
     editor: { enable: true, styles: { hoverColor: theme.colors.blue[3], selectColor: theme.colors.blue[6] } },
+    // debug: {
+    //   bBoxes: true,
+    // },
   },
   quickScoreOptions: {
     numberOfMeasures: 1,
