@@ -6,7 +6,7 @@ import { Measure } from "./model/Measure"
 import { GlobalMeasure } from "./model"
 import { FlowLayout, ILayout } from "./layouts"
 import { Page } from "./graphical/GraphicalScore"
-import { InteractionEventMap } from "./events"
+import { EventType, InteractionEventMap } from "./events"
 
 /**
  * Main class responsible for rendering music score.
@@ -100,8 +100,14 @@ class RenderManager {
     }
 
     const pageDimensions = this.scoreStorm.getLayout().getPageDimensions(this.renderer.getContainerWidth())
-    const rows = score.graphical.calculateLineBreaks(pageDimensions.width)
-    // TODO: handle errors
+    const { rows, errors } = score.graphical.calculateLineBreaks(pageDimensions.width)
+
+    // handle errors
+    if (errors.length) {
+      this.scoreStorm.eventManager.dispatch(EventType.RENDERING_ERROR, { errors })
+      return
+    }
+
     score.graphical.calculatePageBreaks(rows, this.scoreStorm.settings, pageDimensions.height)
 
     // clear
@@ -245,8 +251,11 @@ class RenderManager {
         })
       }
 
+      const leftOffset =
+        (globalBeat.graphical.offsetLeft - event.graphical.getBeatOffsetLeft()) * this.scoreStorm.settings.unit
+
       event.graphical.setPosition(
-        measureX + availableWidth * globalBeat.fraction,
+        measureX + availableWidth * globalBeat.fraction + leftOffset,
         this.y + this.scoreStorm.settings.midStave,
         this.scoreStorm.settings,
       )

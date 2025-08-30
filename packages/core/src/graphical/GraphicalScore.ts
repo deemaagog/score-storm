@@ -30,6 +30,7 @@ export class GraphicalScore {
   }
 
   calculateLineBreaks(containerWidth: number) {
+    const errors = []
     // calculate line breaks
     const rows: Pick<Row, "globalMeasures">[] = []
     const instrumentsCurrentClefs: GraphicalClef[] = []
@@ -52,7 +53,7 @@ export class GraphicalScore {
       if (globalMeasure.time) {
         currentTimeSignature = globalMeasure.time.graphical
       }
-      globalMeasure.graphical.calculateMinContentWidth()
+      globalMeasure.graphical.calculateMinContentWidthAndSetRelativeBeatPositions()
 
       // calculate measure attributes relative positions TODO: move to GraphicalGlobalMeasure
       let timeSignatureRelativeWidth = 0,
@@ -87,6 +88,10 @@ export class GraphicalScore {
 
       // const minContentWidth = graphicalGlobalMeasure.minContentWidth
       const minContentWidth = containerWidth / 2 // temp, just for demo
+      if (minContentWidth > containerWidth) {
+        // for now, handle this as an error. TODO: force resize if not enough space
+        errors.push(`Unsufficient space for measure ${globalMeasure.index}`)
+      }
       // TODO: set graphical measure attributes, distribute available space , set actual width to graphicalGlobalMeasures
       globalMeasure.graphical.width = minContentWidth
 
@@ -100,7 +105,7 @@ export class GraphicalScore {
       })
     }
 
-    return rows
+    return { rows, errors }
   }
 
   calculatePageBreaks(rows: Pick<Row, "globalMeasures">[], settings: Settings, pageHeight: number) {

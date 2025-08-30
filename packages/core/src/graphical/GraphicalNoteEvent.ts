@@ -249,10 +249,20 @@ export class GraphicalNoteEvent extends BaseGraphical implements IGraphical {
     if (this.flagGlyph) {
       const stemThickness = STEM_THICKNESS
       offsetRight = offsetRight - stemThickness
-
-      const flagWidth = this.flagGlyph.bBoxes.bBoxNE[0] - this.flagGlyph.bBoxes.bBoxSW[0]
-      offsetRight += flagWidth
+      offsetRight += this.flagWidth!
     }
+
+    // if (this.noteEvent.duration?.dots && this.noteEvent.duration.dots > 0) {
+    //   if (this.flagGlyph) {
+    //     offsetRight += this.flagWidth! + settings.dotMargin / 4
+    //   } else {
+    //     offsetRight += settings.dotMargin
+    //   }
+    //   for (let i = 0; i < this.noteEvent.duration.dots; i++) {
+    //     offsetRight += i * settings.spaceBetweenDots
+    //   }
+    // }
+
     return offsetRight
   }
 

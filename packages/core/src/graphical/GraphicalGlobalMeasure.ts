@@ -1,9 +1,9 @@
 import { GlobalMeasure } from "../model/GlobalMeasure"
-import { Point } from './interfaces'
+import { Point } from "./interfaces"
 
 export class GraphicalGlobalMeasure {
   globalMeasure!: GlobalMeasure
-  
+
   minContentWidth!: number // notes/rests only, measure attributes are not taken into account
   width!: number // actual width calculated at the time of line breaking
   height!: number
@@ -21,13 +21,13 @@ export class GraphicalGlobalMeasure {
     this.position = position
   }
 
-  calculateMinContentWidth() {
+  calculateMinContentWidthAndSetRelativeBeatPositions() {
     let minContentWidth = 0
-    for(const globalBeat of this.globalMeasure.globalBeats) {
+    for (const globalBeat of this.globalMeasure.globalBeats) {
       const graphicalGlobalBeat = globalBeat.graphical
       let offsetLeft = 0
       let offsetRight = 0
-      for(const beat of globalBeat.beats) {
+      for (const beat of globalBeat.beats) {
         const graphicalBeat = beat.graphical
         const beatOffsetLeft = graphicalBeat.getBeatOffsetLeft()
         const beatOffsetRight = graphicalBeat.getBeatOffsetRight()
