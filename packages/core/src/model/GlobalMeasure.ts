@@ -44,11 +44,16 @@ export class GlobalMeasure {
         const dots = beat.duration.dots || 0
         let fraction = new Fraction(timeSignature.unit, timeSignature.count).mul(beat.durationValue)
 
+        let beatDuration = beat.durationValue
+
         if (dots > 0) {
+          let beatDurationCopy = beatDuration
           let dotFraction = fraction.clone()
           for (let i = 0; i < dots; i++) {
             dotFraction = dotFraction.div(2)
             fraction = fraction.add(dotFraction)
+
+            beatDuration = beatDuration + beatDurationCopy * (1 / 2 ** (i + 1))
           }
         }
 
@@ -61,11 +66,11 @@ export class GlobalMeasure {
         if (globalBeats.has(currentBeatString)) {
           globalBeat = globalBeats.get(currentBeatString)!
           globalBeat.beats.push(beat)
-          if (beat.durationValue < globalBeat.duration) {
-            globalBeat.duration = beat.durationValue
+          if (beatDuration < globalBeat.duration) {
+            globalBeat.duration = beatDuration
           }
         } else {
-          globalBeat = new GlobalBeat(beat.durationValue, currentBeatFractionValue, [beat])
+          globalBeat = new GlobalBeat(beatDuration, currentBeatFractionValue, [beat])
           globalBeats.set(currentBeatString, globalBeat)
         }
         this.globalBeatByNote.set(beat, globalBeat)

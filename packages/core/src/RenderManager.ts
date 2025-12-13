@@ -100,7 +100,7 @@ class RenderManager {
     }
 
     const pageDimensions = this.scoreStorm.getLayout().getPageDimensions(this.renderer.getContainerWidth())
-    const { rows, errors } = score.graphical.calculateLineBreaks(pageDimensions.width)
+    const { rows, errors } = score.graphical.calculateLineBreaks(pageDimensions.width, this.scoreStorm.settings)
 
     // handle errors
     if (errors.length) {
@@ -251,14 +251,22 @@ class RenderManager {
         })
       }
 
-      const leftOffset =
-        (globalBeat.graphical.offsetLeft - event.graphical.getBeatOffsetLeft()) * this.scoreStorm.settings.unit
+      // const leftOffset =
+      // (globalBeat.graphical.offsetLeft - event.graphical.getBeatOffsetLeft()) * this.scoreStorm.settings.unit
+      // globalBeat.graphical.offsetLeft * this.scoreStorm.settings.unit
+      //0
 
       event.graphical.setPosition(
-        measureX + availableWidth * globalBeat.fraction + leftOffset,
+        measureX + event.graphical.xRelativePosition,
         this.y + this.scoreStorm.settings.midStave,
         this.scoreStorm.settings,
       )
+
+      // event.graphical.setPosition(
+      //   measureX + availableWidth * globalBeat.fraction + leftOffset,
+      //   this.y + this.scoreStorm.settings.midStave,
+      //   this.scoreStorm.settings,
+      // )
       const bBox = event.graphical.getBBox(this.scoreStorm.settings)
       this.renderInteractiveObject(event, event.graphical, bBox)
       this.renderBBox(bBox)

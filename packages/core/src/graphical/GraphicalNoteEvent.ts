@@ -31,6 +31,7 @@ export class GraphicalNoteEvent extends BaseGraphical implements IGraphical {
   accidentalWidth?: number
   flagGlyph?: Glyph
   flagWidth?: number
+  xRelativePosition: number = 0 // relative to minimal measure content width
 
   static glyphMap: GlyphMap = {
     whole: NoteheadWhole,

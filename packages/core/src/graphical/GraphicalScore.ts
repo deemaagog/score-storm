@@ -29,7 +29,7 @@ export class GraphicalScore {
     this.score = score
   }
 
-  calculateLineBreaks(containerWidth: number) {
+  calculateLineBreaks(containerWidth: number, settings: Settings) {
     const errors = []
     // calculate line breaks
     const rows: Pick<Row, "globalMeasures">[] = []
@@ -50,10 +50,12 @@ export class GraphicalScore {
       }
 
       const globalMeasure = this.score.globalMeasures[gm]
+
+      globalMeasure.graphical.calculateMinContentWidthAndSetRelativeBeatPositions(settings)
+
       if (globalMeasure.time) {
         currentTimeSignature = globalMeasure.time.graphical
       }
-      globalMeasure.graphical.calculateMinContentWidthAndSetRelativeBeatPositions()
 
       // calculate measure attributes relative positions TODO: move to GraphicalGlobalMeasure
       let timeSignatureRelativeWidth = 0,
@@ -86,8 +88,8 @@ export class GraphicalScore {
       globalMeasure.graphical.timeSignatureRelativeWidth = timeSignatureRelativeWidth
       globalMeasure.graphical.clefRelativeWidth = clefRelativeWidth
 
-      // const minContentWidth = graphicalGlobalMeasure.minContentWidth
-      const minContentWidth = containerWidth / 2 // temp, just for demo
+      const minContentWidth = globalMeasure.graphical.minContentWidth
+      // const minContentWidth = containerWidth / 2 // temp, just for demo
       if (minContentWidth > containerWidth) {
         // for now, handle this as an error. TODO: force resize if not enough space
         errors.push(`Unsufficient space for measure ${globalMeasure.index}`)

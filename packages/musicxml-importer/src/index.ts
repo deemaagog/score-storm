@@ -52,6 +52,7 @@ export const fromMusicXML = (xml: string): Score => {
     score.globalMeasures.push(globalMeasure)
     globalMeasure.createGlobalBeats()
   }
+  console.log("score", score)
 
   return score
 }

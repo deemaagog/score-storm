@@ -62,6 +62,7 @@ export class Score {
       globalMeasure.createGlobalBeats()
     }
 
+    console.log("score", score)
     return score
   }
 

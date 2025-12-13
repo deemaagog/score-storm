@@ -15,6 +15,7 @@ export class GraphicalRestEvent extends BaseGraphical implements IGraphical {
   x!: number
   y!: number
   noteEvent!: Beat
+  xRelativePosition: number = 0 // relative to minimal measure content width
 
   static glyphMap: GlyphMap = {
     whole: RestWhole,

@@ -35,6 +35,9 @@ export class Settings {
   spaceBetweenStaveRows!: number
   spaceBetweenInstrumentsRows!: number
 
+  minimalSpaceBetweenNotes!: number
+  minimalMeasureWidth!: number
+
   debug?: {
     bBoxes: boolean
   }
@@ -66,6 +69,9 @@ export class Settings {
 
     this.spaceBetweenStaveRows = 6
     this.spaceBetweenInstrumentsRows = 5
+
+    this.minimalSpaceBetweenNotes = 2 // for 64th notes for now
+    this.minimalMeasureWidth = 16
 
     this.midStave = this.barlineHeight / 2
     // default editor settings
