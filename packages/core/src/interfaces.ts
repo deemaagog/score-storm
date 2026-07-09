@@ -8,17 +8,21 @@ export type PageParameters = {
 
 /* eslint-disable no-unused-vars */
 export interface IRenderer {
-  /**
-   * This holds the reference to the ScoreStorm instance. It is set by the RenderManager and should not be set manually.
-   * It is used to access the settings and eventManager.
-   */
-  scoreStorm: ScoreStorm
-
   isInitialized: boolean
 
   getContainerWidth(): number
 
-  init(): void
+  /**
+   * Called once when the renderer is first used. ScoreStorm is passed here to give renderers
+   * access to interaction event wiring and settings.
+   *
+   * TODO: this still couples low-level renderers to the top-level ScoreStorm orchestrator.
+   * A cleaner approach would be to pass only what each renderer actually needs:
+   * - an EventManager<InteractionEventMap> (interactionBus) for event subscription/dispatch
+   * - Settings via PageParameters for rendering configuration
+   * This would make renderers depend on narrow contracts instead of the full ScoreStorm class.
+   */
+  init(scoreStorm: ScoreStorm): void
 
   createPage(parameters: PageParameters): void
 

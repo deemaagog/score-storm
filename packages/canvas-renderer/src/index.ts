@@ -1,9 +1,9 @@
 import ScoreStorm, {
   HoverProcessedEvent,
   IRenderer,
+  InteractionEventType,
   SelectionProcessedEvent,
   IGraphical,
-  InteractionEventType,
   PageParameters,
 } from "@score-storm/core"
 import { Page } from "./Page"
@@ -53,11 +53,12 @@ class CanvasRenderer implements IRenderer {
     }
   }
 
-  init() {
+  init(scoreStorm: ScoreStorm) {
     this.isInitialized = true
+    this.scoreStorm = scoreStorm
 
-    this.scoreStorm.setInteractionEventListener(InteractionEventType.HOVER_PROCESSED, this.handleHoverProcessed)
-    this.scoreStorm.setInteractionEventListener(InteractionEventType.SELECTION_PROCESSED, this.handleSelectionProcessed)
+    scoreStorm.setInteractionEventListener(InteractionEventType.HOVER_PROCESSED, this.handleHoverProcessed)
+    scoreStorm.setInteractionEventListener(InteractionEventType.SELECTION_PROCESSED, this.handleSelectionProcessed)
   }
 
   destroy() {
