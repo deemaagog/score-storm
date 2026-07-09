@@ -8,7 +8,6 @@ type NodeSkiaRendererOptions<TSvgFlag extends SvgFlagOrUndefined = undefined> = 
 }
 
 export class NodeSkiaRenderer<TSvgFlag extends SvgFlagOrUndefined = undefined> implements IRenderer {
-  scoreStorm!: ScoreStorm
   containerWidth: number
   isInitialized: boolean = false
   svgExportFlag?: TSvgFlag
@@ -24,7 +23,7 @@ export class NodeSkiaRenderer<TSvgFlag extends SvgFlagOrUndefined = undefined> i
     return this.containerWidth
   }
 
-  init() {
+  init(_scoreStorm: ScoreStorm) {
     this.isInitialized = true
   }
 

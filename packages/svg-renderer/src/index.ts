@@ -25,11 +25,12 @@ class SvgRenderer implements IRenderer {
     return this.containerElement.clientWidth
   }
 
-  init() {
+  init(scoreStorm: ScoreStorm) {
     this.isInitialized = true
+    this.scoreStorm = scoreStorm
 
     // TODO: unsubscribe
-    this.scoreStorm.setInteractionEventListener(InteractionEventType.SELECTION_PROCESSED, this.handleSelectionProcessed)
+    scoreStorm.setInteractionEventListener(InteractionEventType.SELECTION_PROCESSED, this.handleSelectionProcessed)
   }
 
   handleSelectionProcessed({ object }: SelectionProcessedEvent) {

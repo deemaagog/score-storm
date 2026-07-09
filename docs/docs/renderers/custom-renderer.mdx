@@ -5,7 +5,7 @@ sidebar_position: 6
 # Custom Renderer
 
 Feel free to create your own renderer.
-Renderer has to implement common interface
+A renderer must implement the `IRenderer` interface:
 
 import CodeBlock from "@theme/CodeBlock"
 
@@ -15,11 +15,13 @@ export interface IRenderer {
 
 isInitialized: boolean
 
-scoreStorm: ScoreStorm
-
 getContainerWidth(): number
 
-init(): void
+/\*\*
+- Called once before the first render. Use this to subscribe to interaction
+- events and perform any one-time setup.
+  \*/
+init(scoreStorm: ScoreStorm): void
 
 createPage(parameters: PageParameters): void
 
@@ -31,11 +33,16 @@ destroy(): void
 
 setColor(color: string): void
 
+getColor(): string
+
 drawRect(x: number, y: number, width: number, height: number): void
+
+drawCircle(x: number, y: number, radius: number): void
 
 drawGlyph(glyph: string | number, x: number, y: number): void
 
 renderInGroup(object: object, renderCallback: () => void): void
+
 }
 `}
 
@@ -45,7 +52,7 @@ Example:
 
 ```js
 class CustomRenderer {
-  // implementation according to Renderer interface
+  // implement IRenderer methods...
 }
 
 const scoreStorm = new ScoreStorm()

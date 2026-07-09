@@ -31,12 +31,8 @@ class RenderManager {
       // eslint-disable-next-line no-console
       console.log("destroying...")
       this.renderer.destroy()
-      // this.eventManager.clear()
     }
     this.renderer = renderer
-
-    // inject scoreStorm into renderer. TODO: Investigate if this is the best way to do this
-    this.renderer.scoreStorm = this.scoreStorm
   }
 
   getRenderer() {
@@ -96,7 +92,7 @@ class RenderManager {
     if (!this.renderer.isInitialized) {
       // eslint-disable-next-line no-console
       console.log("initializing...")
-      this.renderer.init()
+      this.renderer.init(this.scoreStorm)
     }
 
     const pageDimensions = this.scoreStorm.getLayout().getPageDimensions(this.renderer.getContainerWidth())
