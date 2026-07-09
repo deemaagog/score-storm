@@ -1,8 +1,7 @@
 import { ScoreStorm } from "../ScoreStorm"
 
 export interface ICommand {
-  inject?(scoreStorm: ScoreStorm): void
-  execute(): void
-  undo(): void
-  redo(): void
+  execute(scoreStorm: ScoreStorm): void
+  undo(scoreStorm: ScoreStorm): void
+  redo(scoreStorm: ScoreStorm): void
 }

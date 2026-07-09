@@ -1,5 +1,6 @@
 import { GraphicalNoteEvent } from "../graphical"
 import { AccidentalDisplay, Beat, Pitch } from "../model/Beat"
+import { ScoreStorm } from "../ScoreStorm"
 import { ICommand } from "./ICommand"
 
 type ChangePitchCommandParams = {
@@ -21,7 +22,7 @@ export class ChangePitchCommand implements ICommand {
     this.newPitch = newPitch
   }
 
-  execute() {
+  execute(_scoreStorm: ScoreStorm) {
     const note = this.beat.notes![0]
     this.originalPitch = note.pitch
     this.originalAccidentalDisplay = note.accidentalDisplay
@@ -35,7 +36,7 @@ export class ChangePitchCommand implements ICommand {
     this.beat.graphical = new GraphicalNoteEvent(this.beat)
   }
 
-  undo() {
+  undo(_scoreStorm: ScoreStorm) {
     const note = this.beat.notes![0]
     note.pitch = this.originalPitch
     note.accidentalDisplay = this.originalAccidentalDisplay
@@ -44,7 +45,7 @@ export class ChangePitchCommand implements ICommand {
     this.beat.graphical = new GraphicalNoteEvent(this.beat)
   }
 
-  redo() {
-    this.execute()
+  redo(scoreStorm: ScoreStorm) {
+    this.execute(scoreStorm)
   }
 }

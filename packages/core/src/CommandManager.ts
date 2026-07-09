@@ -9,9 +9,7 @@ export class CommandManager {
   constructor(private scoreStorm: ScoreStorm) {}
 
   public execute(command: ICommand) {
-    command.inject?.(this.scoreStorm) // inject scoreStorm instance into the command
-
-    command.execute()
+    command.execute(this.scoreStorm)
     this.undoStack.push(command)
     this.redoStack = []
     this.handleUpdate()
@@ -20,7 +18,7 @@ export class CommandManager {
   public undo() {
     const command = this.undoStack.pop()
     if (command) {
-      command.undo()
+      command.undo(this.scoreStorm)
       this.redoStack.push(command)
       this.handleUpdate()
     }
@@ -29,7 +27,7 @@ export class CommandManager {
   public redo() {
     const command = this.redoStack.pop()
     if (command) {
-      command.redo()
+      command.redo(this.scoreStorm)
       this.undoStack.push(command)
       this.handleUpdate()
     }

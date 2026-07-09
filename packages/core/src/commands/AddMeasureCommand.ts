@@ -9,14 +9,8 @@ import { ICommand } from "./ICommand"
  * A command to add a measure at the end of the score
  */
 export class AddMeasureCommand implements ICommand {
-  scoreStorm!: ScoreStorm
-
-  inject(scoreStorm: ScoreStorm): void {
-    this.scoreStorm = scoreStorm
-  }
-
-  execute() {
-    const score = this.scoreStorm.getScore()
+  execute(scoreStorm: ScoreStorm) {
+    const score = scoreStorm.getScore()
 
     const currentTimeSignature = score.getMeasureTimeSignature(score.globalMeasures.length - 1)
     if (!currentTimeSignature) {
@@ -49,27 +43,27 @@ export class AddMeasureCommand implements ICommand {
     score.globalMeasures.push(globalMeasure)
     globalMeasure.createGlobalBeats()
 
-    this.handleNumberOfMeasuresChange()
+    this.handleNumberOfMeasuresChange(scoreStorm)
   }
 
-  undo() {
-    const score = this.scoreStorm.getScore()
+  undo(scoreStorm: ScoreStorm) {
+    const score = scoreStorm.getScore()
     const index = score.globalMeasures.length - 1
     score.globalMeasures.splice(index, 1)
     score.instruments.forEach((instrument) => {
       instrument.measures.splice(index, 1)
     })
 
-    this.handleNumberOfMeasuresChange()
+    this.handleNumberOfMeasuresChange(scoreStorm)
   }
 
-  redo() {
-    this.execute()
+  redo(scoreStorm: ScoreStorm) {
+    this.execute(scoreStorm)
   }
 
-  handleNumberOfMeasuresChange() {
-    this.scoreStorm.eventManager.dispatch(EventType.NUMBER_OF_MEASURES_UPDATED, {
-      numberOfMeasures: this.scoreStorm.getScore().globalMeasures.length,
+  private handleNumberOfMeasuresChange(scoreStorm: ScoreStorm) {
+    scoreStorm.eventManager.dispatch(EventType.NUMBER_OF_MEASURES_UPDATED, {
+      numberOfMeasures: scoreStorm.getScore().globalMeasures.length,
     })
   }
 }

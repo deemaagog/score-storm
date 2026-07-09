@@ -12,7 +12,6 @@ type RemoveMeasureCommandParams = {
  * A command to remove a measure from the score at a given index
  */
 export class RemoveMeasureCommand implements ICommand {
-  scoreStorm!: ScoreStorm
   private index: number
   private globalMeasure!: GlobalMeasure
   private measuresByInstrument!: Measure[]
@@ -21,12 +20,8 @@ export class RemoveMeasureCommand implements ICommand {
     this.index = index
   }
 
-  inject(scoreStorm: ScoreStorm): void {
-    this.scoreStorm = scoreStorm
-  }
-
-  execute() {
-    const score = this.scoreStorm.getScore()
+  execute(scoreStorm: ScoreStorm) {
+    const score = scoreStorm.getScore()
     this.globalMeasure = score.globalMeasures[this.index]
     this.measuresByInstrument = score.instruments.map((instrument) => instrument.measures[this.index])
 
@@ -46,26 +41,26 @@ export class RemoveMeasureCommand implements ICommand {
       })
     })
 
-    this.handleNumberOfMeasuresChange()
+    this.handleNumberOfMeasuresChange(scoreStorm)
   }
 
-  undo() {
-    const score = this.scoreStorm.getScore()
+  undo(scoreStorm: ScoreStorm) {
+    const score = scoreStorm.getScore()
     score.globalMeasures.splice(this.index, 0, this.globalMeasure)
     score.instruments.forEach((instrument, i) => {
       instrument.measures.splice(this.index, 0, this.measuresByInstrument[i])
     })
 
-    this.handleNumberOfMeasuresChange()
+    this.handleNumberOfMeasuresChange(scoreStorm)
   }
 
-  redo() {
-    this.execute()
+  redo(scoreStorm: ScoreStorm) {
+    this.execute(scoreStorm)
   }
 
-  handleNumberOfMeasuresChange() {
-    this.scoreStorm.eventManager.dispatch(EventType.NUMBER_OF_MEASURES_UPDATED, {
-      numberOfMeasures: this.scoreStorm.getScore().globalMeasures.length,
+  private handleNumberOfMeasuresChange(scoreStorm: ScoreStorm) {
+    scoreStorm.eventManager.dispatch(EventType.NUMBER_OF_MEASURES_UPDATED, {
+      numberOfMeasures: scoreStorm.getScore().globalMeasures.length,
     })
   }
 }
