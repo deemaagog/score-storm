@@ -1,5 +1,6 @@
 import { GraphicalNoteEvent, GraphicalRestEvent } from "../graphical"
 import { Beat } from "../model/Beat"
+import { ScoreStorm } from "../ScoreStorm"
 import { ICommand } from "./ICommand"
 
 type ChangeBeatTypeCommandParams = {
@@ -16,7 +17,7 @@ export class ChangeBeatTypeCommand implements ICommand {
     this.beat = beat
   }
 
-  execute() {
+  execute(_scoreStorm: ScoreStorm) {
     // if rest, make it note and vice versa
     if (this.beat.rest) {
       this.beat.rest = undefined
@@ -35,11 +36,11 @@ export class ChangeBeatTypeCommand implements ICommand {
     }
   }
 
-  undo() {
-    this.execute()
+  undo(scoreStorm: ScoreStorm) {
+    this.execute(scoreStorm)
   }
 
-  redo() {
-    this.execute()
+  redo(scoreStorm: ScoreStorm) {
+    this.execute(scoreStorm)
   }
 }

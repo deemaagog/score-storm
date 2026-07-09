@@ -13,19 +13,14 @@ type CloneMeasureCommandParams = {
  * A command to clone a measure at the right of the original measure
  */
 export class CloneMeasureCommand implements ICommand {
-  private scoreStorm!: ScoreStorm
   private index: number
 
   constructor({ index }: CloneMeasureCommandParams) {
     this.index = index
   }
 
-  inject(scoreStorm: ScoreStorm): void {
-    this.scoreStorm = scoreStorm
-  }
-
-  execute() {
-    const score = this.scoreStorm.getScore()
+  execute(scoreStorm: ScoreStorm) {
+    const score = scoreStorm.getScore()
     for (const instrument of score.instruments) {
       const originalMeasure = instrument.measures[this.index]
       // assuming only one stave for now
@@ -72,11 +67,11 @@ export class CloneMeasureCommand implements ICommand {
     score.globalMeasures.splice(this.index + 1, 0, globalMeasure)
     globalMeasure.createGlobalBeats()
 
-    this.handleNumberOfMeasuresChange()
+    this.handleNumberOfMeasuresChange(scoreStorm)
   }
 
-  undo() {
-    const score = this.scoreStorm.getScore()
+  undo(scoreStorm: ScoreStorm) {
+    const score = scoreStorm.getScore()
     score.globalMeasures.splice(this.index + 1, 1)
     score.globalMeasures.forEach((gm) => {
       if (gm.index > this.index) {
@@ -93,16 +88,16 @@ export class CloneMeasureCommand implements ICommand {
       })
     })
 
-    this.handleNumberOfMeasuresChange()
+    this.handleNumberOfMeasuresChange(scoreStorm)
   }
 
-  redo() {
-    this.execute()
+  redo(scoreStorm: ScoreStorm) {
+    this.execute(scoreStorm)
   }
 
-  handleNumberOfMeasuresChange() {
-    this.scoreStorm.eventManager.dispatch(EventType.NUMBER_OF_MEASURES_UPDATED, {
-      numberOfMeasures: this.scoreStorm.getScore().globalMeasures.length,
+  private handleNumberOfMeasuresChange(scoreStorm: ScoreStorm) {
+    scoreStorm.eventManager.dispatch(EventType.NUMBER_OF_MEASURES_UPDATED, {
+      numberOfMeasures: scoreStorm.getScore().globalMeasures.length,
     })
   }
 }

@@ -5,14 +5,8 @@ import { ICommand } from "./ICommand"
  * A command to change a clef. Currently only supports changing the clef of the first stave of the first instrument.
  */
 export class ChangeClefCommand implements ICommand {
-  scoreStorm!: ScoreStorm
-
-  inject(scoreStorm: ScoreStorm): void {
-    this.scoreStorm = scoreStorm
-  }
-
-  execute() {
-    const firstMeasure = this.scoreStorm.getScore().instruments[0].measures[0]
+  execute(scoreStorm: ScoreStorm) {
+    const firstMeasure = scoreStorm.getScore().instruments[0].measures[0]
     if (firstMeasure.clef?.sign === "G") {
       firstMeasure.clef!.changeType("F", 2)
     } else {
@@ -20,11 +14,11 @@ export class ChangeClefCommand implements ICommand {
     }
   }
 
-  undo() {
-    this.execute()
+  undo(scoreStorm: ScoreStorm) {
+    this.execute(scoreStorm)
   }
 
-  redo() {
-    this.execute()
+  redo(scoreStorm: ScoreStorm) {
+    this.execute(scoreStorm)
   }
 }
