@@ -16,7 +16,7 @@
     "vite": "^5.1.0"
   },
   "dependencies": {
-    "@playwright/test": "^1.41.2",
+    "@playwright/test": "^1.61.1",
     "@score-storm/canvas-renderer": "workspace:*",
     "@score-storm/core": "workspace:*",
     "@score-storm/musicxml-importer": "workspace:*",
