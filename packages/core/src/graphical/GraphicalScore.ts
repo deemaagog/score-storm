@@ -5,6 +5,7 @@ import { GraphicalTimeSignature } from "./GraphicalTimeSignature"
 import { GlobalMeasure } from "../model"
 import { Measure } from "../model/Measure"
 import { Clef } from "../model/Clef"
+import { TimeSignature } from "../model/TimeSignature"
 
 export type InstrumentPosition = number
 
@@ -34,10 +35,10 @@ export class GraphicalScore {
   calculateLineBreaks(containerWidth: number) {
     // calculate line breaks
     const rows: Pick<Row, "globalMeasures">[] = []
-    // tracks current Clef model object per instrument — a fresh GraphicalClef is created
-    // for each row so every row occurrence gets its own stable x, y position
+    // tracks current Clef/TimeSignature model objects per instrument — fresh graphical
+    // instances are created for each row so every occurrence gets its own stable x, y position
     const instrumentsCurrentClefs: (Clef | undefined)[] = []
-    let currentTimeSignature: GraphicalTimeSignature
+    let currentTimeSignature: TimeSignature | undefined
 
     let currentRowGlobalMeasures: GlobalMeasure[] = []
     let currentRowWidth = 0
@@ -54,7 +55,7 @@ export class GraphicalScore {
 
       const globalMeasure = this.score.globalMeasures[gm]
       if (globalMeasure.time) {
-        currentTimeSignature = globalMeasure.time.graphical
+        currentTimeSignature = globalMeasure.time
       }
       globalMeasure.graphical.calculateMinContentWidth()
 
@@ -67,11 +68,13 @@ export class GraphicalScore {
           instrumentsCurrentClefs[i] = measure.clef
         }
 
-        // first row
+        // first row — create a fresh GraphicalTimeSignature per instrument so each stave
+        // gets its own stable x, y position and ID for hover/selection
         if (!currentRowGlobalMeasures.length && gm === 0) {
-          measure.graphical.time = currentTimeSignature! // we are certain that it's defined
-          if (currentTimeSignature!.width > timeSignatureRelativeWidth) {
-            timeSignatureRelativeWidth = currentTimeSignature!.width
+          const graphicalTime = new GraphicalTimeSignature(currentTimeSignature!, measure)
+          measure.graphical.time = graphicalTime
+          if (graphicalTime.width > timeSignatureRelativeWidth) {
+            timeSignatureRelativeWidth = graphicalTime.width
           }
         }
 

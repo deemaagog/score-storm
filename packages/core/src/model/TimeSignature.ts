@@ -1,11 +1,7 @@
-import { GraphicalTimeSignature } from '../graphical'
-
 export class TimeSignature {
   readonly uid = crypto.randomUUID()
   count: number
   unit: number
-
-  graphical: GraphicalTimeSignature
 
   /**
    * @param count Indicates how many such note values constitute a measure
@@ -21,7 +17,6 @@ export class TimeSignature {
     }
     this.count = count
     this.unit = unit
-    this.graphical = new GraphicalTimeSignature(this)
   }
 
   unitToDuration(): string {
