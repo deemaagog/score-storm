@@ -1,5 +1,6 @@
 import { Settings } from "../Settings"
 import { IRenderer } from "../interfaces"
+import { Measure } from "../model/Measure"
 import { TimeSignature } from "../model/TimeSignature"
 import { getTextFromUnicode } from "../utils"
 import {
@@ -25,7 +26,9 @@ export class GraphicalTimeSignature implements IGraphical {
   unitGlyph!: Glyph
   x!: number
   y!: number
-  time!: TimeSignature
+  count: number
+  unit: number
+  measure: Measure
 
   static glyphMap: GlyphMap = {
     1: TimeSig1,
@@ -39,17 +42,18 @@ export class GraphicalTimeSignature implements IGraphical {
     9: TimeSig9,
   }
 
-  constructor(time: TimeSignature) {
-    this.id = `gts-${time.uid}`
-    this.time = time
+  constructor(time: TimeSignature, measure: Measure) {
+    this.id = `gts-${measure.uid}`
+    this.count = time.count
+    this.unit = time.unit
+    this.measure = measure
     this.calculateMetrics()
   }
 
   private calculateMetrics() {
-    const { count, unit } = this.time!
+    const { count, unit } = this
 
     this.countGlyph = GraphicalTimeSignature.glyphMap[count as keyof GlyphMap]
-
     this.unitGlyph = GraphicalTimeSignature.glyphMap[unit as keyof GlyphMap]
 
     if (!this.countGlyph || !this.unitGlyph) {
