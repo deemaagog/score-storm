@@ -7,7 +7,6 @@ import { Pitch } from "./model/Beat"
  * @param interval Interval to transpose the pitch (ex: P5, M3, m7)
  * @returns Transposed pitch
  */
-
 export const transposePitch = (pitch: Pitch, interval: string): Pitch => {
   const tonalPitch = toTonalPitch(pitch)
   const pitchNote = note(tonalPitch)
@@ -27,4 +26,14 @@ export const transposePitch = (pitch: Pitch, interval: string): Pitch => {
 export const toTonalPitch = (pitch: Pitch): string => {
   const alter = pitch.alter ? altToAcc(pitch.alter) : ""
   return `${pitch.step}${alter}${pitch.octave}`
+}
+
+/**
+ * Converts a SMuFL Unicode symbol string (e.g. "U+E050") to the corresponding character.
+ * @param unicodeSymbol Unicode symbol in "U+XXXX" format
+ * @returns The character represented by the Unicode code point
+ */
+export const getTextFromUnicode = (unicodeSymbol: string): string => {
+  const codeString = parseInt(unicodeSymbol.replace("U+", ""), 16)
+  return String.fromCharCode(codeString)
 }

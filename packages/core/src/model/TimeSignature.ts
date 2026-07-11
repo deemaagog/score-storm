@@ -1,6 +1,7 @@
 import { GraphicalTimeSignature } from '../graphical'
 
 export class TimeSignature {
+  readonly uid = crypto.randomUUID()
   count: number
   unit: number
 

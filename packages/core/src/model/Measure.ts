@@ -5,6 +5,7 @@ import { Clef } from "./Clef"
 import { Instrument } from "./Instrument"
 
 export class Measure {
+  readonly uid = crypto.randomUUID()
   clef?: Clef
   events!: Beat[]
   instrument!: Instrument

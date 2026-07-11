@@ -1,7 +1,7 @@
 import { Settings } from "../Settings"
 import { IRenderer } from "../interfaces"
 import { TimeSignature } from "../model/TimeSignature"
-import { BaseGraphical } from "./BaseGraphical"
+import { getTextFromUnicode } from "../utils"
 import {
   TimeSig1,
   TimeSig2,
@@ -17,7 +17,8 @@ import { BBox, Glyph, IGraphical } from "./interfaces"
 
 type GlyphMap = Record<number, Glyph>
 
-export class GraphicalTimeSignature extends BaseGraphical implements IGraphical {
+export class GraphicalTimeSignature implements IGraphical {
+  readonly id: string
   height!: number
   width!: number
   countGlyph!: Glyph
@@ -39,7 +40,7 @@ export class GraphicalTimeSignature extends BaseGraphical implements IGraphical 
   }
 
   constructor(time: TimeSignature) {
-    super()
+    this.id = `gts-${time.uid}`
     this.time = time
     this.calculateMetrics()
   }
@@ -83,7 +84,7 @@ export class GraphicalTimeSignature extends BaseGraphical implements IGraphical 
 
   render(renderer: IRenderer, settings: Settings) {
     renderer.drawGlyph(
-      this.getTextFromUnicode(this.countGlyph.symbol),
+      getTextFromUnicode(this.countGlyph.symbol),
       this.x -
         this.countGlyph.bBoxes.bBoxSW[0] * settings.unit +
         ((this.width - (this.countGlyph.bBoxes.bBoxNE[0] - this.countGlyph.bBoxes.bBoxSW[0])) / 2) * settings.unit,
@@ -91,7 +92,7 @@ export class GraphicalTimeSignature extends BaseGraphical implements IGraphical 
     )
 
     renderer.drawGlyph(
-      this.getTextFromUnicode(this.unitGlyph.symbol),
+      getTextFromUnicode(this.unitGlyph.symbol),
       this.x -
         this.unitGlyph.bBoxes.bBoxSW[0] * settings.unit +
         ((this.width - (this.unitGlyph.bBoxes.bBoxNE[0] - this.unitGlyph.bBoxes.bBoxSW[0])) / 2) * settings.unit,

@@ -1,13 +1,14 @@
 import { Settings } from "../Settings"
 import { IRenderer } from "../interfaces"
 import { Beat } from "../model/Beat"
-import { BaseGraphical } from "./BaseGraphical"
+import { getTextFromUnicode } from "../utils"
 import { RestHalf, RestWhole, RestQuarter, RestEighth, Rest16th, Rest32nd, Rest64th } from "./glyphs/rest"
 import { BBox, Glyph, IGraphical } from "./interfaces"
 
 type GlyphMap = Record<string, Glyph>
 
-export class GraphicalRestEvent extends BaseGraphical implements IGraphical {
+export class GraphicalRestEvent implements IGraphical {
+  readonly id: string
   height!: number
   width!: number
   restGlyph!: Glyph
@@ -27,7 +28,7 @@ export class GraphicalRestEvent extends BaseGraphical implements IGraphical {
   }
 
   constructor(noteEvent: Beat) {
-    super()
+    this.id = `gre-${noteEvent.uid}`
     this.noteEvent = noteEvent
     this.calculateMetrics(noteEvent)
   }
@@ -69,7 +70,7 @@ export class GraphicalRestEvent extends BaseGraphical implements IGraphical {
 
   render(renderer: IRenderer, settings: Settings) {
     renderer.drawGlyph(
-      this.getTextFromUnicode(this.restGlyph.symbol),
+      getTextFromUnicode(this.restGlyph.symbol),
       this.x - this.restGlyph.bBoxes.bBoxSW[0] * settings.unit,
       this.y,
     )

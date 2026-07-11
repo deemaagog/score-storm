@@ -2,6 +2,7 @@ import { GraphicalGlobalBeat } from '../graphical/GraphicalGlobalBeat'
 import { Beat } from "./Beat"
 
 export class GlobalBeat  {
+  readonly uid = crypto.randomUUID()
   duration: number
   fraction: number
   beats: Beat[]

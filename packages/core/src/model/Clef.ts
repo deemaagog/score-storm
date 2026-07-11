@@ -1,6 +1,7 @@
 import { Pitch } from "./Beat"
 
 export class Clef {
+  readonly uid = crypto.randomUUID()
   position: number
   sign: string
 

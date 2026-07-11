@@ -2,7 +2,7 @@ import { note } from "@tonaljs/pitch-note"
 import { Settings } from "../Settings"
 import { IRenderer } from "../interfaces"
 import { Note, Beat } from "../model/Beat"
-import { BaseGraphical } from "./BaseGraphical"
+import { getTextFromUnicode } from "../utils"
 import { DoubleFlat, DoubleSharp, Flat, Natural, Sharp } from "./glyphs/accidental"
 import { NoteheadHalf, NoteheadQuarter, NoteheadWhole } from "./glyphs/notehead"
 import { Flag8thUp, Flag16thUp, Flag32ndUp, Flag64thUp } from "./glyphs/flag"
@@ -18,7 +18,8 @@ type GlyphMap = Record<string, Glyph>
 type FlagMap = Record<string, Glyph>
 type GlyphAccidentalMap = Record<number, Glyph>
 
-export class GraphicalNoteEvent extends BaseGraphical implements IGraphical {
+export class GraphicalNoteEvent implements IGraphical {
+  readonly id: string
   noteEvent: Beat
   height!: number
   width!: number
@@ -58,7 +59,7 @@ export class GraphicalNoteEvent extends BaseGraphical implements IGraphical {
   }
 
   constructor(noteEvent: Beat) {
-    super()
+    this.id = `gne-${noteEvent.uid}`
     this.noteEvent = noteEvent
     this.calculateMetrics(noteEvent)
   }
@@ -136,7 +137,7 @@ export class GraphicalNoteEvent extends BaseGraphical implements IGraphical {
     if (this.accidentalGlyph) {
       renderer.setColor(settings.mainColor)
       renderer.drawGlyph(
-        this.getTextFromUnicode(this.accidentalGlyph.symbol),
+        getTextFromUnicode(this.accidentalGlyph.symbol),
         this.x - this.accidentalGlyph.bBoxes.bBoxSW[0] * settings.unit,
         this.y,
       )
@@ -183,7 +184,7 @@ export class GraphicalNoteEvent extends BaseGraphical implements IGraphical {
 
       if (this.flagGlyph) {
         renderer.drawGlyph(
-          this.getTextFromUnicode(this.flagGlyph.symbol),
+          getTextFromUnicode(this.flagGlyph.symbol),
           this.x +
             this.width * settings.unit -
             stemThickness -
@@ -213,7 +214,7 @@ export class GraphicalNoteEvent extends BaseGraphical implements IGraphical {
 
     renderer.setColor(currentColor)
     renderer.drawGlyph(
-      this.getTextFromUnicode(this.noteheadGlyph.symbol),
+      getTextFromUnicode(this.noteheadGlyph.symbol),
       this.x - this.noteheadGlyph.bBoxes.bBoxSW[0] * settings.unit + xShift,
       this.y,
     )
