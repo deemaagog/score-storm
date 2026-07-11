@@ -9,6 +9,7 @@ interface KeySignature {
 }
 
 export class GlobalMeasure {
+  readonly uid = crypto.randomUUID()
   key?: KeySignature
   time?: TimeSignature
   score!: Score

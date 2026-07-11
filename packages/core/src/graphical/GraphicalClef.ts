@@ -2,13 +2,14 @@ import { Settings } from "../Settings"
 import { IRenderer } from "../interfaces"
 import { Clef } from "../model/Clef"
 import { Measure } from "../model/Measure"
-import { BaseGraphical } from "./BaseGraphical"
+import { getTextFromUnicode } from "../utils"
 import { ClefG, ClefF } from "./glyphs/clef"
 import { BBox, Glyph, IGraphical } from "./interfaces"
 
 type GlyphMap = Record<"G" | "F", Glyph>
 
-export class GraphicalClef extends BaseGraphical implements IGraphical {
+export class GraphicalClef implements IGraphical {
+  readonly id: string
   height!: number
   width!: number
   clefGlyph!: Glyph
@@ -25,7 +26,7 @@ export class GraphicalClef extends BaseGraphical implements IGraphical {
   }
 
   constructor(clef: Clef, measure: Measure) {
-    super()
+    this.id = `gc-${measure.uid}`
     this.sign = clef.sign
     this.position = clef.position
     this.measure = measure
@@ -69,7 +70,7 @@ export class GraphicalClef extends BaseGraphical implements IGraphical {
 
   render(renderer: IRenderer, settings: Settings) {
     renderer.drawGlyph(
-      this.getTextFromUnicode(this.clefGlyph.symbol),
+      getTextFromUnicode(this.clefGlyph.symbol),
       this.x - this.clefGlyph.bBoxes.bBoxSW[0] * settings.unit,
       this.y,
     )

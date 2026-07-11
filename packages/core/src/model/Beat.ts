@@ -26,6 +26,7 @@ type Rest = {
 }
 
 export class Beat {
+  readonly uid = crypto.randomUUID()
   duration: NoteDuration
   durationValue: number
   notes?: Note[]

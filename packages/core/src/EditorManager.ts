@@ -8,26 +8,23 @@ type SpatialIndexItem = {
   minY: number
   maxX: number
   maxY: number
-  object: object
+  graphicalId: string
 }
 
 export class EditorManager {
   interactionEventManager: EventManager<InteractionEventMap>
-  private hoveredObject: any | null = null
-  // selectedObject intentionally holds a model object (not a graphical one) so that selection
-  // survives re-renders — model references are stable across renders while graphical objects
-  // are ephemeral and rebuilt on every render call.
+  private hoveredId: string | null = null
+  // selectedId holds the stable ID of the selected graphical object so that selection
+  // survives re-renders. The ID is deterministic (derived from the model object's uid),
+  // so the same graphical element gets the same ID after each render.
   //
-  // When multiple interaction targets map to the same model type (e.g. clicking a clef vs
-  // clicking the measure body both involve a Measure), intent wrappers can disambiguate:
-  //   class ClefInteraction { constructor(public measure: Measure) {} }
-  //   class MeasureInteraction { constructor(public measure: Measure) {} }
-  // selectedObject would then be a ClefInteraction or MeasureInteraction, keeping the
-  // underlying model reference stable while making the interaction intent explicit.
-  private selectedObject: any | null = null // TODO: improve types, create BaseObject class
+  // When multiple graphical objects should be highlighted together (e.g. all time
+  // signatures for a selected GlobalMeasure), dispatch can be extended to look up all
+  // graphicals whose IDs share a common prefix (e.g. "gts-<globalMeasure.uid>-*").
+  private selectedId: string | null = null
   private spatialSearchTreeByPage: Map<number, RBush<SpatialIndexItem>>
-  private graphicalByObject: Map<object, IGraphical> = new Map()
-  private pageIndexByObject: Map<object, number> = new Map()
+  private graphicalById: Map<string, IGraphical> = new Map()
+  private pageIndexById: Map<string, number> = new Map()
 
   constructor() {
     this.interactionEventManager = new EventManager<InteractionEventMap>()
@@ -57,21 +54,21 @@ export class EditorManager {
     let shouldUpdate = true
 
     if (result.length) {
-      if (this.hoveredObject) {
+      if (this.hoveredId !== null) {
         shouldUpdate = false
       }
-      this.hoveredObject = result[0].object
+      this.hoveredId = result[0].graphicalId
     } else {
-      if (!this.hoveredObject) {
+      if (this.hoveredId === null) {
         shouldUpdate = false
       }
-      this.hoveredObject = null
+      this.hoveredId = null
     }
 
     if (shouldUpdate) {
       this.interactionEventManager.dispatch(InteractionEventType.HOVER_PROCESSED, {
         pageIndex,
-        object: this.graphicalByObject.get(this.hoveredObject) || null,
+        object: this.graphicalById.get(this.hoveredId ?? "") || null,
       })
     }
   }
@@ -88,22 +85,20 @@ export class EditorManager {
       maxY: y,
     })
 
-    const newSelected = result[0] ? result[0].object : null
-    if (newSelected !== this.selectedObject) {
-      this.selectedObject = newSelected
+    const newSelectedId = result[0] ? result[0].graphicalId : null
+    if (newSelectedId !== this.selectedId) {
+      this.selectedId = newSelectedId
       this.interactionEventManager.dispatch(InteractionEventType.SELECTION_PROCESSED, {
         pageIndex,
-        object: this.graphicalByObject.get(this.selectedObject) || null,
+        object: this.graphicalById.get(this.selectedId ?? "") || null,
       })
     }
   }
 
-  registerInteractionArea(object: object, graphicalObject: IGraphical, bBox: BBox, pageIndex: number) {
-    this.pageIndexByObject.set(object, pageIndex)
-    if (!this.graphicalByObject.get(object)) {
-      // TODO: this doesn't work for graphical objects that does not have their counterpart in score model (clef on non first row e.t.c)
-      this.graphicalByObject.set(object, graphicalObject)
-    }
+  registerInteractionArea(graphicalObject: IGraphical, bBox: BBox, pageIndex: number) {
+    const id = graphicalObject.id
+    this.pageIndexById.set(id, pageIndex)
+    this.graphicalById.set(id, graphicalObject)
 
     let spatialSearchTree: RBush<SpatialIndexItem>
     if (!this.spatialSearchTreeByPage.has(pageIndex)) {
@@ -118,24 +113,25 @@ export class EditorManager {
       minY: bBox.y,
       maxX: bBox.x + bBox.width,
       maxY: bBox.y + bBox.height,
-      object,
+      graphicalId: id,
     })
   }
 
   clear() {
     this.spatialSearchTreeByPage.clear()
-    this.graphicalByObject.clear()
-    this.pageIndexByObject.clear()
+    this.graphicalById.clear()
+    this.pageIndexById.clear()
     // this.interactionEventManager.clear()
   }
 
   restoreSelection() {
-    if (this.selectedObject) {
-      const pageIndex = this.pageIndexByObject.get(this.selectedObject)
-      if (pageIndex !== undefined) {
+    if (this.selectedId) {
+      const pageIndex = this.pageIndexById.get(this.selectedId)
+      const graphical = this.graphicalById.get(this.selectedId)
+      if (pageIndex !== undefined && graphical) {
         this.interactionEventManager.dispatch(InteractionEventType.SELECTION_PROCESSED, {
           pageIndex,
-          object: this.graphicalByObject.get(this.selectedObject) || null,
+          object: graphical,
         })
       }
     }

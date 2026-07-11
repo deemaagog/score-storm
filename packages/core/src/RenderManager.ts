@@ -214,7 +214,7 @@ class RenderManager {
       measureX += this.scoreStorm.settings.unit * this.scoreStorm.settings.clefMargin
       measure.graphical.clef.setPosition(measureX, this.y + this.scoreStorm.settings.midStave, this.scoreStorm.settings)
       const bBox = measure.graphical.clef.getBBox(this.scoreStorm.settings)
-      this.renderInteractiveObject(measure, measure.graphical.clef, bBox)
+      this.renderInteractiveObject(measure.graphical.clef, bBox)
       this.renderBBox(bBox)
       measureX += this.scoreStorm.settings.unit * globalMeasure.graphical.clefRelativeWidth
     }
@@ -223,7 +223,7 @@ class RenderManager {
       measureX += this.scoreStorm.settings.unit * this.scoreStorm.settings.timeSignatureMargin
       measure.graphical.time.setPosition(measureX, this.y + this.scoreStorm.settings.midStave)
       const bBox = measure.graphical.time.getBBox(this.scoreStorm.settings)
-      this.renderInteractiveObject(measure.graphical.time.time, measure.graphical.time, bBox)
+      this.renderInteractiveObject(measure.graphical.time, bBox)
       this.renderBBox(bBox)
       measureX += this.scoreStorm.settings.unit * globalMeasure.graphical.timeSignatureRelativeWidth
     }
@@ -247,7 +247,7 @@ class RenderManager {
         this.scoreStorm.settings,
       )
       const bBox = event.graphical.getBBox(this.scoreStorm.settings)
-      this.renderInteractiveObject(event, event.graphical, bBox)
+      this.renderInteractiveObject(event.graphical, bBox)
       this.renderBBox(bBox)
     }
 
@@ -257,8 +257,8 @@ class RenderManager {
     // this.renderer.setColor("black")
   }
 
-  renderInteractiveObject(object: object, graphicalObject: IGraphical, bBox: BBox) {
-    this.editorManager.registerInteractionArea(object, graphicalObject, bBox, this.currentPageIndex)
+  renderInteractiveObject(graphicalObject: IGraphical, bBox: BBox) {
+    this.editorManager.registerInteractionArea(graphicalObject, bBox, this.currentPageIndex)
     this.renderer.renderInGroup(graphicalObject, () => graphicalObject.render(this.renderer, this.scoreStorm.settings))
   }
 }
