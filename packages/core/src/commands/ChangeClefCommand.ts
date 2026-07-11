@@ -1,21 +1,42 @@
+import { Clef } from "../model/Clef"
+import { Measure } from "../model/Measure"
 import { ScoreStorm } from "../ScoreStorm"
 import { ICommand } from "./ICommand"
 
+type ChangeClefCommandParams = {
+  measure: Measure
+}
+
 /**
- * A command to change a clef. Currently only supports changing the clef of the first stave of the first instrument.
+ * A command to toggle the clef of a given measure (G ↔ F).
+ * If the measure has no explicit clef, a new one is created (clef change mid-score).
  */
 export class ChangeClefCommand implements ICommand {
-  execute(scoreStorm: ScoreStorm) {
-    const firstMeasure = scoreStorm.getScore().instruments[0].measures[0]
-    if (firstMeasure.clef?.sign === "G") {
-      firstMeasure.clef!.changeType("F", 2)
+  private measure: Measure
+  private previousClef: Clef | undefined
+
+  constructor({ measure }: ChangeClefCommandParams) {
+    this.measure = measure
+  }
+
+  execute(_scoreStorm: ScoreStorm) {
+    this.previousClef = this.measure.clef
+
+    // TODO: pass currentSign via constructor (from GraphicalClef.sign) to avoid
+    // relying on getCurrentClef() which is currently hardcoded to measures[0]
+    const currentSign = this.measure.clef?.sign ?? this.measure.getCurrentClef().sign
+    const newSign = currentSign === "G" ? "F" : "G"
+    const newPosition = newSign === "G" ? -2 : 2
+
+    if (this.measure.clef) {
+      this.measure.clef.changeType(newSign, newPosition)
     } else {
-      firstMeasure.clef!.changeType("G", -2)
+      this.measure.clef = new Clef(newSign, newPosition)
     }
   }
 
-  undo(scoreStorm: ScoreStorm) {
-    this.execute(scoreStorm)
+  undo(_scoreStorm: ScoreStorm) {
+    this.measure.clef = this.previousClef
   }
 
   redo(scoreStorm: ScoreStorm) {

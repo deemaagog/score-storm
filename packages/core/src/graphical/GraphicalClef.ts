@@ -1,6 +1,7 @@
 import { Settings } from "../Settings"
 import { IRenderer } from "../interfaces"
 import { Clef } from "../model/Clef"
+import { Measure } from "../model/Measure"
 import { BaseGraphical } from "./BaseGraphical"
 import { ClefG, ClefF } from "./glyphs/clef"
 import { BBox, Glyph, IGraphical } from "./interfaces"
@@ -14,21 +15,25 @@ export class GraphicalClef extends BaseGraphical implements IGraphical {
   verticalShift!: number // value in stave spaces
   x!: number // todo : create Point2d type
   y!: number
-  clef: Clef
+  sign: string
+  position: number
+  measure: Measure
 
   static glyphMap: GlyphMap = {
     G: ClefG,
     F: ClefF,
   }
 
-  constructor(clef: Clef) {
+  constructor(clef: Clef, measure: Measure) {
     super()
-    this.clef = clef
+    this.sign = clef.sign
+    this.position = clef.position
+    this.measure = measure
     this.calculateMetrics()
   }
 
   calculateMetrics() {
-    const { position, sign } = this.clef
+    const { position, sign } = this
 
     this.verticalShift = position * -0.5
 

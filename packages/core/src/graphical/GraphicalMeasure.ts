@@ -17,7 +17,7 @@ export class GraphicalMeasure {
   getTopStaveOverflow(settings: Settings) {
     let maxY = 0
     if (this.clef) {
-      maxY = this.measure.getCurrentClef().graphical.getTopStaveOverflow(settings)
+      maxY = this.clef.getTopStaveOverflow(settings)
     }
 
     return this.measure.events.reduce(
@@ -29,7 +29,7 @@ export class GraphicalMeasure {
   getBottomStaveOverflow(settings: Settings) {
     let minY = 0
     if (this.clef) {
-      minY = this.measure.getCurrentClef().graphical.getBottomStaveOverflow(settings)
+      minY = this.clef.getBottomStaveOverflow(settings)
     }
 
     return this.measure.events.reduce(
