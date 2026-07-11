@@ -214,7 +214,7 @@ class RenderManager {
       measureX += this.scoreStorm.settings.unit * this.scoreStorm.settings.clefMargin
       measure.graphical.clef.setPosition(measureX, this.y + this.scoreStorm.settings.midStave, this.scoreStorm.settings)
       const bBox = measure.graphical.clef.getBBox(this.scoreStorm.settings)
-      this.renderInteractiveObject(measure.graphical.clef.clef, measure.graphical.clef, bBox)
+      this.renderInteractiveObject(measure, measure.graphical.clef, bBox)
       this.renderBBox(bBox)
       measureX += this.scoreStorm.settings.unit * globalMeasure.graphical.clefRelativeWidth
     }

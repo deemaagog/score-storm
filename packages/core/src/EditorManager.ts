@@ -14,6 +14,16 @@ type SpatialIndexItem = {
 export class EditorManager {
   interactionEventManager: EventManager<InteractionEventMap>
   private hoveredObject: any | null = null
+  // selectedObject intentionally holds a model object (not a graphical one) so that selection
+  // survives re-renders — model references are stable across renders while graphical objects
+  // are ephemeral and rebuilt on every render call.
+  //
+  // When multiple interaction targets map to the same model type (e.g. clicking a clef vs
+  // clicking the measure body both involve a Measure), intent wrappers can disambiguate:
+  //   class ClefInteraction { constructor(public measure: Measure) {} }
+  //   class MeasureInteraction { constructor(public measure: Measure) {} }
+  // selectedObject would then be a ClefInteraction or MeasureInteraction, keeping the
+  // underlying model reference stable while making the interaction intent explicit.
   private selectedObject: any | null = null // TODO: improve types, create BaseObject class
   private spatialSearchTreeByPage: Map<number, RBush<SpatialIndexItem>>
   private graphicalByObject: Map<object, IGraphical> = new Map()

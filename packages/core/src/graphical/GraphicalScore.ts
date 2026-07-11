@@ -3,6 +3,8 @@ import { Score } from "../model/Score"
 import { GraphicalClef } from "./GraphicalClef"
 import { GraphicalTimeSignature } from "./GraphicalTimeSignature"
 import { GlobalMeasure } from "../model"
+import { Measure } from "../model/Measure"
+import { Clef } from "../model/Clef"
 
 export type InstrumentPosition = number
 
@@ -32,7 +34,9 @@ export class GraphicalScore {
   calculateLineBreaks(containerWidth: number) {
     // calculate line breaks
     const rows: Pick<Row, "globalMeasures">[] = []
-    const instrumentsCurrentClefs: GraphicalClef[] = []
+    // tracks current Clef model object per instrument — a fresh GraphicalClef is created
+    // for each row so every row occurrence gets its own stable x, y position
+    const instrumentsCurrentClefs: (Clef | undefined)[] = []
     let currentTimeSignature: GraphicalTimeSignature
 
     let currentRowGlobalMeasures: GlobalMeasure[] = []
@@ -60,7 +64,7 @@ export class GraphicalScore {
       for (let i = 0; i < this.score.instruments.length; i++) {
         const measure = this.score.instruments[i].measures[gm]
         if (measure.clef) {
-          instrumentsCurrentClefs[i] = measure.clef.graphical
+          instrumentsCurrentClefs[i] = measure.clef
         }
 
         // first row
@@ -71,11 +75,15 @@ export class GraphicalScore {
           }
         }
 
-        // first measure in row
+        // first measure in row — create a fresh GraphicalClef instance for this specific
+        // row/measure so each occurrence gets its own stable position for hover/selection
         if (!currentRowGlobalMeasures.length) {
-          measure.graphical.clef = instrumentsCurrentClefs[i]
-          if (instrumentsCurrentClefs[i].width > clefRelativeWidth) {
-            clefRelativeWidth = instrumentsCurrentClefs[i].width
+          if (instrumentsCurrentClefs[i]) {
+            const graphicalClef = new GraphicalClef(instrumentsCurrentClefs[i]!, measure)
+            measure.graphical.clef = graphicalClef
+            if (graphicalClef.width > clefRelativeWidth) {
+              clefRelativeWidth = graphicalClef.width
+            }
           }
         } else {
           measure.graphical.clef = undefined // TODO: assign null instead of undefined???

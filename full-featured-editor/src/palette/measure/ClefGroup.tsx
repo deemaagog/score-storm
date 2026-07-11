@@ -11,15 +11,17 @@ export const ClefGroup = () => {
   const { scoreStorm } = useContext(ScoreStormContext)
   const { selectedObject } = useContext(SelectionContext)
 
+  const isClef = selectedObject instanceof GraphicalClef
+  const selectedGraphicalClef = isClef ? (selectedObject as GraphicalClef) : null
+
   const handleClefClick = () => {
-    scoreStorm.executeCommand(new ChangeClefCommand())
+    if (!selectedGraphicalClef) return
+    scoreStorm.executeCommand(new ChangeClefCommand({ measure: selectedGraphicalClef.measure }))
     scoreStorm.render()
   }
 
-  const isClef = selectedObject instanceof GraphicalClef
-
-  const gClefActive = isClef && (selectedObject as GraphicalClef).clef.sign === "G"
-  const fClefActive = isClef && (selectedObject as GraphicalClef).clef.sign === "F"
+  const gClefActive = !!selectedGraphicalClef && selectedGraphicalClef.sign === "G"
+  const fClefActive = !!selectedGraphicalClef && selectedGraphicalClef.sign === "F"
 
   return (
     <Group>
