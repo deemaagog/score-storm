@@ -1,4 +1,5 @@
 import RenderManager from "./RenderManager"
+import { GraphicalScore } from "./graphical/GraphicalScore"
 import { EventManager } from "./EventManager"
 import { IRenderer } from "./interfaces"
 import { Score } from "./model/Score"
@@ -102,5 +103,9 @@ export class ScoreStorm {
 
   public getLayout(): ILayout {
     return this.renderManager.getLayout()
+  }
+
+  public getGraphicalScore(): GraphicalScore | undefined {
+    return this.renderManager.getGraphicalScore()
   }
 }

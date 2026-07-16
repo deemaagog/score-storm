@@ -28,7 +28,7 @@ export class GraphicalTimeSignature implements IGraphical {
   y!: number
   count: number
   unit: number
-  measure: Measure
+  readonly measure: Measure
 
   static glyphMap: GlyphMap = {
     1: TimeSig1,

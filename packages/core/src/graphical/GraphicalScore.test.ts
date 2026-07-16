@@ -1,4 +1,5 @@
 import { GraphicalScore, Row } from "./GraphicalScore"
+import { GraphicalInstrument } from "./GraphicalInstrument"
 import { Settings } from "../Settings"
 
 const mockSettings = {
@@ -8,28 +9,43 @@ const mockSettings = {
   spaceBetweenInstrumentsRows: 5,
 } as Settings
 
-const generateMockScore = (
+/**
+ * Builds a GraphicalScore with mock instruments and globalMeasures suitable for
+ * calculatePageBreaks tests. GraphicalMeasure overflows are driven by the
+ * topOverflow / bottomOverflow parameters.
+ */
+const buildGraphicalScore = (
   numberOfMeasures: number,
   numberOfInstruments: number,
   topOverflow: number = 0,
   bottomOverflow: number = 0,
 ) => {
-  return {
-    globalMeasures: Array.from({ length: numberOfMeasures }, (_, i) => ({ index: i })),
-    instruments: Array.from({ length: numberOfInstruments }, (_, i) => ({
-      measures: Array.from({ length: numberOfMeasures }, (_, j) => ({
-        graphical: {
-          getTopStaveOverflow: vi.fn(() => topOverflow),
-          getBottomStaveOverflow: vi.fn(() => bottomOverflow),
-        },
-      })),
-    })),
+  const gs = new GraphicalScore()
+
+  // mock GraphicalGlobalMeasure objects — only globalMeasure.index is needed
+  const globalMeasures = Array.from({ length: numberOfMeasures }, (_, i) => ({
+    globalMeasure: { index: i },
+  }))
+  gs.globalMeasures = globalMeasures as any
+
+  // mock GraphicalInstrument → GraphicalMeasure objects with overflow stubs
+  for (let i = 0; i < numberOfInstruments; i++) {
+    const instrument = new GraphicalInstrument()
+    instrument.measures = Array.from({ length: numberOfMeasures }, () => ({
+      getTopStaveOverflow: vi.fn(() => topOverflow),
+      getBottomStaveOverflow: vi.fn(() => bottomOverflow),
+      events: [],
+    })) as any
+    gs.instruments.push(instrument)
   }
+
+  return { gs, globalMeasures }
 }
-const mockScoreToRows = (mockScore: any) => {
-  const rows = []
-  for (let i = 0; i < mockScore.globalMeasures.length; i += 2) {
-    rows.push({ globalMeasures: mockScore.globalMeasures.slice(i, i + 2) })
+
+const globalMeasuresToRows = (globalMeasures: any[]) => {
+  const rows: Pick<Row, "globalMeasures">[] = []
+  for (let i = 0; i < globalMeasures.length; i += 2) {
+    rows.push({ globalMeasures: globalMeasures.slice(i, i + 2) })
   }
   return rows
 }
@@ -41,9 +57,8 @@ describe("GraphicalScore.calculatePageBreaks", () => {
      one instrument, 
      no top overflow, 
      no bottom overflow`, () => {
-      const mockScore = generateMockScore(2, 1)
-      const rows = mockScoreToRows(mockScore)
-      const gs = new GraphicalScore(mockScore as any)
+      const { gs, globalMeasures } = buildGraphicalScore(2, 1)
+      const rows = globalMeasuresToRows(globalMeasures)
 
       gs.calculatePageBreaks(rows, mockSettings, Infinity)
       expect(gs.pages.length).toBe(1)
@@ -60,9 +75,8 @@ describe("GraphicalScore.calculatePageBreaks", () => {
     one instrument,
     top overflow = 2,
     bottom overflow = 1`, () => {
-      const mockScore = generateMockScore(2, 1, 2, 1)
-      const rows = mockScoreToRows(mockScore)
-      const gs = new GraphicalScore(mockScore as any)
+      const { gs, globalMeasures } = buildGraphicalScore(2, 1, 2, 1)
+      const rows = globalMeasuresToRows(globalMeasures)
 
       gs.calculatePageBreaks(rows, mockSettings, Infinity)
       expect(gs.pages.length).toBe(1)
@@ -78,9 +92,8 @@ describe("GraphicalScore.calculatePageBreaks", () => {
      one instrument,
      no top overflow,
      no bottom overflow`, () => {
-      const mockScore = generateMockScore(5, 1)
-      const rows = mockScoreToRows(mockScore)
-      const gs = new GraphicalScore(mockScore as any)
+      const { gs, globalMeasures } = buildGraphicalScore(5, 1)
+      const rows = globalMeasuresToRows(globalMeasures)
 
       gs.calculatePageBreaks(rows, mockSettings, Infinity)
       expect(gs.pages.length).toBe(1)
@@ -102,9 +115,8 @@ describe("GraphicalScore.calculatePageBreaks", () => {
     one instrument,
     top overflow = 2,
     bottom overflow = 1`, () => {
-      const mockScore = generateMockScore(5, 1, 2, 1)
-      const rows = mockScoreToRows(mockScore)
-      const gs = new GraphicalScore(mockScore as any)
+      const { gs, globalMeasures } = buildGraphicalScore(5, 1, 2, 1)
+      const rows = globalMeasuresToRows(globalMeasures)
 
       gs.calculatePageBreaks(rows, mockSettings, Infinity)
       expect(gs.pages.length).toBe(1)
@@ -126,9 +138,8 @@ describe("GraphicalScore.calculatePageBreaks", () => {
     2 instruments,
     no top overflow,
     no bottom overflow`, () => {
-      const mockScore = generateMockScore(1, 2)
-      const rows = mockScoreToRows(mockScore)
-      const gs = new GraphicalScore(mockScore as any)
+      const { gs, globalMeasures } = buildGraphicalScore(1, 2)
+      const rows = globalMeasuresToRows(globalMeasures)
 
       gs.calculatePageBreaks(rows, mockSettings, Infinity)
       expect(gs.pages).toBeDefined()
@@ -145,9 +156,8 @@ describe("GraphicalScore.calculatePageBreaks", () => {
     2 instruments,
     no top overflow,
     no bottom overflow`, () => {
-      const mockScore = generateMockScore(5, 2)
-      const rows = mockScoreToRows(mockScore)
-      const gs = new GraphicalScore(mockScore as any)
+      const { gs, globalMeasures } = buildGraphicalScore(5, 2)
+      const rows = globalMeasuresToRows(globalMeasures)
 
       gs.calculatePageBreaks(rows, mockSettings, Infinity)
       expect(gs.pages).toBeDefined()
@@ -170,9 +180,8 @@ describe("GraphicalScore.calculatePageBreaks", () => {
     2 instruments,
     top overflow = 2,
     bottom overflow = 1`, () => {
-      const mockScore = generateMockScore(5, 2, 2, 1)
-      const rows = mockScoreToRows(mockScore)
-      const gs = new GraphicalScore(mockScore as any)
+      const { gs, globalMeasures } = buildGraphicalScore(5, 2, 2, 1)
+      const rows = globalMeasuresToRows(globalMeasures)
 
       gs.calculatePageBreaks(rows, mockSettings, Infinity)
       expect(gs.pages).toBeDefined()
@@ -197,9 +206,8 @@ describe("GraphicalScore.calculatePageBreaks", () => {
      one instrument, 
      no top overflow, 
      no bottom overflow`, () => {
-      const mockScore = generateMockScore(2, 1)
-      const rows = mockScoreToRows(mockScore)
-      const gs = new GraphicalScore(mockScore as any)
+      const { gs, globalMeasures } = buildGraphicalScore(2, 1)
+      const rows = globalMeasuresToRows(globalMeasures)
 
       gs.calculatePageBreaks(rows, mockSettings, 25)
       expect(gs.pages.length).toBe(1)
@@ -215,9 +223,8 @@ describe("GraphicalScore.calculatePageBreaks", () => {
     one instrument,
     top overflow = 2,
     bottom overflow = 1`, () => {
-      const mockScore = generateMockScore(2, 1, 2, 1)
-      const rows = mockScoreToRows(mockScore)
-      const gs = new GraphicalScore(mockScore as any)
+      const { gs, globalMeasures } = buildGraphicalScore(2, 1, 2, 1)
+      const rows = globalMeasuresToRows(globalMeasures)
 
       gs.calculatePageBreaks(rows, mockSettings, 25)
       expect(gs.pages.length).toBe(1)
@@ -233,9 +240,8 @@ describe("GraphicalScore.calculatePageBreaks", () => {
      one instrument,
      no top overflow,
      no bottom overflow`, () => {
-      const mockScore = generateMockScore(5, 1)
-      const rows = mockScoreToRows(mockScore)
-      const gs = new GraphicalScore(mockScore as any)
+      const { gs, globalMeasures } = buildGraphicalScore(5, 1)
+      const rows = globalMeasuresToRows(globalMeasures)
 
       gs.calculatePageBreaks(rows, mockSettings, 25)
       expect(gs.pages.length).toBe(2)
@@ -261,9 +267,8 @@ describe("GraphicalScore.calculatePageBreaks", () => {
     one instrument,
     top overflow = 2,
     bottom overflow = 1`, () => {
-      const mockScore = generateMockScore(5, 1, 2, 1)
-      const rows = mockScoreToRows(mockScore)
-      const gs = new GraphicalScore(mockScore as any)
+      const { gs, globalMeasures } = buildGraphicalScore(5, 1, 2, 1)
+      const rows = globalMeasuresToRows(globalMeasures)
 
       gs.calculatePageBreaks(rows, mockSettings, 25)
       expect(gs.pages.length).toBe(2)
@@ -289,9 +294,8 @@ describe("GraphicalScore.calculatePageBreaks", () => {
     2 instruments,
     no top overflow,
     no bottom overflow`, () => {
-      const mockScore = generateMockScore(1, 2)
-      const rows = mockScoreToRows(mockScore)
-      const gs = new GraphicalScore(mockScore as any)
+      const { gs, globalMeasures } = buildGraphicalScore(1, 2)
+      const rows = globalMeasuresToRows(globalMeasures)
 
       gs.calculatePageBreaks(rows, mockSettings, 25)
       expect(gs.pages).toBeDefined()
@@ -308,9 +312,8 @@ describe("GraphicalScore.calculatePageBreaks", () => {
     2 instruments,
     no top overflow,
     no bottom overflow`, () => {
-      const mockScore = generateMockScore(5, 2)
-      const rows = mockScoreToRows(mockScore)
-      const gs = new GraphicalScore(mockScore as any)
+      const { gs, globalMeasures } = buildGraphicalScore(5, 2)
+      const rows = globalMeasuresToRows(globalMeasures)
 
       gs.calculatePageBreaks(rows, mockSettings, 40)
       expect(gs.pages).toBeDefined()
@@ -337,9 +340,8 @@ describe("GraphicalScore.calculatePageBreaks", () => {
     2 instruments,
     top overflow = 2,
     bottom overflow = 1`, () => {
-      const mockScore = generateMockScore(5, 2, 2, 1)
-      const rows = mockScoreToRows(mockScore)
-      const gs = new GraphicalScore(mockScore as any)
+      const { gs, globalMeasures } = buildGraphicalScore(5, 2, 2, 1)
+      const rows = globalMeasuresToRows(globalMeasures)
 
       gs.calculatePageBreaks(rows, mockSettings, 40)
       expect(gs.pages).toBeDefined()
@@ -369,9 +371,8 @@ describe("GraphicalScore.calculatePageBreaks", () => {
         2 instruments,
         top overflow = 0,
         bottom overflow = 0`, () => {
-      const mockScore = generateMockScore(10, 2, 0, 0)
-      const rows = mockScoreToRows(mockScore)
-      const gs = new GraphicalScore(mockScore as any)
+      const { gs, globalMeasures } = buildGraphicalScore(10, 2, 0, 0)
+      const rows = globalMeasuresToRows(globalMeasures)
 
       gs.calculatePageBreaks(rows, mockSettings, 40)
       expect(gs.pages).toBeDefined()
@@ -407,9 +408,8 @@ describe("GraphicalScore.calculatePageBreaks", () => {
       2 instruments,
       top overflow = 2,
       bottom overflow = 1`, () => {
-      const mockScore = generateMockScore(12, 2, 2, 1)
-      const rows = mockScoreToRows(mockScore)
-      const gs = new GraphicalScore(mockScore as any)
+      const { gs, globalMeasures } = buildGraphicalScore(12, 2, 2, 1)
+      const rows = globalMeasuresToRows(globalMeasures)
 
       gs.calculatePageBreaks(rows, mockSettings, 70)
       expect(gs.pages).toBeDefined()

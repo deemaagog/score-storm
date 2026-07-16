@@ -2,8 +2,7 @@ import Fraction from "fraction.js"
 import { GlobalBeat } from "./GlobalBeat"
 import { Score } from "./Score"
 import { TimeSignature } from "./TimeSignature"
-import { Beat } from "./Beat"
-import { GraphicalGlobalMeasure } from "../graphical/GraphicalGlobalMeasure"
+
 interface KeySignature {
   fifths: number
 }
@@ -17,13 +16,6 @@ export class GlobalMeasure {
 
   // TODO: use Fraction as key https://github.com/dataform-co/dataform/blob/main/common/strings/stringifier.ts#L73
   globalBeats: GlobalBeat[] = []
-  globalBeatByNote: Map<Beat, GlobalBeat> = new Map() // is this still needed?
-
-  graphical: GraphicalGlobalMeasure
-
-  constructor() {
-    this.graphical = new GraphicalGlobalMeasure(this)
-  }
 
   getCurrentTimeSignature(): TimeSignature {
     // TODO: account for time signature changes
@@ -69,7 +61,6 @@ export class GlobalMeasure {
           globalBeat = new GlobalBeat(beat.durationValue, currentBeatFractionValue, [beat])
           globalBeats.set(currentBeatString, globalBeat)
         }
-        this.globalBeatByNote.set(beat, globalBeat)
       }
     }
 

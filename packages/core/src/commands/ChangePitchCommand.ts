@@ -1,4 +1,3 @@
-import { GraphicalNoteEvent } from "../graphical"
 import { AccidentalDisplay, Beat, Pitch } from "../model/Beat"
 import { ScoreStorm } from "../ScoreStorm"
 import { ICommand } from "./ICommand"
@@ -31,18 +30,12 @@ export class ChangePitchCommand implements ICommand {
     note.accidentalDisplay = {
       show: !!this.newPitch.alter,
     }
-
-    // this will be reworked in https://github.com/deemaagog/score-storm/issues/64
-    this.beat.graphical = new GraphicalNoteEvent(this.beat)
   }
 
   undo(_scoreStorm: ScoreStorm) {
     const note = this.beat.notes![0]
     note.pitch = this.originalPitch
     note.accidentalDisplay = this.originalAccidentalDisplay
-
-    // this will be reworked in https://github.com/deemaagog/score-storm/issues/64
-    this.beat.graphical = new GraphicalNoteEvent(this.beat)
   }
 
   redo(scoreStorm: ScoreStorm) {

@@ -3,7 +3,6 @@ import { ScoreStormContext } from "../ScoreStormProvider"
 import { PlayerContext } from "../PlayerProvider"
 import { useSettings } from "../SettingsProvider"
 import CanvasRenderer from "@score-storm/canvas-renderer"
-import { GlobalMeasure } from "@score-storm/core"
 
 // Very basic cursor implementation.
 // TODO: sync with audio timer
@@ -20,13 +19,17 @@ export const Cursor: React.FC = () => {
   useEffect(() => {
     if (isPlaying) {
       const pageElements = (scoreStorm.getRenderer() as CanvasRenderer).pages.map((page) => page.pageElement)
-      const score = scoreStorm.getScore()
-      const firstBeatPosition = score.globalMeasures[0].globalBeats[0].graphical.position!
-      const initialY = score.globalMeasures[0].graphical.position!.y
+      const graphicalScore = scoreStorm.getGraphicalScore()!
+
+      const firstGlobalMeasure = graphicalScore.globalMeasures[0]
+      const firstGlobalBeat = firstGlobalMeasure.globalBeats[0]
+      const firstBeatPosition = firstGlobalBeat.position!
+      const initialY = firstGlobalMeasure.position!.y
+
       setCursorParams({
         x: firstBeatPosition.x,
         y: initialY,
-        height: score.globalMeasures[0].graphical.height,
+        height: firstGlobalMeasure.height,
         width: scoreStorm.getSettings().unit,
       })
 
@@ -34,19 +37,19 @@ export const Cursor: React.FC = () => {
       let durationTotal = 0
 
       // two loops are needed because need to calculate total duration first
-      for (const globalMeasure of score.globalMeasures) {
-        for (const globalBeat of globalMeasure.globalBeats) {
-          durationTotal += globalBeat.duration
+      for (const graphicalGlobalMeasure of graphicalScore.globalMeasures) {
+        for (const graphicalGlobalBeat of graphicalGlobalMeasure.globalBeats) {
+          durationTotal += graphicalGlobalBeat.globalBeat.duration
         }
       }
 
       let offset = 0
       let previousY = 0
-      let prevGlobalMeasure: GlobalMeasure
+      let prevGraphicalGlobalMeasure = firstGlobalMeasure
       let pageOffset = 0
       let previousPageOffset = 0
 
-      const pages = score.graphical.pages
+      const pages = graphicalScore.pages
 
       for (let pi = 0; pi < pages.length; pi++) {
         pageOffset = pageElements[pi].offsetTop
@@ -54,40 +57,41 @@ export const Cursor: React.FC = () => {
         for (let ri = 0; ri < page.rows.length; ri++) {
           const row = page.rows[ri]
           for (let gm = 0; gm < row.globalMeasures.length; gm++) {
-            const globalMeasure = row.globalMeasures[gm]
-            const currentY = globalMeasure.graphical.position!.y + pageOffset
+            const graphicalGlobalMeasure = row.globalMeasures[gm]
+            const currentY = graphicalGlobalMeasure.position!.y + pageOffset
             const isNewRow = previousY != 0 && previousY !== currentY
 
-            for (let gb = 0; gb < globalMeasure.globalBeats.length; gb++) {
-              const globalBeat = globalMeasure.globalBeats[gb]
-              const translateX = globalBeat.graphical.position!.x - firstBeatPosition.x
+            for (let gb = 0; gb < graphicalGlobalMeasure.globalBeats.length; gb++) {
+              const graphicalGlobalBeat = graphicalGlobalMeasure.globalBeats[gb]
+              const translateX = graphicalGlobalBeat.position!.x - firstBeatPosition.x
               const translateY = currentY - initialY
 
               if (isNewRow && gb === 0) {
-                const prevGlobalBeat = prevGlobalMeasure!.globalBeats[prevGlobalMeasure!.globalBeats.length - 1]
+                const prevGlobalBeats = prevGraphicalGlobalMeasure.globalBeats
+                const prevGraphicalGlobalBeat = prevGlobalBeats[prevGlobalBeats.length - 1]
                 const prevMeasureEndX =
-                  prevGlobalMeasure!.graphical.position!.x +
-                  prevGlobalMeasure!.graphical.width -
-                  prevGlobalBeat.graphical.position!.x -
+                  prevGraphicalGlobalMeasure.position!.x +
+                  prevGraphicalGlobalMeasure.width -
+                  prevGraphicalGlobalBeat.position!.x -
                   scoreStorm.getSettings().unit // minus barline width
 
                 keyFrames.push({
-                  transform: `translate(${prevGlobalBeat.graphical.position!.x - firstBeatPosition.x + prevMeasureEndX}px,${prevGlobalMeasure!.graphical.position!.y + (ri === 0 ? previousPageOffset : pageOffset) - initialY}px)`,
+                  transform: `translate(${prevGraphicalGlobalBeat.position!.x - firstBeatPosition.x + prevMeasureEndX}px,${prevGraphicalGlobalMeasure.position!.y + (ri === 0 ? previousPageOffset : pageOffset) - initialY}px)`,
                   offset,
                 })
                 keyFrames.push({
-                  transform: `translate(${translateX}px,${translateY}px) scaleY(${globalMeasure.graphical.height / score.globalMeasures[0].graphical.height})`,
+                  transform: `translate(${translateX}px,${translateY}px) scaleY(${graphicalGlobalMeasure.height / firstGlobalMeasure.height})`,
                   offset,
                 })
               } else {
                 keyFrames.push({
-                  transform: `translate(${translateX}px,${translateY}px) scaleY(${globalMeasure.graphical.height / score.globalMeasures[0].graphical.height})`,
+                  transform: `translate(${translateX}px,${translateY}px) scaleY(${graphicalGlobalMeasure.height / firstGlobalMeasure.height})`,
                   offset,
                 })
               }
-              offset = offset + globalBeat.duration / durationTotal
+              offset = offset + graphicalGlobalBeat.globalBeat.duration / durationTotal
             }
-            prevGlobalMeasure = globalMeasure
+            prevGraphicalGlobalMeasure = graphicalGlobalMeasure
             previousY = currentY
           }
         }
@@ -96,16 +100,17 @@ export const Cursor: React.FC = () => {
 
       // last beat
       // get X position of barline
-      const lastMeasure = score.globalMeasures[score.globalMeasures.length - 1]
-      const lastBeat = lastMeasure.globalBeats[lastMeasure.globalBeats.length - 1]
+      const lastGraphicalGlobalMeasure = graphicalScore.globalMeasures[graphicalScore.globalMeasures.length - 1]
+      const lastGlobalBeats = lastGraphicalGlobalMeasure.globalBeats
+      const lastGraphicalGlobalBeat = lastGlobalBeats[lastGlobalBeats.length - 1]
       const measureEndX =
-        lastMeasure.graphical.position!.x +
-        lastMeasure.graphical.width -
-        lastBeat.graphical.position!.x -
+        lastGraphicalGlobalMeasure.position!.x +
+        lastGraphicalGlobalMeasure.width -
+        lastGraphicalGlobalBeat.position!.x -
         scoreStorm.getSettings().unit // minus barline width
 
       keyFrames.push({
-        transform: `translate(${lastBeat.graphical.position!.x - firstBeatPosition.x + measureEndX}px,${lastMeasure.graphical.position!.y + pageOffset - initialY}px)`,
+        transform: `translate(${lastGraphicalGlobalBeat.position!.x - firstBeatPosition.x + measureEndX}px,${lastGraphicalGlobalMeasure.position!.y + pageOffset - initialY}px)`,
         offset: 1,
       })
 

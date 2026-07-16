@@ -18,7 +18,7 @@ export class GraphicalClef implements IGraphical {
   y!: number
   sign: string
   position: number
-  measure: Measure
+  readonly measure: Measure
 
   static glyphMap: GlyphMap = {
     G: ClefG,

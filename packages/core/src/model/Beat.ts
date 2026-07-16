@@ -1,4 +1,3 @@
-import { GraphicalNoteEvent, GraphicalRestEvent } from "../graphical"
 import { Measure } from "./Measure"
 
 export type Pitch = {
@@ -33,8 +32,6 @@ export class Beat {
   rest?: Rest
   measure!: Measure
 
-  graphical: GraphicalNoteEvent | GraphicalRestEvent
-
   constructor(params: { duration?: NoteDuration; notes?: Note[]; rest?: Rest }, measure: Measure) {
     const { duration, notes, rest } = params
 
@@ -52,12 +49,6 @@ export class Beat {
     this.rest = rest
 
     this.durationValue = this.getDurationValue(duration.base)
-
-    if (notes) {
-      this.graphical = new GraphicalNoteEvent(this)
-    } else {
-      this.graphical = new GraphicalRestEvent(this)
-    }
   }
 
   getDurationValue(base: string): number {

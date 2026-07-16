@@ -1,4 +1,5 @@
 export { GraphicalScore } from "./GraphicalScore"
+export { GraphicalInstrument } from "./GraphicalInstrument"
 export { GraphicalClef } from "./GraphicalClef"
 export { GraphicalRestEvent } from "./GraphicalRestEvent"
 export { GraphicalNoteEvent } from "./GraphicalNoteEvent"

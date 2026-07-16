@@ -1,16 +1,16 @@
 import { Settings } from "../Settings"
-import { Score } from "../model/Score"
 import { GraphicalClef } from "./GraphicalClef"
 import { GraphicalTimeSignature } from "./GraphicalTimeSignature"
-import { GlobalMeasure } from "../model"
-import { Measure } from "../model/Measure"
+import { GraphicalGlobalMeasure } from "./GraphicalGlobalMeasure"
+import { GraphicalMeasure } from "./GraphicalMeasure"
+import { GraphicalInstrument } from "./GraphicalInstrument"
 import { Clef } from "../model/Clef"
 import { TimeSignature } from "../model/TimeSignature"
 
 export type InstrumentPosition = number
 
 export class Row {
-  globalMeasures!: GlobalMeasure[]
+  globalMeasures!: GraphicalGlobalMeasure[]
   relativeInstrumentsPosition!: InstrumentPosition[]
   systemYPosition!: number
   systemHeight!: number // TODO: come up with a better name for this
@@ -22,48 +22,46 @@ export class Page {
 }
 
 /**
- * The main class for graphical representation of music score model
+ * The main class for graphical representation of music score model.
+ * Owns the full graphical tree — instruments, measures, events, global measures and global beats.
+ * Built by RenderManager.buildGraphical() on each render call.
  */
 export class GraphicalScore {
   pages!: Page[]
-  score: Score
-
-  constructor(score: Score) {
-    this.score = score
-  }
+  instruments: GraphicalInstrument[] = []
+  globalMeasures: GraphicalGlobalMeasure[] = []
 
   calculateLineBreaks(containerWidth: number) {
-    // calculate line breaks
     const rows: Pick<Row, "globalMeasures">[] = []
     // tracks current Clef/TimeSignature model objects per instrument — fresh graphical
     // instances are created for each row so every occurrence gets its own stable x, y position
     const instrumentsCurrentClefs: (Clef | undefined)[] = []
     let currentTimeSignature: TimeSignature | undefined
 
-    let currentRowGlobalMeasures: GlobalMeasure[] = []
+    let currentRowGlobalMeasures: GraphicalGlobalMeasure[] = []
     let currentRowWidth = 0
 
-    for (let gm = 0; gm < this.score.globalMeasures.length; gm++) {
+    for (let gm = 0; gm < this.globalMeasures.length; gm++) {
       if (currentRowWidth >= containerWidth) {
-        rows.push({
-          globalMeasures: currentRowGlobalMeasures,
-        })
-
+        rows.push({ globalMeasures: currentRowGlobalMeasures })
         currentRowWidth = 0
         currentRowGlobalMeasures = []
       }
 
-      const globalMeasure = this.score.globalMeasures[gm]
-      if (globalMeasure.time) {
-        currentTimeSignature = globalMeasure.time
+      const graphicalGlobalMeasure = this.globalMeasures[gm]
+      if (graphicalGlobalMeasure.globalMeasure.time) {
+        currentTimeSignature = graphicalGlobalMeasure.globalMeasure.time
       }
-      globalMeasure.graphical.calculateMinContentWidth()
+      graphicalGlobalMeasure.calculateMinContentWidth()
 
       // calculate measure attributes relative positions TODO: move to GraphicalGlobalMeasure
       let timeSignatureRelativeWidth = 0,
         clefRelativeWidth = 0
-      for (let i = 0; i < this.score.instruments.length; i++) {
-        const measure = this.score.instruments[i].measures[gm]
+
+      for (let i = 0; i < this.instruments.length; i++) {
+        const graphicalMeasure = this.instruments[i].measures[gm]
+        const measure = graphicalMeasure.measure
+
         if (measure.clef) {
           instrumentsCurrentClefs[i] = measure.clef
         }
@@ -72,7 +70,7 @@ export class GraphicalScore {
         // gets its own stable x, y position and ID for hover/selection
         if (!currentRowGlobalMeasures.length && gm === 0) {
           const graphicalTime = new GraphicalTimeSignature(currentTimeSignature!, measure)
-          measure.graphical.time = graphicalTime
+          graphicalMeasure.time = graphicalTime
           if (graphicalTime.width > timeSignatureRelativeWidth) {
             timeSignatureRelativeWidth = graphicalTime.width
           }
@@ -83,32 +81,30 @@ export class GraphicalScore {
         if (!currentRowGlobalMeasures.length) {
           if (instrumentsCurrentClefs[i]) {
             const graphicalClef = new GraphicalClef(instrumentsCurrentClefs[i]!, measure)
-            measure.graphical.clef = graphicalClef
+            graphicalMeasure.clef = graphicalClef
             if (graphicalClef.width > clefRelativeWidth) {
               clefRelativeWidth = graphicalClef.width
             }
           }
         } else {
-          measure.graphical.clef = undefined // TODO: assign null instead of undefined???
+          graphicalMeasure.clef = undefined // TODO: assign null instead of undefined???
         }
       }
 
-      globalMeasure.graphical.timeSignatureRelativeWidth = timeSignatureRelativeWidth
-      globalMeasure.graphical.clefRelativeWidth = clefRelativeWidth
+      graphicalGlobalMeasure.timeSignatureRelativeWidth = timeSignatureRelativeWidth
+      graphicalGlobalMeasure.clefRelativeWidth = clefRelativeWidth
 
       // const minContentWidth = graphicalGlobalMeasure.minContentWidth
       const minContentWidth = containerWidth / 2 // temp, just for demo
       // TODO: set graphical measure attributes, distribute available space , set actual width to graphicalGlobalMeasures
-      globalMeasure.graphical.width = minContentWidth
+      graphicalGlobalMeasure.width = minContentWidth
 
       currentRowWidth += minContentWidth
-      currentRowGlobalMeasures.push(globalMeasure)
+      currentRowGlobalMeasures.push(graphicalGlobalMeasure)
     }
 
     if (currentRowGlobalMeasures.length) {
-      rows.push({
-        globalMeasures: currentRowGlobalMeasures,
-      })
+      rows.push({ globalMeasures: currentRowGlobalMeasures })
     }
 
     return rows
@@ -189,7 +185,7 @@ export class GraphicalScore {
     let bottomOverflow = 0
 
     // Calculate positions and overflow for each instrument
-    for (let instrumentIndex = 0; instrumentIndex < this.score.instruments.length; instrumentIndex++) {
+    for (let instrumentIndex = 0; instrumentIndex < this.instruments.length; instrumentIndex++) {
       // Set position for this instrument
       instrumentPositions[instrumentIndex] = currentInstrumentPosition
 
@@ -200,29 +196,22 @@ export class GraphicalScore {
       currentInstrumentPosition += instrumentHeight + settings.unit * settings.spaceBetweenInstrumentsRows
 
       // Calculate overflow for each measure in this row
-      for (const globalMeasure of row.globalMeasures) {
-        const graphicalMeasure = this.score.instruments[instrumentIndex].measures[globalMeasure.index].graphical
+      for (const graphicalGlobalMeasure of row.globalMeasures) {
+        const graphicalMeasure = this.instruments[instrumentIndex].measures[graphicalGlobalMeasure.globalMeasure.index]
 
         // Only check top overflow for first instrument
         if (instrumentIndex === 0) {
-          const measureTopOverflow = graphicalMeasure.getTopStaveOverflow(settings)
-          topOverflow = Math.max(topOverflow, measureTopOverflow)
+          topOverflow = Math.max(topOverflow, graphicalMeasure.getTopStaveOverflow(settings))
         }
 
         // Only check bottom overflow for last instrument
-        if (instrumentIndex === this.score.instruments.length - 1) {
-          const measureBottomOverflow = graphicalMeasure.getBottomStaveOverflow(settings)
-          bottomOverflow = Math.max(bottomOverflow, measureBottomOverflow)
+        if (instrumentIndex === this.instruments.length - 1) {
+          bottomOverflow = Math.max(bottomOverflow, graphicalMeasure.getBottomStaveOverflow(settings))
         }
       }
     }
 
-    return {
-      systemHeight,
-      instrumentPositions,
-      topOverflow,
-      bottomOverflow,
-    }
+    return { systemHeight, instrumentPositions, topOverflow, bottomOverflow }
   }
 
   /**

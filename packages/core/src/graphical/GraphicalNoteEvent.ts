@@ -20,7 +20,7 @@ type GlyphAccidentalMap = Record<number, Glyph>
 
 export class GraphicalNoteEvent implements IGraphical {
   readonly id: string
-  noteEvent: Beat
+  readonly noteEvent: Beat
   height!: number
   width!: number
   noteheadGlyph!: Glyph

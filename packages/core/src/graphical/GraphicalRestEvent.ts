@@ -15,7 +15,7 @@ export class GraphicalRestEvent implements IGraphical {
   verticalShift!: number // value in stave spaces
   x!: number
   y!: number
-  noteEvent!: Beat
+  readonly noteEvent: Beat
 
   static glyphMap: GlyphMap = {
     whole: RestWhole,
