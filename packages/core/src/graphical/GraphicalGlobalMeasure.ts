@@ -1,9 +1,15 @@
 import { GlobalMeasure } from "../model/GlobalMeasure"
+import { GraphicalGlobalBeat } from "./GraphicalGlobalBeat"
+import { GraphicalNoteEvent } from "./GraphicalNoteEvent"
+import { GraphicalRestEvent } from "./GraphicalRestEvent"
 import { Point } from './interfaces'
 
 export class GraphicalGlobalMeasure {
-  globalMeasure!: GlobalMeasure
-  
+  readonly globalMeasure: GlobalMeasure
+
+  globalBeats: GraphicalGlobalBeat[] = []
+  globalBeatByBeat: Map<GraphicalNoteEvent | GraphicalRestEvent, GraphicalGlobalBeat> = new Map()
+
   minContentWidth!: number // notes/rests only, measure attributes are not taken into account
   width!: number // actual width calculated at the time of line breaking
   height!: number
@@ -23,16 +29,12 @@ export class GraphicalGlobalMeasure {
 
   calculateMinContentWidth() {
     let minContentWidth = 0
-    for(const globalBeat of this.globalMeasure.globalBeats) {
-      const graphicalGlobalBeat = globalBeat.graphical
+    for (const graphicalGlobalBeat of this.globalBeats) {
       let offsetLeft = 0
       let offsetRight = 0
-      for(const beat of globalBeat.beats) {
-        const graphicalBeat = beat.graphical
-        const beatOffsetLeft = graphicalBeat.getBeatOffsetLeft()
-        const beatOffsetRight = graphicalBeat.getBeatOffsetRight()
-        offsetLeft = Math.max(offsetLeft, beatOffsetLeft)
-        offsetRight = Math.max(offsetRight, beatOffsetRight)
+      for (const beat of graphicalGlobalBeat.beats) {
+        offsetLeft = Math.max(offsetLeft, beat.getBeatOffsetLeft())
+        offsetRight = Math.max(offsetRight, beat.getBeatOffsetRight())
       }
       graphicalGlobalBeat.setOffsets(offsetLeft, offsetRight)
       minContentWidth += offsetLeft + offsetRight

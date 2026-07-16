@@ -4,8 +4,6 @@ import { Measure } from "./Measure"
 import { Beat } from "./Beat"
 import { Clef } from "./Clef"
 import { Instrument, InstrumentNames, InstrumentType } from "./Instrument"
-import { GraphicalScore } from "../graphical"
-
 export type QuickScoreOptions = {
   numberOfMeasures?: number
   timeSignature?: TimeSignature
@@ -69,12 +67,6 @@ export class Score {
 
   // TODO: staves/measures
   instruments: Instrument[] = []
-
-  graphical: GraphicalScore
-
-  constructor() {
-    this.graphical = new GraphicalScore(this)
-  }
 
   getMeasureTimeSignature(index: number): TimeSignature | undefined {
     for (let i = index; i >= 0; i--) {

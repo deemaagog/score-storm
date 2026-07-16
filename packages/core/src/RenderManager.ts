@@ -2,10 +2,16 @@ import { IRenderer } from "./interfaces"
 import { ScoreStorm } from "./ScoreStorm"
 import { BBox, IGraphical } from "./graphical/interfaces"
 import { EditorManager } from "./EditorManager"
-import { Measure } from "./model/Measure"
-import { GlobalMeasure } from "./model"
+import { Score } from "./model/Score"
+import { Beat } from "./model/Beat"
 import { FlowLayout, ILayout } from "./layouts"
-import { Page } from "./graphical/GraphicalScore"
+import { GraphicalScore, Page } from "./graphical/GraphicalScore"
+import { GraphicalMeasure } from "./graphical/GraphicalMeasure"
+import { GraphicalGlobalMeasure } from "./graphical/GraphicalGlobalMeasure"
+import { GraphicalGlobalBeat } from "./graphical/GraphicalGlobalBeat"
+import { GraphicalNoteEvent } from "./graphical/GraphicalNoteEvent"
+import { GraphicalRestEvent } from "./graphical/GraphicalRestEvent"
+import { GraphicalInstrument } from "./graphical/GraphicalInstrument"
 import { InteractionEventMap } from "./events"
 
 /**
@@ -20,10 +26,61 @@ class RenderManager {
   private y: number = 0
   private currentPageIndex: number = 0
 
+  // Owns the graphical tree — rebuilt on every render call via buildGraphical()
+  private graphicalScore!: GraphicalScore
+
   constructor(scoreStorm: ScoreStorm) {
     this.scoreStorm = scoreStorm
     this.editorManager = new EditorManager()
     this.layout = new FlowLayout()
+  }
+
+  getGraphicalScore(): GraphicalScore | undefined {
+    return this.graphicalScore
+  }
+
+  /**
+   * Builds the complete graphical tree from the score model.
+   * Uses a local beatMap to wire beat graphicals into the global beat tree
+   * without requiring any persistent map.
+   */
+  private buildGraphical(score: Score): GraphicalScore {
+    const graphicalScore = new GraphicalScore()
+
+    // local map used only during build to correlate beats with their graphicals
+    const beatMap = new Map<Beat, GraphicalNoteEvent | GraphicalRestEvent>()
+
+    for (const instrument of score.instruments) {
+      const graphicalInstrument = new GraphicalInstrument()
+      for (const measure of instrument.measures) {
+        const graphicalMeasure = new GraphicalMeasure(measure)
+        for (const beat of measure.events) {
+          const graphicalBeat = beat.notes
+            ? new GraphicalNoteEvent(beat)
+            : new GraphicalRestEvent(beat)
+          graphicalMeasure.events.push(graphicalBeat)
+          beatMap.set(beat, graphicalBeat)
+        }
+        graphicalInstrument.measures.push(graphicalMeasure)
+      }
+      graphicalScore.instruments.push(graphicalInstrument)
+    }
+
+    for (const globalMeasure of score.globalMeasures) {
+      const graphicalGlobalMeasure = new GraphicalGlobalMeasure(globalMeasure)
+      for (const globalBeat of globalMeasure.globalBeats) {
+        const graphicalGlobalBeat = new GraphicalGlobalBeat(globalBeat)
+        for (const beat of globalBeat.beats) {
+          const graphicalBeat = beatMap.get(beat)!
+          graphicalGlobalBeat.beats.push(graphicalBeat)
+          graphicalGlobalMeasure.globalBeatByBeat.set(graphicalBeat, graphicalGlobalBeat)
+        }
+        graphicalGlobalMeasure.globalBeats.push(graphicalGlobalBeat)
+      }
+      graphicalScore.globalMeasures.push(graphicalGlobalMeasure)
+    }
+
+    return graphicalScore
   }
 
   setRenderer(renderer: IRenderer) {
@@ -95,18 +152,20 @@ class RenderManager {
       this.renderer.init(this.scoreStorm)
     }
 
+    this.graphicalScore = this.buildGraphical(score)
+
     const pageDimensions = this.scoreStorm.getLayout().getPageDimensions(this.renderer.getContainerWidth())
-    const rows = score.graphical.calculateLineBreaks(pageDimensions.width)
+    const rows = this.graphicalScore.calculateLineBreaks(pageDimensions.width)
     // TODO: handle errors
-    score.graphical.calculatePageBreaks(rows, this.scoreStorm.settings, pageDimensions.height)
+    this.graphicalScore.calculatePageBreaks(rows, this.scoreStorm.settings, pageDimensions.height)
 
     // clear
     this.editorManager.clear()
     this.renderer.clear()
 
-    for (let i = 0; i < score.graphical.pages.length; i++) {
-      const page = score.graphical.pages[i]
-      const isLastPage = i === score.graphical.pages.length - 1
+    for (let i = 0; i < this.graphicalScore.pages.length; i++) {
+      const page = this.graphicalScore.pages[i]
+      const isLastPage = i === this.graphicalScore.pages.length - 1
       this.x = 0
       this.y = 0
       this.currentPageIndex = i
@@ -126,7 +185,6 @@ class RenderManager {
   }
 
   renderPage(page: Page, isLastPage: boolean) {
-    const score = this.scoreStorm.getScore()
     this.x = 0
     this.y = 0
 
@@ -136,19 +194,19 @@ class RenderManager {
 
       for (let gmi = 0; gmi < row.globalMeasures.length; gmi++) {
         const latestMeasureInRow = gmi === row.globalMeasures.length - 1
-        const globalMeasure = row.globalMeasures[gmi]
+        const graphicalGlobalMeasure = row.globalMeasures[gmi]
 
         for (let i = 0; i < row.relativeInstrumentsPosition.length; i++) {
           this.y = row.systemYPosition + row.relativeInstrumentsPosition[i]
 
-          const measure = score.instruments[i].measures[globalMeasure.index]
-          this.renderMeasure(measure, latestRow, latestMeasureInRow, globalMeasure)
+          const graphicalMeasure = this.graphicalScore.instruments[i].measures[graphicalGlobalMeasure.globalMeasure.index]
+          this.renderMeasure(graphicalMeasure, latestRow, latestMeasureInRow, graphicalGlobalMeasure)
         }
         // setting global measure position and height
-        globalMeasure.graphical.height = row.systemHeight
-        globalMeasure.graphical.setPosition({ x: this.x, y: row.systemYPosition + row.relativeInstrumentsPosition[0] })
+        graphicalGlobalMeasure.height = row.systemHeight
+        graphicalGlobalMeasure.setPosition({ x: this.x, y: row.systemYPosition + row.relativeInstrumentsPosition[0] })
 
-        this.x += globalMeasure.graphical.width // TODO: make X position a GraphicalGlobalMeasure property
+        this.x += graphicalGlobalMeasure.width // TODO: make X position a GraphicalGlobalMeasure property
       }
       this.x = 0
 
@@ -167,30 +225,34 @@ class RenderManager {
     }
   }
 
-  renderMeasure(measure: Measure, latestRow: boolean, latestMeasureInRow: boolean, globalMeasure: GlobalMeasure) {
+  renderMeasure(
+    graphicalMeasure: GraphicalMeasure,
+    latestRow: boolean,
+    latestMeasureInRow: boolean,
+    graphicalGlobalMeasure: GraphicalGlobalMeasure,
+  ) {
     // draw staff lines
+    graphicalMeasure.renderStaveLines(this.renderer, this.x, this.y, this.scoreStorm.settings, graphicalGlobalMeasure.width)
 
-    measure.graphical.renderStaveLines(this.renderer, this.x, this.y, this.scoreStorm.settings)
-
-    this.renderMeasureContent(measure, globalMeasure)
+    this.renderMeasureContent(graphicalMeasure, graphicalGlobalMeasure)
 
     // draw end barline
     if (latestRow && latestMeasureInRow) {
       this.renderer.drawRect(
-        this.x + globalMeasure.graphical.width - this.scoreStorm.settings.unit,
+        this.x + graphicalGlobalMeasure.width - this.scoreStorm.settings.unit,
         this.y,
         this.scoreStorm.settings.barLineThickness,
         this.scoreStorm.settings.barlineHeight,
       )
       this.renderer.drawRect(
-        this.x + globalMeasure.graphical.width - this.scoreStorm.settings.barLineThickness * 3.8,
+        this.x + graphicalGlobalMeasure.width - this.scoreStorm.settings.barLineThickness * 3.8,
         this.y,
         this.scoreStorm.settings.barLineThickness * 3.8,
         this.scoreStorm.settings.barlineHeight,
       )
     } else {
       this.renderer.drawRect(
-        this.x + globalMeasure.graphical.width - this.scoreStorm.settings.barLineThickness,
+        this.x + graphicalGlobalMeasure.width - this.scoreStorm.settings.barLineThickness,
         this.y,
         this.scoreStorm.settings.barLineThickness,
         this.scoreStorm.settings.barlineHeight,
@@ -206,48 +268,48 @@ class RenderManager {
     }
   }
 
-  renderMeasureContent(measure: Measure, globalMeasure: GlobalMeasure) {
+  renderMeasureContent(graphicalMeasure: GraphicalMeasure, graphicalGlobalMeasure: GraphicalGlobalMeasure) {
     //  draw measure content
     // temporarily do horizontal positioning here, but ultimately this should be done in GraphicalMeasure
     let measureX = this.x
-    if (measure.graphical.clef) {
+    if (graphicalMeasure.clef) {
       measureX += this.scoreStorm.settings.unit * this.scoreStorm.settings.clefMargin
-      measure.graphical.clef.setPosition(measureX, this.y + this.scoreStorm.settings.midStave, this.scoreStorm.settings)
-      const bBox = measure.graphical.clef.getBBox(this.scoreStorm.settings)
-      this.renderInteractiveObject(measure.graphical.clef, bBox)
+      graphicalMeasure.clef.setPosition(measureX, this.y + this.scoreStorm.settings.midStave, this.scoreStorm.settings)
+      const bBox = graphicalMeasure.clef.getBBox(this.scoreStorm.settings)
+      this.renderInteractiveObject(graphicalMeasure.clef, bBox)
       this.renderBBox(bBox)
-      measureX += this.scoreStorm.settings.unit * globalMeasure.graphical.clefRelativeWidth
+      measureX += this.scoreStorm.settings.unit * graphicalGlobalMeasure.clefRelativeWidth
     }
 
-    if (measure.graphical.time) {
+    if (graphicalMeasure.time) {
       measureX += this.scoreStorm.settings.unit * this.scoreStorm.settings.timeSignatureMargin
-      measure.graphical.time.setPosition(measureX, this.y + this.scoreStorm.settings.midStave)
-      const bBox = measure.graphical.time.getBBox(this.scoreStorm.settings)
-      this.renderInteractiveObject(measure.graphical.time, bBox)
+      graphicalMeasure.time.setPosition(measureX, this.y + this.scoreStorm.settings.midStave)
+      const bBox = graphicalMeasure.time.getBBox(this.scoreStorm.settings)
+      this.renderInteractiveObject(graphicalMeasure.time, bBox)
       this.renderBBox(bBox)
-      measureX += this.scoreStorm.settings.unit * globalMeasure.graphical.timeSignatureRelativeWidth
+      measureX += this.scoreStorm.settings.unit * graphicalGlobalMeasure.timeSignatureRelativeWidth
     }
 
     measureX += this.scoreStorm.settings.unit * this.scoreStorm.settings.contentMargin
-    const availableWidth = globalMeasure.graphical.width - (measureX - this.x)
-    for (let i = 0; i < measure.events.length; i++) {
-      const event = measure.events[i]
-      const globalBeat = globalMeasure.globalBeatByNote.get(event)!
+    const availableWidth = graphicalGlobalMeasure.width - (measureX - this.x)
 
-      if (!globalBeat.graphical.position) {
-        globalBeat.graphical.setPosition({
-          x: measureX + availableWidth * globalBeat.fraction,
+    for (const graphicalEvent of graphicalMeasure.events) {
+      const graphicalGlobalBeat = graphicalGlobalMeasure.globalBeatByBeat.get(graphicalEvent)!
+
+      if (!graphicalGlobalBeat.position) {
+        graphicalGlobalBeat.setPosition({
+          x: measureX + availableWidth * graphicalGlobalBeat.globalBeat.fraction,
           y: this.y,
         })
       }
 
-      event.graphical.setPosition(
-        measureX + availableWidth * globalBeat.fraction,
+      graphicalEvent.setPosition(
+        measureX + availableWidth * graphicalGlobalBeat.globalBeat.fraction,
         this.y + this.scoreStorm.settings.midStave,
         this.scoreStorm.settings,
       )
-      const bBox = event.graphical.getBBox(this.scoreStorm.settings)
-      this.renderInteractiveObject(event.graphical, bBox)
+      const bBox = graphicalEvent.getBBox(this.scoreStorm.settings)
+      this.renderInteractiveObject(graphicalEvent, bBox)
       this.renderBBox(bBox)
     }
 

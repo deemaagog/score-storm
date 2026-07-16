@@ -2,13 +2,16 @@ import { Settings } from "../Settings"
 import { IRenderer } from "../interfaces"
 import { Measure } from "../model/Measure"
 import { GraphicalClef } from "./GraphicalClef"
+import { GraphicalNoteEvent } from "./GraphicalNoteEvent"
+import { GraphicalRestEvent } from "./GraphicalRestEvent"
 import { GraphicalTimeSignature } from "./GraphicalTimeSignature"
 
 export class GraphicalMeasure {
   time?: GraphicalTimeSignature
   // // key?: GlobalMeasure["key"]
   clef?: GraphicalClef
-  measure: Measure
+  readonly measure: Measure
+  events: (GraphicalNoteEvent | GraphicalRestEvent)[] = []
 
   constructor(measure: Measure) {
     this.measure = measure
@@ -20,8 +23,8 @@ export class GraphicalMeasure {
       maxY = this.clef.getTopStaveOverflow(settings)
     }
 
-    return this.measure.events.reduce(
-      (max, event) => Math.max(max, event.graphical.getTopStaveOverflow(settings)),
+    return this.events.reduce(
+      (max, event) => Math.max(max, event.getTopStaveOverflow(settings)),
       maxY,
     )
   }
@@ -32,20 +35,20 @@ export class GraphicalMeasure {
       minY = this.clef.getBottomStaveOverflow(settings)
     }
 
-    return this.measure.events.reduce(
-      (min, event) => Math.max(min, event.graphical.getBottomStaveOverflow(settings)),
+    return this.events.reduce(
+      (min, event) => Math.max(min, event.getBottomStaveOverflow(settings)),
       minY,
     )
   }
 
-  renderStaveLines(renderer: IRenderer, x: number, y: number, settings: Settings) {
+  renderStaveLines(renderer: IRenderer, x: number, y: number, settings: Settings, measureWidth: number) {
     renderer.setColor(settings.staveLineColor)
     const half = Math.floor(settings.numberOfStaffLines / 2)
     for (let index = -half; index <= half; index++) {
       renderer.drawRect(
         x,
         y + settings.midStave + settings.unit * index - settings.staffLineThickness / 2,
-        this.measure.getGlobalMeasure().graphical.width,
+        measureWidth,
         settings.staffLineThickness,
       )
     }

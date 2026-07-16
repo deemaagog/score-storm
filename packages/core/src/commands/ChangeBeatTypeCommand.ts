@@ -1,4 +1,3 @@
-import { GraphicalNoteEvent, GraphicalRestEvent } from "../graphical"
 import { Beat } from "../model/Beat"
 import { ScoreStorm } from "../ScoreStorm"
 import { ICommand } from "./ICommand"
@@ -26,13 +25,9 @@ export class ChangeBeatTypeCommand implements ICommand {
           pitch: this.beat.measure.getCurrentClef().getMiddleLinePitch(),
         },
       ]
-      // this will be reworked in https://github.com/deemaagog/score-storm/issues/64
-      this.beat.graphical = new GraphicalNoteEvent(this.beat)
     } else {
       this.beat.rest = {}
       this.beat.notes = undefined
-      // this will be reworked in https://github.com/deemaagog/score-storm/issues/64
-      this.beat.graphical = new GraphicalRestEvent(this.beat)
     }
   }
 
