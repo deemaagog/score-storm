@@ -42,17 +42,20 @@ export class GraphicalScore {
     let currentRowWidth = 0
 
     for (let gm = 0; gm < this.globalMeasures.length; gm++) {
-      if (currentRowWidth >= containerWidth) {
-        rows.push({ globalMeasures: currentRowGlobalMeasures })
-        currentRowWidth = 0
-        currentRowGlobalMeasures = []
-      }
-
       const graphicalGlobalMeasure = this.globalMeasures[gm]
       if (graphicalGlobalMeasure.globalMeasure.time) {
         currentTimeSignature = graphicalGlobalMeasure.globalMeasure.time
       }
       graphicalGlobalMeasure.calculateMinContentWidth()
+
+      // const minContentWidth = graphicalGlobalMeasure.minContentWidth
+      const minContentWidth = containerWidth / 2 // temp, just for demo
+
+      if (currentRowGlobalMeasures.length > 0 && currentRowWidth + minContentWidth > containerWidth) {
+        rows.push({ globalMeasures: currentRowGlobalMeasures })
+        currentRowWidth = 0
+        currentRowGlobalMeasures = []
+      }
 
       // calculate measure attributes relative positions TODO: move to GraphicalGlobalMeasure
       let timeSignatureRelativeWidth = 0,
@@ -94,8 +97,6 @@ export class GraphicalScore {
       graphicalGlobalMeasure.timeSignatureRelativeWidth = timeSignatureRelativeWidth
       graphicalGlobalMeasure.clefRelativeWidth = clefRelativeWidth
 
-      // const minContentWidth = graphicalGlobalMeasure.minContentWidth
-      const minContentWidth = containerWidth / 2 // temp, just for demo
       // TODO: set graphical measure attributes, distribute available space , set actual width to graphicalGlobalMeasures
       graphicalGlobalMeasure.width = minContentWidth
 
