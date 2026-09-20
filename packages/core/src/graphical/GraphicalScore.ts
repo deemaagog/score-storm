@@ -86,6 +86,18 @@ export class GraphicalScore {
           if (graphicalTime.width > timeSignatureRelativeWidth) {
             timeSignatureRelativeWidth = graphicalTime.width
           }
+        }
+
+        // first measure in row — fresh clef and courtesy key so each system has
+        // its own stable positions for hover/selection
+        if (!currentRowGlobalMeasures.length) {
+          if (instrumentsCurrentClefs[i]) {
+            const graphicalClef = new GraphicalClef(instrumentsCurrentClefs[i]!, measure)
+            graphicalMeasure.clef = graphicalClef
+            if (graphicalClef.width > clefRelativeWidth) {
+              clefRelativeWidth = graphicalClef.width
+            }
+          }
 
           if (currentKeySignature && currentKeySignature.fifths !== 0 && instrumentsCurrentClefs[i]) {
             const graphicalKey = new GraphicalKeySignature(
@@ -98,20 +110,9 @@ export class GraphicalScore {
               keySignatureRelativeWidth = graphicalKey.width
             }
           }
-        }
-
-        // first measure in row — create a fresh GraphicalClef instance for this specific
-        // row/measure so each occurrence gets its own stable position for hover/selection
-        if (!currentRowGlobalMeasures.length) {
-          if (instrumentsCurrentClefs[i]) {
-            const graphicalClef = new GraphicalClef(instrumentsCurrentClefs[i]!, measure)
-            graphicalMeasure.clef = graphicalClef
-            if (graphicalClef.width > clefRelativeWidth) {
-              clefRelativeWidth = graphicalClef.width
-            }
-          }
         } else {
           graphicalMeasure.clef = undefined // TODO: assign null instead of undefined???
+          graphicalMeasure.key = undefined
         }
       }
 

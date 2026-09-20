@@ -20,8 +20,16 @@ test.afterEach(async ({ page }) => {
   await expect(page.locator(".ss-page")).toHaveScreenshot()
 })
 
-test("renders two-sharp key signature on the first system", async ({ page }) => {
+test("renders key signature on the first system", async ({ page }) => {
   const inputXmlString = fs.readFileSync(path.join(__dirname, "key-signature.musicxml"), "utf8")
+  await page.evaluate((xml) => {
+    window.scoreStorm.setScore(window.getScoreFormMusicXml(xml))
+  }, inputXmlString)
+})
+
+test("renders courtesy key signature on later systems", async ({ page }) => {
+  await page.setViewportSize({ width: 1200, height: 800 })
+  const inputXmlString = fs.readFileSync(path.join(__dirname, "key-signature-systems.musicxml"), "utf8")
   await page.evaluate((xml) => {
     window.scoreStorm.setScore(window.getScoreFormMusicXml(xml))
   }, inputXmlString)
