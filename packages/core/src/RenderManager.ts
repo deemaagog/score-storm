@@ -281,6 +281,15 @@ class RenderManager {
       measureX += this.scoreStorm.settings.unit * graphicalGlobalMeasure.clefRelativeWidth
     }
 
+    if (graphicalMeasure.key) {
+      measureX += this.scoreStorm.settings.unit * this.scoreStorm.settings.keySignatureMargin
+      graphicalMeasure.key.setPosition(measureX, this.y + this.scoreStorm.settings.midStave, this.scoreStorm.settings)
+      const bBox = graphicalMeasure.key.getBBox(this.scoreStorm.settings)
+      this.renderInteractiveObject(graphicalMeasure.key, bBox)
+      this.renderBBox(bBox)
+      measureX += this.scoreStorm.settings.unit * graphicalGlobalMeasure.keySignatureRelativeWidth
+    }
+
     if (graphicalMeasure.time) {
       measureX += this.scoreStorm.settings.unit * this.scoreStorm.settings.timeSignatureMargin
       graphicalMeasure.time.setPosition(measureX, this.y + this.scoreStorm.settings.midStave)

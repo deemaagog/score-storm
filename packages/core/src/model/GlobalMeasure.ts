@@ -1,11 +1,8 @@
 import Fraction from "fraction.js"
 import { GlobalBeat } from "./GlobalBeat"
 import { Score } from "./Score"
+import { KeySignature } from "./KeySignature"
 import { TimeSignature } from "./TimeSignature"
-
-interface KeySignature {
-  fifths: number
-}
 
 export class GlobalMeasure {
   readonly uid = crypto.randomUUID()

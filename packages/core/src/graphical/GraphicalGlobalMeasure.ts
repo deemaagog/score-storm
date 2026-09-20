@@ -28,6 +28,7 @@ export class GraphicalGlobalMeasure {
 
   // horizontal relative positions
   timeSignatureRelativeWidth = 0
+  keySignatureRelativeWidth = 0
   clefRelativeWidth = 0
 
   constructor(globalMeasure: GlobalMeasure) {
@@ -68,6 +69,9 @@ export class GraphicalGlobalMeasure {
 
     if (this.clefRelativeWidth > 0) {
       widthInSpaces -= settings.clefMargin + this.clefRelativeWidth
+    }
+    if (this.keySignatureRelativeWidth > 0) {
+      widthInSpaces -= settings.keySignatureMargin + this.keySignatureRelativeWidth
     }
     if (this.timeSignatureRelativeWidth > 0) {
       widthInSpaces -= settings.timeSignatureMargin + this.timeSignatureRelativeWidth

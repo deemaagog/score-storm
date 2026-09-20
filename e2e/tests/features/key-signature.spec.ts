@@ -1,0 +1,44 @@
+import { expect } from "@playwright/test"
+import fs from "fs"
+import path from "path"
+import { test } from "../parametrized-test"
+
+// todo: move to global setup
+test.beforeEach(async ({ page, renderer }) => {
+  await page.goto("/")
+  await page.evaluate((renderer) => {
+    window.scoreStorm.setRenderer(renderer === "svg" ? window.svgRenderer : window.canvasRenderer)
+  }, renderer)
+})
+
+// todo: move to global setup
+test.afterEach(async ({ page }) => {
+  await page.evaluate(() => {
+    window.scoreStorm.render()
+  })
+
+  await expect(page.locator(".ss-page")).toHaveScreenshot()
+})
+
+test("renders key signature on the first system", async ({ page }) => {
+  const inputXmlString = fs.readFileSync(path.join(__dirname, "key-signature.musicxml"), "utf8")
+  await page.evaluate((xml) => {
+    window.scoreStorm.setScore(window.getScoreFormMusicXml(xml))
+  }, inputXmlString)
+})
+
+test("renders courtesy key signature on later systems", async ({ page }) => {
+  await page.setViewportSize({ width: 1200, height: 800 })
+  const inputXmlString = fs.readFileSync(path.join(__dirname, "key-signature-systems.musicxml"), "utf8")
+  await page.evaluate((xml) => {
+    window.scoreStorm.setScore(window.getScoreFormMusicXml(xml))
+  }, inputXmlString)
+})
+
+test("renders a key change mid-system", async ({ page }) => {
+  await page.setViewportSize({ width: 1600, height: 800 })
+  const inputXmlString = fs.readFileSync(path.join(__dirname, "key-signature-change.musicxml"), "utf8")
+  await page.evaluate((xml) => {
+    window.scoreStorm.setScore(window.getScoreFormMusicXml(xml))
+  }, inputXmlString)
+})

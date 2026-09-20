@@ -1,4 +1,5 @@
 import { GlobalMeasure } from "./GlobalMeasure"
+import { KeySignature } from "./KeySignature"
 import { TimeSignature } from "./TimeSignature"
 import { Measure } from "./Measure"
 import { Beat } from "./Beat"
@@ -55,6 +56,7 @@ export class Score {
       globalMeasure.score = score
       if (i === 0) {
         globalMeasure.time = mergedOptions.timeSignature
+        globalMeasure.key = new KeySignature(0)
       }
       score.globalMeasures.push(globalMeasure)
       globalMeasure.createGlobalBeats()
@@ -73,6 +75,16 @@ export class Score {
       const globalMeasure = this.globalMeasures[i]
       if (globalMeasure.time) {
         return globalMeasure.time
+      }
+    }
+    return
+  }
+
+  getMeasureKeySignature(index: number): KeySignature | undefined {
+    for (let i = index; i >= 0; i--) {
+      const globalMeasure = this.globalMeasures[i]
+      if (globalMeasure.key) {
+        return globalMeasure.key
       }
     }
     return
