@@ -31,7 +31,7 @@ export class GraphicalScore {
   instruments: GraphicalInstrument[] = []
   globalMeasures: GraphicalGlobalMeasure[] = []
 
-  calculateLineBreaks(containerWidth: number) {
+  calculateLineBreaks(containerWidth: number, settings: Settings) {
     const rows: Pick<Row, "globalMeasures">[] = []
     // tracks current Clef/TimeSignature model objects per instrument — fresh graphical
     // instances are created for each row so every occurrence gets its own stable x, y position
@@ -46,12 +46,14 @@ export class GraphicalScore {
       if (graphicalGlobalMeasure.globalMeasure.time) {
         currentTimeSignature = graphicalGlobalMeasure.globalMeasure.time
       }
-      graphicalGlobalMeasure.calculateMinContentWidth()
+      graphicalGlobalMeasure.calculateMinContentWidth(settings)
 
-      // const minContentWidth = graphicalGlobalMeasure.minContentWidth
-      const minContentWidth = containerWidth / 2 // temp, just for demo
+      let minWidthInSpaces = graphicalGlobalMeasure.minContentWidth + settings.contentMargin
 
-      if (currentRowGlobalMeasures.length > 0 && currentRowWidth + minContentWidth > containerWidth) {
+      if (
+        currentRowGlobalMeasures.length > 0 &&
+        currentRowWidth + minWidthInSpaces * settings.unit > containerWidth
+      ) {
         rows.push({ globalMeasures: currentRowGlobalMeasures })
         currentRowWidth = 0
         currentRowGlobalMeasures = []
@@ -97,10 +99,16 @@ export class GraphicalScore {
       graphicalGlobalMeasure.timeSignatureRelativeWidth = timeSignatureRelativeWidth
       graphicalGlobalMeasure.clefRelativeWidth = clefRelativeWidth
 
-      // TODO: set graphical measure attributes, distribute available space , set actual width to graphicalGlobalMeasures
-      graphicalGlobalMeasure.width = minContentWidth
+      if (clefRelativeWidth > 0) {
+        minWidthInSpaces += settings.clefMargin + clefRelativeWidth
+      }
+      if (timeSignatureRelativeWidth > 0) {
+        minWidthInSpaces += settings.timeSignatureMargin + timeSignatureRelativeWidth
+      }
 
-      currentRowWidth += minContentWidth
+      graphicalGlobalMeasure.width = minWidthInSpaces * settings.unit
+
+      currentRowWidth += graphicalGlobalMeasure.width
       currentRowGlobalMeasures.push(graphicalGlobalMeasure)
     }
 
@@ -108,7 +116,48 @@ export class GraphicalScore {
       rows.push({ globalMeasures: currentRowGlobalMeasures })
     }
 
+    // #2a: stretch every row except the last to fill containerWidth
+    for (let r = 0; r < rows.length; r++) {
+      const rowMeasures = rows[r].globalMeasures
+      if (r < rows.length - 1) {
+        this.stretchRowToWidth(rowMeasures, containerWidth, settings)
+      } else {
+        for (const measure of rowMeasures) {
+          measure.justifyContent(settings)
+        }
+      }
+    }
+
     return rows
+  }
+
+  private stretchRowToWidth(
+    rowMeasures: GraphicalGlobalMeasure[],
+    targetWidth: number,
+    settings: Settings,
+  ) {
+    const minWidths = rowMeasures.map((measure) => measure.width)
+    const minTotal = minWidths.reduce((sum, width) => sum + width, 0)
+    const extra = targetWidth - minTotal
+
+    if (extra <= 0 || minTotal <= 0) {
+      for (const measure of rowMeasures) {
+        measure.justifyContent(settings)
+      }
+      return
+    }
+
+    let assignedExtra = 0
+    for (let i = 0; i < rowMeasures.length; i++) {
+      if (i === rowMeasures.length - 1) {
+        rowMeasures[i].width = minWidths[i] + (extra - assignedExtra)
+      } else {
+        const share = extra * (minWidths[i] / minTotal)
+        rowMeasures[i].width = minWidths[i] + share
+        assignedExtra += share
+      }
+      rowMeasures[i].justifyContent(settings)
+    }
   }
 
   calculatePageBreaks(rows: Pick<Row, "globalMeasures">[], settings: Settings, pageHeight: number) {
