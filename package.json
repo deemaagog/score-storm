@@ -9,9 +9,9 @@
     "commit": "cz"
   },
   "devDependencies": {
-    "@lerna-lite/cli": "^3.9.3",
-    "@lerna-lite/publish": "^3.9.3",
-    "@lerna-lite/version": "^3.9.3",
+    "@lerna-lite/cli": "^4.11.5",
+    "@lerna-lite/publish": "^4.11.5",
+    "@lerna-lite/version": "^4.11.5",
     "commitizen": "^4.3.0",
     "cz-conventional-changelog": "^3.3.0",
     "husky": "^8.0.3",

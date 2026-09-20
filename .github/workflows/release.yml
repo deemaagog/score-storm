@@ -37,46 +37,37 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          token: ${{  github.token }}
+          token: ${{ github.token }}
           fetch-depth: 0
 
-      - name: Use Node.js 18
+      - name: Use Node.js 24
         uses: actions/setup-node@v4
         with:
-          node-version: 18
-        #   registry-url: 'https://registry.npmjs.org/'
-        #   scope: "@lerna-lite"
+          node-version: 24
+
+      # Trusted publishing requires npm CLI >= 11.5.1
+      - name: Ensure npm CLI supports OIDC
+        run: |
+          npm install -g npm@latest
+          node --version
+          npm --version
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v3
+        uses: pnpm/action-setup@v4
         with:
-          version: 8
+          version: 9.15.5
           run_install: false
 
-      - name: Get pnpm store directory
-        run: echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-
-      - name: Setup pnpm cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-
       - name: Run pnpm install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: Run all workspace TSC builds
         run: pnpm run build
 
-      - name: Setup git user and npm
+      - name: Setup git user
         run: |
           git config --global user.name "Dzmitry Dzehtsiarou"
           git config --global user.email "deemaagog@gmail.com"
-
-          echo "access=public" > .npmrc
-          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" >> .npmrc
 
       - name: Lerna Version (build query)
         shell: bash
@@ -99,20 +90,15 @@ jobs:
               echo "LERNA_VERSION_QUERY=lerna version ${{ github.event.inputs.custom_version }} --force-publish  --yes" >> $GITHUB_ENV
           fi
 
-      - name: Bump version to custom version
+      - name: Bump version
         run: pnpm exec ${{ env.LERNA_VERSION_QUERY }}
         env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           GIT_USER: "deemaagog@gmail.com:${{ github.token }}"
           GH_TOKEN: ${{ github.token }}
 
       - name: Publish packages
         if: ${{ inputs.dryrun != true }}
-        # run: pnpm publish -r
         run: pnpm exec lerna publish from-package --yes
         env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           GIT_USER: "deemaagog@gmail.com:${{ github.token }}"
           GH_TOKEN: ${{ github.token }}
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NPM_CONFIG_PROVENANCE: true
