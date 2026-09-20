@@ -1,10 +1,12 @@
 import { Settings } from "../Settings"
 import { GraphicalClef } from "./GraphicalClef"
+import { GraphicalKeySignature } from "./GraphicalKeySignature"
 import { GraphicalTimeSignature } from "./GraphicalTimeSignature"
 import { GraphicalGlobalMeasure } from "./GraphicalGlobalMeasure"
 import { GraphicalMeasure } from "./GraphicalMeasure"
 import { GraphicalInstrument } from "./GraphicalInstrument"
 import { Clef } from "../model/Clef"
+import { KeySignature } from "../model/KeySignature"
 import { TimeSignature } from "../model/TimeSignature"
 
 export type InstrumentPosition = number
@@ -37,6 +39,7 @@ export class GraphicalScore {
     // instances are created for each row so every occurrence gets its own stable x, y position
     const instrumentsCurrentClefs: (Clef | undefined)[] = []
     let currentTimeSignature: TimeSignature | undefined
+    let currentKeySignature: KeySignature | undefined
 
     let currentRowGlobalMeasures: GraphicalGlobalMeasure[] = []
     let currentRowWidth = 0
@@ -45,6 +48,9 @@ export class GraphicalScore {
       const graphicalGlobalMeasure = this.globalMeasures[gm]
       if (graphicalGlobalMeasure.globalMeasure.time) {
         currentTimeSignature = graphicalGlobalMeasure.globalMeasure.time
+      }
+      if (graphicalGlobalMeasure.globalMeasure.key) {
+        currentKeySignature = graphicalGlobalMeasure.globalMeasure.key
       }
       graphicalGlobalMeasure.calculateMinContentWidth(settings)
 
@@ -61,6 +67,7 @@ export class GraphicalScore {
 
       // calculate measure attributes relative positions TODO: move to GraphicalGlobalMeasure
       let timeSignatureRelativeWidth = 0,
+        keySignatureRelativeWidth = 0,
         clefRelativeWidth = 0
 
       for (let i = 0; i < this.instruments.length; i++) {
@@ -78,6 +85,18 @@ export class GraphicalScore {
           graphicalMeasure.time = graphicalTime
           if (graphicalTime.width > timeSignatureRelativeWidth) {
             timeSignatureRelativeWidth = graphicalTime.width
+          }
+
+          if (currentKeySignature && currentKeySignature.fifths !== 0 && instrumentsCurrentClefs[i]) {
+            const graphicalKey = new GraphicalKeySignature(
+              currentKeySignature,
+              measure,
+              instrumentsCurrentClefs[i]!,
+            )
+            graphicalMeasure.key = graphicalKey
+            if (graphicalKey.width > keySignatureRelativeWidth) {
+              keySignatureRelativeWidth = graphicalKey.width
+            }
           }
         }
 
@@ -97,10 +116,14 @@ export class GraphicalScore {
       }
 
       graphicalGlobalMeasure.timeSignatureRelativeWidth = timeSignatureRelativeWidth
+      graphicalGlobalMeasure.keySignatureRelativeWidth = keySignatureRelativeWidth
       graphicalGlobalMeasure.clefRelativeWidth = clefRelativeWidth
 
       if (clefRelativeWidth > 0) {
         minWidthInSpaces += settings.clefMargin + clefRelativeWidth
+      }
+      if (keySignatureRelativeWidth > 0) {
+        minWidthInSpaces += settings.keySignatureMargin + keySignatureRelativeWidth
       }
       if (timeSignatureRelativeWidth > 0) {
         minWidthInSpaces += settings.timeSignatureMargin + timeSignatureRelativeWidth

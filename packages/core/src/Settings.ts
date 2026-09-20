@@ -21,6 +21,7 @@ export class Settings {
   numberOfStaffLines!: number
   staffLineThickness!: number
   clefMargin!: number
+  keySignatureMargin!: number
   timeSignatureMargin!: number
   dotMargin!: number
   dotRadius!: number
@@ -61,6 +62,7 @@ export class Settings {
     this.barlineHeight = this.unit * 4 + this.staffLineThickness
     this.numberOfStaffLines = NUMBER_OF_STAFF_LINES
     this.clefMargin = 1
+    this.keySignatureMargin = 1
     this.timeSignatureMargin = 1
     this.contentMargin = 2
     this.barLineThickness = this.staffLineThickness * 1.2

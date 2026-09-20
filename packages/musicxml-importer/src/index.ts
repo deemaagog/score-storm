@@ -1,5 +1,5 @@
 import { getMNXScore, getScoreFromMusicXml } from "mnxconverter"
-import { GlobalMeasure, Score, TimeSignature, Beat, Clef, Instrument, Measure } from "@score-storm/core"
+import { GlobalMeasure, Score, TimeSignature, KeySignature, Beat, Clef, Instrument, Measure } from "@score-storm/core"
 
 export const fromMusicXML = (xml: string): Score => {
   const mnxScore = getMNXScore(getScoreFromMusicXml(xml))
@@ -45,7 +45,9 @@ export const fromMusicXML = (xml: string): Score => {
     const globalMeasure = new GlobalMeasure()
     globalMeasure.index = i
     globalMeasure.score = score
-    globalMeasure.key = mnxGlobalMeasure.key
+    if (mnxGlobalMeasure.key) {
+      globalMeasure.key = new KeySignature(Number(mnxGlobalMeasure.key.fifths))
+    }
     if (mnxGlobalMeasure.time) {
       globalMeasure.time = new TimeSignature(mnxGlobalMeasure.time.count, mnxGlobalMeasure.time.unit)
     }
