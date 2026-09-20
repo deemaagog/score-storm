@@ -35,6 +35,13 @@ export class Settings {
   spaceBetweenStaveRows!: number
   spaceBetweenInstrumentsRows!: number
 
+  // Horizontal spacing (staff spaces): rhythmicGap = max(minGap, quarterIdealGap * duration^durationExponent);
+  // glyphRodPadding is extra air between a previous glyph and a same-staff accidental.
+  quarterIdealGap!: number
+  minGap!: number
+  durationExponent!: number
+  glyphRodPadding!: number
+
   debug?: {
     bBoxes: boolean
   }
@@ -66,6 +73,11 @@ export class Settings {
 
     this.spaceBetweenStaveRows = 6
     this.spaceBetweenInstrumentsRows = 5
+
+    this.quarterIdealGap = 4
+    this.minGap = 1.75
+    this.durationExponent = 0.5
+    this.glyphRodPadding = 0.5
 
     this.midStave = this.barlineHeight / 2
     // default editor settings

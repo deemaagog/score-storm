@@ -9,6 +9,7 @@ export class GraphicalGlobalBeat {
   beats: (GraphicalNoteEvent | GraphicalRestEvent)[] = []
   offsetLeft: number = 0
   offsetRight: number = 0
+  contentXInSpaces: number = 0
   position?: Point
 
   constructor(globalBeat: GlobalBeat) {

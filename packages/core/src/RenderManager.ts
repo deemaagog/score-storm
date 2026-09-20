@@ -155,7 +155,7 @@ class RenderManager {
     this.graphicalScore = this.buildGraphical(score)
 
     const pageDimensions = this.scoreStorm.getLayout().getPageDimensions(this.renderer.getContainerWidth())
-    const rows = this.graphicalScore.calculateLineBreaks(pageDimensions.width)
+    const rows = this.graphicalScore.calculateLineBreaks(pageDimensions.width, this.scoreStorm.settings)
     // TODO: handle errors
     this.graphicalScore.calculatePageBreaks(rows, this.scoreStorm.settings, pageDimensions.height)
 
@@ -291,20 +291,18 @@ class RenderManager {
     }
 
     measureX += this.scoreStorm.settings.unit * this.scoreStorm.settings.contentMargin
-    const availableWidth = graphicalGlobalMeasure.width - (measureX - this.x)
 
     for (const graphicalEvent of graphicalMeasure.events) {
       const graphicalGlobalBeat = graphicalGlobalMeasure.globalBeatByBeat.get(graphicalEvent)!
+      const beatX = measureX + graphicalGlobalBeat.contentXInSpaces * this.scoreStorm.settings.unit
 
-      if (!graphicalGlobalBeat.position) {
-        graphicalGlobalBeat.setPosition({
-          x: measureX + availableWidth * graphicalGlobalBeat.globalBeat.fraction,
-          y: this.y,
-        })
-      }
+      graphicalGlobalBeat.setPosition({
+        x: beatX,
+        y: this.y,
+      })
 
       graphicalEvent.setPosition(
-        measureX + availableWidth * graphicalGlobalBeat.globalBeat.fraction,
+        beatX,
         this.y + this.scoreStorm.settings.midStave,
         this.scoreStorm.settings,
       )

@@ -116,43 +116,49 @@ export class GraphicalNoteEvent implements IGraphical {
     this.y = y + this.verticalShift * settings.unit
   }
 
+  private getNoteheadX(settings: Settings): number {
+    return this.x - this.noteheadGlyph.bBoxes.bBoxSW[0] * settings.unit
+  }
+
+  private getAccidentalX(settings: Settings): number {
+    return (
+      this.x - this.getBeatOffsetLeft() * settings.unit - this.accidentalGlyph!.bBoxes.bBoxSW[0] * settings.unit
+    )
+  }
+
   getBBox(settings: Settings): BBox {
-    let xShift = 0
+    const noteheadX = this.getNoteheadX(settings)
+    let x = noteheadX
+    let right = noteheadX + this.width * settings.unit
+
     if (this.accidentalGlyph) {
-      xShift = xShift + this.accidentalWidth! * settings.unit + 0.5 * settings.unit
+      const accidentalX = this.getAccidentalX(settings)
+      x = Math.min(x, accidentalX)
+      right = Math.max(right, accidentalX + this.accidentalWidth! * settings.unit)
     }
+
     return {
-      x: this.x + xShift,
+      x,
       y: this.y - this.noteheadGlyph.bBoxes.bBoxNE[1] * settings.unit,
-      width: this.width * settings.unit,
+      width: right - x,
       height: this.height * settings.unit,
     }
   }
 
   render(renderer: IRenderer, settings: Settings) {
-    let xShift = 0
     const currentColor = renderer.getColor()
+    const noteheadX = this.getNoteheadX(settings)
 
-    // draw accidental
     if (this.accidentalGlyph) {
       renderer.setColor(settings.mainColor)
-      renderer.drawGlyph(
-        getTextFromUnicode(this.accidentalGlyph.symbol),
-        this.x - this.accidentalGlyph.bBoxes.bBoxSW[0] * settings.unit,
-        this.y,
-      )
-      xShift = xShift + this.accidentalWidth! * settings.unit + 0.5 * settings.unit
+      renderer.drawGlyph(getTextFromUnicode(this.accidentalGlyph.symbol), this.getAccidentalX(settings), this.y)
     }
 
     // draw ledger lines
     if (Math.abs(this.verticalShift) >= 3) {
       renderer.setColor(settings.staveLineColor)
 
-      const ledgerLineX =
-        this.x -
-        this.noteheadGlyph.bBoxes.bBoxSW[0] * settings.unit +
-        xShift -
-        ((LEDGER_LINE_LENGTH - this.width) * settings.unit) / 2
+      const ledgerLineX = noteheadX - ((LEDGER_LINE_LENGTH - this.width) * settings.unit) / 2
 
       const ledgerLineLength = LEDGER_LINE_LENGTH * settings.unit
       const ledgerLineThickness = settings.staffLineThickness
@@ -176,7 +182,7 @@ export class GraphicalNoteEvent implements IGraphical {
       const stemHeightCut = STEM_HEIGHT_CUT * settings.unit
 
       renderer.drawRect(
-        this.x + this.width * settings.unit - stemThickness + xShift,
+        this.x + this.width * settings.unit - stemThickness,
         this.y - stemHeight,
         stemThickness,
         stemHeight - stemHeightCut,
@@ -185,11 +191,7 @@ export class GraphicalNoteEvent implements IGraphical {
       if (this.flagGlyph) {
         renderer.drawGlyph(
           getTextFromUnicode(this.flagGlyph.symbol),
-          this.x +
-            this.width * settings.unit -
-            stemThickness -
-            this.noteheadGlyph.bBoxes.bBoxSW[0] * settings.unit +
-            xShift,
+          this.x + this.width * settings.unit - stemThickness - this.noteheadGlyph.bBoxes.bBoxSW[0] * settings.unit,
           this.y - 3.5 * settings.unit,
         )
       }
@@ -197,7 +199,7 @@ export class GraphicalNoteEvent implements IGraphical {
 
     if (this.noteEvent.duration?.dots && this.noteEvent.duration.dots > 0) {
       const dotVerticalShift = Number.isInteger(this.verticalShift) ? -0.5 : 0
-      let x = this.x + this.width * settings.unit + xShift
+      let x = this.x + this.width * settings.unit
       if (this.flagGlyph) {
         x += (this.flagWidth! + settings.dotMargin / 4) * settings.unit
       } else {
@@ -213,11 +215,7 @@ export class GraphicalNoteEvent implements IGraphical {
     }
 
     renderer.setColor(currentColor)
-    renderer.drawGlyph(
-      getTextFromUnicode(this.noteheadGlyph.symbol),
-      this.x - this.noteheadGlyph.bBoxes.bBoxSW[0] * settings.unit + xShift,
-      this.y,
-    )
+    renderer.drawGlyph(getTextFromUnicode(this.noteheadGlyph.symbol), noteheadX, this.y)
   }
 
   calculateVerticalShift(): number {
