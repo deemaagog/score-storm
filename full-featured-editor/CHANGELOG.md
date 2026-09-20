@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.4.0](https://github.com/deemaagog/score-storm/compare/v0.3.4...v0.4.0) (2026-09-20)
+
+### Bug Fixes
+
+* fix clef changes, remove Clef-GrahicalClef relation ([c039d9c](https://github.com/deemaagog/score-storm/commit/c039d9c464ceac64ac740c374ad68ee8a7915f5c)) - by @deemaagog
+* fix hover and selection on multipage canvas ([8e5becf](https://github.com/deemaagog/score-storm/commit/8e5becfbe5d01cd57f4d241a7a501fb4ed07952d)) - by @deemaagog
+* fix selection provider ([9e2a12f](https://github.com/deemaagog/score-storm/commit/9e2a12ff08938b45d60965f5f22c67602048b4d5)) - by @deemaagog
+
+### Features
+
+* account for page index in editor events ([db2fc75](https://github.com/deemaagog/score-storm/commit/db2fc7550cf531d77b786a4939bc716b8c2a8a5a)) - by @deemaagog
+* add layout switcher ([10c91bd](https://github.com/deemaagog/score-storm/commit/10c91bdd53db69048ace435a1dd435e3f9b2df04)) - by @deemaagog
+* fix cursor for multipage score ([0537ae4](https://github.com/deemaagog/score-storm/commit/0537ae41006be6b3d1742efc2f903aee767df1ba)) - by @deemaagog
+* render dots ([73d9e9c](https://github.com/deemaagog/score-storm/commit/73d9e9cb2b0f3965bfff986e21352ee5a08f98cb)) - by @deemaagog
+* upgrade mantine and setup notifications ([7b47787](https://github.com/deemaagog/score-storm/commit/7b477876c5647b7e381b950a8fb8eb1c78a3c6bd)) - by @deemaagog
+
 ## [0.3.4](https://github.com/deemaagog/score-storm/compare/v0.3.3...v0.3.4) (2025-03-01)
 
 ### Features

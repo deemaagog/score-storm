@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.4.0](https://github.com/deemaagog/score-storm/compare/v0.3.4...v0.4.0) (2026-09-20)
+
+### Bug Fixes
+
+* handle resize ([038f620](https://github.com/deemaagog/score-storm/commit/038f620a0e57707169ee4f70febe8c73c7a4a1ab)) - by @deemaagog
+
+### Features
+
+* multipage layout for node skia renderer ([336acfb](https://github.com/deemaagog/score-storm/commit/336acfb8c564ce12add6934692e05e2f5e5d6b81)) - by @deemaagog
+* render dots ([73d9e9c](https://github.com/deemaagog/score-storm/commit/73d9e9cb2b0f3965bfff986e21352ee5a08f98cb)) - by @deemaagog
+
 ## [0.3.4](https://github.com/deemaagog/score-storm/compare/v0.3.3...v0.3.4) (2025-03-01)
 
 **Note:** Version bump only for package @score-storm/node-skia-renderer

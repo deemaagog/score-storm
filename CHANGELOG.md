@@ -3,6 +3,39 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.4.0](https://github.com/deemaagog/score-storm/compare/v0.3.4...v0.4.0) (2026-09-20)
+
+### Bug Fixes
+
+* fix clef changes, remove Clef-GrahicalClef relation ([c039d9c](https://github.com/deemaagog/score-storm/commit/c039d9c464ceac64ac740c374ad68ee8a7915f5c)) - by @deemaagog
+* fix getting coordinates on scrolled page ([2d032f3](https://github.com/deemaagog/score-storm/commit/2d032f3a4a490f401a96685cd50ee4dae8739cf7)) - by @deemaagog
+* fix hover and selection on multipage canvas ([8e5becf](https://github.com/deemaagog/score-storm/commit/8e5becfbe5d01cd57f4d241a7a501fb4ed07952d)) - by @deemaagog
+* fix measure commands ([baedbaf](https://github.com/deemaagog/score-storm/commit/baedbafc24728b38c49c116f45834f3104126334)) - by @deemaagog
+* fix selection provider ([9e2a12f](https://github.com/deemaagog/score-storm/commit/9e2a12ff08938b45d60965f5f22c67602048b4d5)) - by @deemaagog
+* fix system Y position for pages other than first ([559a66f](https://github.com/deemaagog/score-storm/commit/559a66fb929ed19dc9b228568d0f08c7bb004696)) - by @deemaagog
+* fix time signature selection ([17007cd](https://github.com/deemaagog/score-storm/commit/17007cd7b70c2df6d323db9219e0e51ef56a5286)) - by @deemaagog
+* handle resize ([038f620](https://github.com/deemaagog/score-storm/commit/038f620a0e57707169ee4f70febe8c73c7a4a1ab)) - by @deemaagog
+* row packing ([7bee518](https://github.com/deemaagog/score-storm/commit/7bee518aeb86a025f893969d62a6041dfbb9a41d)) - by @deemaagog
+* typo ([d52ce65](https://github.com/deemaagog/score-storm/commit/d52ce65d43e51fba4623c216f1312f7cbc1d8ca1)) - by @deemaagog
+* upgrade playwright and snapshots ([#85](https://github.com/deemaagog/score-storm/issues/85)) ([844765c](https://github.com/deemaagog/score-storm/commit/844765c26c6b39c6bbbb4ae8d66d2fc745f20341)) - by @deemaagog
+
+### Features
+
+* account for page index in editor events ([db2fc75](https://github.com/deemaagog/score-storm/commit/db2fc7550cf531d77b786a4939bc716b8c2a8a5a)) - by @deemaagog
+* account for pages with fixed height  in page breaks calculation ([2df10cf](https://github.com/deemaagog/score-storm/commit/2df10cf1154a1068c1e3e9be4dca1b3daeb47bbc)) - by @deemaagog
+* add layout interface ([af03fec](https://github.com/deemaagog/score-storm/commit/af03fecb8f7feee24a286a067551ff9f6f091749)) - by @deemaagog
+* add layout switcher ([10c91bd](https://github.com/deemaagog/score-storm/commit/10c91bdd53db69048ace435a1dd435e3f9b2df04)) - by @deemaagog
+* fix cursor for multipage score ([0537ae4](https://github.com/deemaagog/score-storm/commit/0537ae41006be6b3d1742efc2f903aee767df1ba)) - by @deemaagog
+* implement horizontal justification (springs and rods), distribute available row space ([18b6fb4](https://github.com/deemaagog/score-storm/commit/18b6fb4ef1c604df1a2d346bde4cf8685c479a5c)) - by @deemaagog
+* introduce pages in graphical score ([c74df6f](https://github.com/deemaagog/score-storm/commit/c74df6fe06d0ab6eda3c3dc09192ee64d1bfb7e0)) - by @deemaagog
+* multipage layout for node skia renderer ([336acfb](https://github.com/deemaagog/score-storm/commit/336acfb8c564ce12add6934692e05e2f5e5d6b81)) - by @deemaagog
+* multipage layout for svg and canvas renderers ([f90a540](https://github.com/deemaagog/score-storm/commit/f90a540740764e9ba96eb4dbb16dd03a107327d6)) - by @deemaagog
+* render dots ([73d9e9c](https://github.com/deemaagog/score-storm/commit/73d9e9cb2b0f3965bfff986e21352ee5a08f98cb)) - by @deemaagog
+* set default layout ([9c26f37](https://github.com/deemaagog/score-storm/commit/9c26f37bd4b1e797978f06cde3ca4c333ed5fad8)) - by @deemaagog
+* store space between rows and space between instruments in settings ([47bddc4](https://github.com/deemaagog/score-storm/commit/47bddc4f8e3230ca82d8fcd4e9eb253b6f5de072)) - by @deemaagog
+* upgrade mantine and setup notifications ([7b47787](https://github.com/deemaagog/score-storm/commit/7b477876c5647b7e381b950a8fb8eb1c78a3c6bd)) - by @deemaagog
+* use stable graphical ids ([fd93bb4](https://github.com/deemaagog/score-storm/commit/fd93bb4c8f8de07e64b336825993464f2956e588)) - by @deemaagog
+
 ## [0.3.4](https://github.com/deemaagog/score-storm/compare/v0.3.3...v0.3.4) (2025-03-01)
 
 ### Features
