@@ -34,3 +34,11 @@ test("renders courtesy key signature on later systems", async ({ page }) => {
     window.scoreStorm.setScore(window.getScoreFormMusicXml(xml))
   }, inputXmlString)
 })
+
+test("renders a key change mid-system", async ({ page }) => {
+  await page.setViewportSize({ width: 1600, height: 800 })
+  const inputXmlString = fs.readFileSync(path.join(__dirname, "key-signature-change.musicxml"), "utf8")
+  await page.evaluate((xml) => {
+    window.scoreStorm.setScore(window.getScoreFormMusicXml(xml))
+  }, inputXmlString)
+})

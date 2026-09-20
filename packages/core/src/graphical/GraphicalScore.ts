@@ -78,9 +78,11 @@ export class GraphicalScore {
           instrumentsCurrentClefs[i] = measure.clef
         }
 
+        const isFirstInRow = !currentRowGlobalMeasures.length
+
         // first row — create a fresh GraphicalTimeSignature per instrument so each stave
         // gets its own stable x, y position and ID for hover/selection
-        if (!currentRowGlobalMeasures.length && gm === 0) {
+        if (isFirstInRow && gm === 0) {
           const graphicalTime = new GraphicalTimeSignature(currentTimeSignature!, measure)
           graphicalMeasure.time = graphicalTime
           if (graphicalTime.width > timeSignatureRelativeWidth) {
@@ -88,9 +90,7 @@ export class GraphicalScore {
           }
         }
 
-        // first measure in row — fresh clef and courtesy key so each system has
-        // its own stable positions for hover/selection
-        if (!currentRowGlobalMeasures.length) {
+        if (isFirstInRow) {
           if (instrumentsCurrentClefs[i]) {
             const graphicalClef = new GraphicalClef(instrumentsCurrentClefs[i]!, measure)
             graphicalMeasure.clef = graphicalClef
@@ -98,20 +98,26 @@ export class GraphicalScore {
               clefRelativeWidth = graphicalClef.width
             }
           }
-
-          if (currentKeySignature && currentKeySignature.fifths !== 0 && instrumentsCurrentClefs[i]) {
-            const graphicalKey = new GraphicalKeySignature(
-              currentKeySignature,
-              measure,
-              instrumentsCurrentClefs[i]!,
-            )
-            graphicalMeasure.key = graphicalKey
-            if (graphicalKey.width > keySignatureRelativeWidth) {
-              keySignatureRelativeWidth = graphicalKey.width
-            }
-          }
         } else {
           graphicalMeasure.clef = undefined // TODO: assign null instead of undefined???
+        }
+
+        // Courtesy key on every system, plus an explicit key change mid-system
+        const keyForThisMeasure = isFirstInRow
+          ? currentKeySignature
+          : graphicalGlobalMeasure.globalMeasure.key
+
+        if (keyForThisMeasure && keyForThisMeasure.fifths !== 0 && instrumentsCurrentClefs[i]) {
+          const graphicalKey = new GraphicalKeySignature(
+            keyForThisMeasure,
+            measure,
+            instrumentsCurrentClefs[i]!,
+          )
+          graphicalMeasure.key = graphicalKey
+          if (graphicalKey.width > keySignatureRelativeWidth) {
+            keySignatureRelativeWidth = graphicalKey.width
+          }
+        } else {
           graphicalMeasure.key = undefined
         }
       }
